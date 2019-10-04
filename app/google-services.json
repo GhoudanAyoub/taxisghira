@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "674937957957",
+    "firebase_url": "https://taxisghira-e5a6a.firebaseio.com",
+    "project_id": "taxisghira-e5a6a",
+    "storage_bucket": "taxisghira-e5a6a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674937957957:android:5ab63d1814d58d71",
+        "android_client_info": {
+          "package_name": "com.TaxiSghira.TreeProg.plashscreen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "674937957957-fc1r179rqeg4i5iqq93mu35go53q97p3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.TaxiSghira.TreeProg.plashscreen",
+            "certificate_hash": "69350b9c51871821b0a21875cc9e3b4f83173771"
+          }
+        },
+        {
+          "client_id": "674937957957-9ifa0nnq7qk3d3qr78o75tqo4ppn4eh9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARXw2YdZgWZC3MSEbcrlLJPtGxTsseVCw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "674937957957-9ifa0nnq7qk3d3qr78o75tqo4ppn4eh9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

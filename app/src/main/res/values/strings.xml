@@ -1,0 +1,278 @@
+<resources>
+    <string name="app_name">طاكسي صغيرة</string>
+    <string name="title_activity_acceuil_mol_taxi">Acceuil</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_acceuil_client">Acceuil</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">أفضل الشوافرية</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
+    <string name="nom">Nom</string>
+    <string name="go">Go 👉</string>
+    <string name="welcome">Welcome</string>
+    <string name="prenom">Prenom</string>
+    <string name="cin">CIN</string>
+    <string name="couleur_de_taxi">Couleur De Taxi</string>
+    <string name="ville">Ville</string>
+    <string name="mot_de_passe">Mot de Passe</string>
+    <string name="conteur">Conteur</string>
+    <string name="sans_conteurs_tarif">Sans Conteurs / Tarif</string>
+    <string name="tarif_dh">Tarif DH</string>
+    <string name="trajet">Trajet</string>
+    <string name="gmail">Gmail</string>
+    <string name="licence">Licence</string>
+    <string name="read_more">Read More</string>
+    <string name="profile">Profile</string>
+    <string name="rate">Rate</string>
+    <string name="demande">Demande</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="chercher">Chercher 👨‍💻</string>
+    <string name="votre_location">Votre Location</string>
+    <string name="place_d_arrive">Place d\'Arrive</string>
+    <string name="account">Account</string>
+    <string name="top_cheuffour">Top Cheuffour</string>
+    <string name="top_client">Top Client</string>
+    <string name="rate_given">Rate given</string>
+    <string name="rate_taken">Rate Taken</string>
+    <string name="setting">setting</string>
+    <string name="deconnecter">Deconnecter</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="j_arrive">J\'arrive ☺</string>
+    <string name="depart_de">Depart De :</string>
+    <string name="l_arrive_a">L\'arrive a :</string>
+    <string name="get_a_ride_wherever_you_are_whenever_you_want">خود ليك طاكسي فينما كنتي أو فأي وقت بغيتي </string>
+    <string name="continue_with_phone_number">تسجل بواسطة رقم الهاتف</string>
+    <string name="continue_with">تسجل عن طريق</string>
+    <string name="google"> GOOGLE</string>
+    <string name="created_and_designed_by_treeprog">تم إنشاؤها وتصميمها بواسطة TreeProg</string>
+
+
+    <!-- sms msg -->
+
+    <string name="show">Show</string>
+    <string name="ringing">"RINGING, number: "</string>
+    <string name="offhook">OFFHOOK</string>
+    <string name="idle">IDLE</string>
+    <string name="restarting_app">Restarting app</string>
+    <string name="permission_not_granted">إذن غير ممنوح!</string>
+    <string name="dial_number">"حالة الهاتف: الاتصال:</string>
+    <string name="failure_permission">عدم الحصول على إذن!</string>
+    <string name="telephony_enabled">تم تمكين الاتصال الهاتفي</string>
+    <string name="telephony_not_enabled">"لم يتم تمكين الهاتف!"</string>
+    <string name="call">Call</string>
+    <string name="make_a_call">إجراء مكالمة</string>
+    <string name="send_a_message">ارسل رسالة</string>
+    <string name="enter_message_here">أدخل الرسالة هنا</string>
+    <string name="phone_disabled">تم تعطيل الاتصال الهاتفي</string>
+    <string name="retry">Retry</string>
+    <string name="sms_disabled">تم تعطيل استخدام الرسائل القصيرة</string>
+    <string name="granted_permission">تم تأمين التصريح</string>
+    <string name="putYourPhoneNumber">ادخل رقم الهاتف الخاص</string>
+    <string name="msgforPhonePut">تاكد من ان رقم الهاتف صحيح من اجل التسجيل في التطبيق</string>
+    <string name="next">التالي</string>
+    <string name="changePhoneNumber">تغيير رقم الهاتف</string>
+    <string name="checkYourPhoneNumber">تحقق من رقم هاتفك</string>
+    <string name="msgForCheck">ادخل الرمز الدي تلقيته في هدا الرقم</string>
+    <string name="or">أو</string>
+    <string name="resend">أعادة إرسال الرمز</string>
+    <string name="putgmail">ادخل بريدك الالكتروني</string>
+    <string name="forbatterSafety">ادخل بريدك الالكتروني لحماية افضل</string>
+    <string name="firstname">الاسم لاشخصي</string>
+    <string name="lastname">الاسم العائلي</string>
+    <string name="adress">العنوان</string>
+    <string name="personaldata">ادخل بياناتك الشخصية</string>
+    <string name="CinChifor">رقم بطاقة التعريف الوطنبة</string>
+    <string name="NumTaXi">رقم سيارة الاجرة</string>
+    <string name="Photo">📤تحميل صورة لبطاقة التعريف الوطنية</string>
+    <string name="OuiNon">هل السيارة تحتوي على عداد?</string>
+
+
+    <!--f,gdklmgjfdlgkjfk-->
+
+    <string name="label_google_sign_in">Firebase + Google Sign In</string>
+    <string name="desc_google_sign_in">Use a Google Sign In credential to authenticate with Firebase.</string>
+
+    <string name="label_facebook_login">Firebase + Facebook Login</string>
+    <string name="desc_facebook_login">Use a Facebook Login credential to authenticate with Firebase.</string>
+
+    <string name="label_twitter_login">Firebase + Twitter Login</string>
+    <string name="desc_twitter_login">Use a Twitter Login credential to authenticate with Firebase.</string>
+
+    <string name="label_emailpassword">Email/Password Authentication</string>
+    <string name="desc_emailpassword">Use an email and password to authenticate with Firebase.</string>
+
+    <string name="label_passwordless">Passwordless Authentication</string>
+    <string name="desc_passwordless">Use only an email to authenticate with Firebase.</string>
+
+    <string name="label_phone_auth">Phone Number Authentication</string>
+    <string name="desc_phone_auth">Use a phone number to authenticate with Firebase.</string>
+
+    <string name="label_anonymous_auth">Anonymous Authentication</string>
+    <string name="desc_anonymous_auth">Sign in anonymously and then later upgrade to a full Firebase Auth user.</string>
+
+    <string name="label_custom_auth">Custom Authentication</string>
+    <string name="desc_custom_auth">Use a custom token signed by your own server to authenticate with Firebase.</string>
+
+    <string name="label_firebase_ui">FirebaseUI Auth</string>
+    <string name="desc_firebase_ui">Use the FirebaseUI-Android library to authenticate with Firebase.</string>
+
+    <string name="hint_user_id">User ID</string>
+    <string name="get_custom_token">Get Token</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_account">Create Account</string>
+    <string name="send_link">Send Link</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="verify_email">Verify Email</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="loading">Loading…</string>
+    <string name="custom_token">Custom Token</string>
+    <string name="signed_in">Signed In</string>
+    <string name="signed_out">Signed Out</string>
+    <string name="token_null">Token: null</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="desc_firebase_lockup">Firebase logo and name</string>
+    <string name="auth_failed">Authentication failed</string>
+    <string name="start_phone_auth">Start</string>
+    <string name="verify_phone_auth">Verify</string>
+    <string name="resend_phone_auth">Resend</string>
+    <string name="hint_phone_number">Phone Number</string>
+    <string name="hint_verification_code">Verification Code</string>
+    <string name="status_code_sent">Code Sent</string>
+    <string name="status_verification_failed">Verification failed</string>
+    <string name="status_verification_succeeded">Verification succeeded</string>
+    <string name="status_sign_in_failed">Sign-in failed</string>
+    <string name="instant_validation">(instant validation)</string>
+
+    <string name="firebase_status_fmt">Firebase User: %s</string>
+    <string name="firebase_user_management">Firebase User Management</string>
+
+    <string name="google_status_fmt">Google User: %s</string>
+    <string name="google_title_text">Google Sign In</string>
+
+    <string name="facebook_status_fmt">Facebook User: %s</string>
+    <string name="facebook_title_text">Facebook Login</string>
+
+    <string name="emailpassword_status_fmt">Email User: %1$s (verified: %2$b)</string>
+    <string name="emailpassword_title_text">Email and Password</string>
+
+    <string name="passwordless_status_fmt">Email User: %1$s (verified: %2$b)</string>
+    <string name="passwordless_title_text">Passwordless Sign In</string>
+    <string name="status_email_not_sent">Send link to your email to get started.</string>
+    <string name="status_email_sent">Link sent, check your email to continue.</string>
+    <string name="status_link_found">Link received, enter email to sign in.</string>
+
+    <string name="phone_title_text">Phone Number</string>
+
+    <string name="twitter_status_fmt">Twitter User: %s</string>
+    <string name="twitter_title_text">Twitter Login</string>
+
+    <string name="firebaseui_status_fmt">Firebase User: %s</string>
+    <string name="firebaseui_title_text">FirebaseUI Auth</string>
+
+    <string name="id_fmt">User ID: %s</string>
+    <string name="email_fmt">Email: %s</string>
+    <string name="title_activity_map">Map</string>
+    <string name="whereAreYouGoing">أين ستتجه؟</string>
+    <string name="user_location_permission_not_granted">عدم الحصول على إذن!</string>
+    <string name="user_location_permission_explanation">إذن غير ممنوح!</string>
+    <string name="TreeProg">TreeProg</string>
+    <string name="MadeBy">تم إنشاؤها وتصميمها بواسطة</string>
+
+
+    <string name="pref_title_more">More Apps</string>
+    <string name="pref_title_rate">Rate</string>
+    <string name="pref_title_about">About</string>
+    <string name="pref_title_copyright">Copyright</string>
+    <string name="pref_title_dev_name">Developed By</string>
+    <string name="pref_title_term">Term &amp; Policies</string>
+    <string name="Apropos">
+        TreeProg Sarl
+    </string>
+    <string name="pref_category_other"> Settings</string>
+    <string name="developer_name"> Ayoub Ghoudan </string>
+    <string name="copyright">  All Right Reserved</string>
+    <string name="content_term">Apache License
+
+Version 2.0, January 2004
+
+http://www.apache.org/licenses/
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. Definitions.
+
+"License" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.
+
+"Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.
+
+"Legal Entity" shall mean the union of the acting entity and all other entities that control, are controlled by, or are under common control with that entity. For the purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
+
+"You" (or "Your") shall mean an individual or Legal Entity exercising permissions granted by this License.
+
+"Source" form shall mean the preferred form for making modifications, including but not limited to software source code, documentation source, and configuration files.
+
+"Object" form shall mean any form resulting from mechanical transformation or translation of a Source form, including but not limited to compiled object code, generated documentation, and conversions to other media types.
+
+"Work" shall mean the work of authorship, whether in Source or Object form, made available under the License, as indicated by a copyright notice that is included in or attached to the work (an example is provided in the Appendix below).
+
+"Derivative Works" shall mean any work, whether in Source or Object form, that is based on (or derived from) the Work and for which the editorial revisions, annotations, elaborations, or other modifications represent, as a whole, an original work of authorship. For the purposes of this License, Derivative Works shall not include works that remain separable from, or merely link (or bind by name) to the interfaces of, the Work and Derivative Works thereof.
+
+"Contribution" shall mean any work of authorship, including the original version of the Work and any modifications or additions to that Work or Derivative Works thereof, that is intentionally submitted to Licensor for inclusion in the Work by the copyright owner or by an individual or Legal Entity authorized to submit on behalf of the copyright owner. For the purposes of this definition, "submitted" means any form of electronic, verbal, or written communication sent to the Licensor or its representatives, including but not limited to communication on electronic mailing lists, source code control systems, and issue tracking systems that are managed by, or on behalf of, the Licensor for the purpose of discussing and improving the Work, but excluding communication that is conspicuously marked or otherwise designated in writing by the copyright owner as "Not a Contribution."
+
+"Contributor" shall mean Licensor and any individual or Legal Entity on behalf of whom a Contribution has been received by Licensor and subsequently incorporated within the Work.
+
+2. Grant of Copyright License. Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute the Work and such Derivative Works in Source or Object form.
+
+3. Grant of Patent License. Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) patent license to make, have made, use, offer to sell, sell, import, and otherwise transfer the Work, where such license applies only to those patent claims licensable by such Contributor that are necessarily infringed by their Contribution(s) alone or by combination of their Contribution(s) with the Work to which such Contribution(s) was submitted. If You institute patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Work or a Contribution incorporated within the Work constitutes direct or contributory patent infringement, then any patent licenses granted to You under this License for that Work shall terminate as of the date such litigation is filed.
+
+4. Redistribution. You may reproduce and distribute copies of the Work or Derivative Works thereof in any medium, with or without modifications, and in Source or Object form, provided that You meet the following conditions:
+
+You must give any other recipients of the Work or Derivative Works a copy of this License; and
+You must cause any modified files to carry prominent notices stating that You changed the files; and
+You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of the Work, excluding those notices that do not pertain to any part of the Derivative Works; and
+If the Work includes a "NOTICE" text file as part of its distribution, then any Derivative Works that You distribute must include a readable copy of the attribution notices contained within such NOTICE file, excluding those notices that do not pertain to any part of the Derivative Works, in at least one of the following places: within a NOTICE text file distributed as part of the Derivative Works; within the Source form or documentation, if provided along with the Derivative Works; or, within a display generated by the Derivative Works, if and wherever such third-party notices normally appear. The contents of the NOTICE file are for informational purposes only and do not modify the License. You may add Your own attribution notices within Derivative Works that You distribute, alongside or as an addendum to the NOTICE text from the Work, provided that such additional attribution notices cannot be construed as modifying the License.
+
+You may add Your own copyright statement to Your modifications and may provide additional or different license terms and conditions for use, reproduction, or distribution of Your modifications, or for any such Derivative Works as a whole, provided Your use, reproduction, and distribution of the Work otherwise complies with the conditions stated in this License.
+5. Submission of Contributions. Unless You explicitly state otherwise, any Contribution intentionally submitted for inclusion in the Work by You to the Licensor shall be under the terms and conditions of this License, without any additional terms or conditions. Notwithstanding the above, nothing herein shall supersede or modify the terms of any separate license agreement you may have executed with Licensor regarding such Contributions.
+
+6. Trademarks. This License does not grant permission to use the trade names, trademarks, service marks, or product names of the Licensor, except as required for reasonable and customary use in describing the origin of the Work and reproducing the content of the NOTICE file.
+
+7. Disclaimer of Warranty. Unless required by applicable law or agreed to in writing, Licensor provides the Work (and each Contributor provides its Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.
+
+8. Limitation of Liability. In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall any Contributor be liable to You for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising as a result of this License or out of the use or inability to use the Work (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if such Contributor has been advised of the possibility of such damages.
+
+9. Accepting Warranty or Additional Liability. While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty or additional liability.
+
+END OF TERMS AND CONDITIONS
+
+        Copyright [2019] [GHOUDAN AYOUB]
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+    </string>
+
+
+</resources>

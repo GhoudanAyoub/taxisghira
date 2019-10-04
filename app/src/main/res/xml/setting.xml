@@ -1,0 +1,38 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Account Data">
+        <Preference
+            android:key="UpdateAccount"
+            android:summary="Update Account"
+            android:title="Personal Information"/>
+        <Preference
+            android:key="DeleteAccount"
+            android:summary="Delete Your Account😔"
+            android:title="Account Option"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_category_other">
+        <Preference
+            android:summary="@string/developer_name"
+            android:title="@string/pref_title_dev_name" />
+        <Preference
+            android:summary="@string/copyright"
+            android:title="@string/pref_title_copyright" />
+        <Preference
+            android:key="@string/pref_title_term"
+            android:title="@string/pref_title_term" />
+        <Preference
+            android:key="key_more"
+            android:title="@string/pref_title_more" />
+        <Preference
+            android:key="key_rate"
+            android:title="@string/pref_title_rate" />
+        <Preference
+            android:key="key_about"
+            android:title="@string/pref_title_about" />
+        <Preference
+            android:key="dis"
+            android:title="Disconnect" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
