@@ -1,31 +1,40 @@
 package com.TaxiSghira.TreeProg.plashscreen.Client;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PutPhone;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Accept;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,7 +69,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionHeight;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
@@ -70,7 +78,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
 
     public static String id;
-    DatabaseReference databaseReference,databaseReference2,databaseReference3;
+    DatabaseReference databaseReference,databaseReference2,databaseReference3,databaseReference4,databaseReference5;
     TextView Ch_Name, TaxiNum, Ch_Num;
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -79,12 +87,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private DirectionsRoute currentRoute;
     private NavigationMapRoute navigationMapRoute;
     private EditText WhereToGo;
-    BottomSheetBehavior bottomSheetBehavior;
-    LinearLayout bottom_sheet;
     AlertDialog.Builder builder;
     private ProgressDialog gProgress;
-    List<Accept> acceptList;
-    Accept accept;
+    public Accept accept;
+    Chifor chifor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +99,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         setContentView(R.layout.app_bar_map);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         findViewById(R.id.UtilTAxi).setVisibility(View.GONE);
+        findViewById(R.id.textViewtad).setVisibility(View.GONE);
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
 
@@ -102,24 +109,73 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         databaseReference = FirebaseDatabase.getInstance().getReference("Favor");
         databaseReference2 = FirebaseDatabase.getInstance().getReference("Demande");
         databaseReference3 = FirebaseDatabase.getInstance().getReference("Accept");
+        databaseReference4 = FirebaseDatabase.getInstance().getReference("Chifor");
+        databaseReference5 = FirebaseDatabase.getInstance().getReference("Client");
+        databaseReference4.keepSynced(true);
+        databaseReference3.keepSynced(true);
 
-        acceptList = new ArrayList<>();
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        bottom_sheet = findViewById(R.id.bottom_sheet);
+        Ch_Name = findViewById(R.id.list_Ch_Name);
+        Ch_Num = findViewById(R.id.list_Ch_num);
+        TaxiNum = findViewById(R.id.list_Taxi_num);
 
-        Ch_Name = findViewById(R.id.Ch_Name);
-        Ch_Num = findViewById(R.id.Ch_Num);
-        TaxiNum = findViewById(R.id.TaxiNum);
+        databaseReference5.orderByChild("gmail").equalTo(PutPhone.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) { }
+                    else {
+                    builder.setIcon(R.drawable.ic_account_circle_black);
+                    builder.setTitle("المعلومات الشخصية");
+                    builder.setMessage("المرجو ملأ معلوماتكم الشخصية");
+                    builder.setPositiveButton("حسنا", (dialog, which) -> startActivity(new Intent(getApplicationContext(), PersonalInfo.class)));
+                    builder.setNegativeButton("",null);
+                    builder.show();
+                }
 
-        findViewById(R.id.Favories).setOnClickListener(v -> Op.AddFAvor(databaseReference, Op.auth, "ghoudan ayoub", "0639603352", 42));
+            }
 
-        //sift mo ola tala3 lih dak  lta7t
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+        databaseReference3.orderByChild("ClientName").equalTo(PutPhone.name).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()){
+                        accept = dataSnapshot1.getValue(Accept.class);
+                        try {
+                            TaxiNum.setText(accept.Taxi_num);
+                            Ch_Name.setText(accept.Ch_Name);
+                            Ch_Num.setText(accept.Ch_num);
+                        }catch (Exception e){
+                            Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    findViewById(R.id.UtilTAxi).setVisibility(View.VISIBLE);
+                    findViewById(R.id.textViewtad).setVisibility(View.VISIBLE);
+                    findViewById(R.id.Favories).setOnClickListener(v -> Op.AddFAvor(databaseReference, PutPhone.gmail, accept.Ch_Name, accept.Ch_num,accept.Taxi_num));
+                findViewById(R.id.Rate).setOnClickListener(v->{
+                    LayoutInflater inflater = getLayoutInflater();
+                    builder.setIcon(R.drawable.ic_gesture_black_24dp);
+                    builder.setTitle("التقييم");
+                    View dialogLayout = inflater.inflate(R.layout.alert_dialog_with_ratingbar, null);
+                    final RatingBar ratingBar = dialogLayout.findViewById(R.id.ratingBar);
+                    builder.setView(dialogLayout);
+                    builder.setPositiveButton("OK", (dialogInterface, i) -> Toast.makeText(getApplicationContext(), "شكرا لتقيمكم", Toast.LENGTH_SHORT).show());
+                    builder.show();
+                });}
+                    else{findViewById(R.id.UtilTAxi).setVisibility(View.GONE);
+                    findViewById(R.id.textViewtad).setVisibility(View.GONE); }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
     }
-
 
     @Override
     public void onBackPressed() { }
@@ -137,9 +193,19 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
             IconFactory iconFactory = IconFactory.getInstance(Map.this);
             Icon icon = iconFactory.fromResource(R.drawable.taxisymb);
-            mapboxMap.addMarker(new MarkerOptions().position(new LatLng(31.642445, -8.056008)).icon(icon));
-            mapboxMap.addMarker(new MarkerOptions().position(new LatLng(31.643157, -8.066967)).icon(icon));
-            mapboxMap.addMarker(new MarkerOptions().position(new LatLng(31.637288, -8.043099)).icon(icon));
+            mapboxMap.addOnCameraMoveStartedListener(reason -> databaseReference4.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()){
+                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                            chifor = dataSnapshot1.getValue(Chifor.class);
+                        }
+                        mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor.getLant(), chifor.getLong())).icon(icon));
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) { }
+            }));
 
             findViewById(R.id.FindButton).setOnClickListener(v -> {
 
@@ -177,8 +243,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 getRoute(originPoint, destinationPoint);
 
             });
-            //lmhm hn ghadi tchof kifach tat afficher hir dyal  had khona li dakhal jma3 karak  m3na
-
         });
     }
 
@@ -225,24 +289,24 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     builder.setIcon(R.drawable.ic_search_black_24dp);
                                     builder.setTitle("عملية البحت");
                                     builder.setMessage("بدأت عملية البحت عن طاكسي\uD83D\uDE04\uD83D\uDE04");
-                                    builder.setNegativeButton("حسنا",(dialog2,which2)->{
-
-                                        databaseReference3.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                if (dataSnapshot.exists()){
-                                                    acceptList.clear();
-                                                    for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()){
-                                                        accept = dataSnapshot1.getValue(Accept.class);
-                                                        acceptList.add(accept);
-                                                    }
-                                                    bottom_sheet.setVisibility(View.VISIBLE);
+                                    builder.setNegativeButton("حسنا",(dialog2,which2)-> databaseReference3.orderByChild("ClientName").equalTo(PutPhone.name).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            if (dataSnapshot.exists()){
+                                                for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()){
+                                                    accept = dataSnapshot1.getValue(Accept.class);
                                                 }
+                                                TaxiNum.setText(accept.Taxi_num);
+                                                Ch_Name.setText(accept.Ch_Name);
+                                                Ch_Num.setText(accept.Ch_num);
+                                                findViewById(R.id.UtilTAxi).setVisibility(View.VISIBLE);
+                                                findViewById(R.id.textViewtad).setVisibility(View.VISIBLE);
+                                                findViewById(R.id.Favories).setOnClickListener(v -> Op.AddFAvor(databaseReference, PutPhone.gmail, accept.Ch_Name, accept.Ch_num,accept.Taxi_num));
                                             }
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) { }
-                                        });
-                                    });
+                                        }
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) { }
+                                    }));
                                     builder.setPositiveButton("رفض",(dialog1,which1)-> databaseReference2.orderByChild("ClientName").equalTo(PutPhone.name).addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(DataSnapshot dataSnapshot) {

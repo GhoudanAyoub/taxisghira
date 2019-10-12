@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.firebase.FirebaseException;
@@ -112,7 +113,7 @@ public class MsgNumber extends AppCompatActivity {
         Op.auth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(getApplicationContext(), "تم التحقح من رقمك بنجاح\uD83D\uDE04", Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(getApplicationContext(),GmailValidation.class));
+                        startActivity(new Intent(getApplicationContext(), Map.class));
                     } else {
                         if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                             Toast.makeText(getApplicationContext(),"المرجو ادخال الارقام الاربعة الصحيحة!",Toast.LENGTH_LONG).show();

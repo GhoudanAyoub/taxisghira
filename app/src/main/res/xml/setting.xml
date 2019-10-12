@@ -6,10 +6,6 @@
             android:key="UpdateAccount"
             android:summary="Update Account"
             android:title="Personal Information"/>
-        <Preference
-            android:key="DeleteAccount"
-            android:summary="Delete Your Account😔"
-            android:title="Account Option"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_category_other">
         <Preference

@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PutPhone;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.Client.TopDriver;
@@ -31,6 +32,7 @@ public class Util_List extends AppCompatActivity {
         setContentView(R.layout.activity_util__list);
         circleImageViewClient = findViewById(R.id.circleImageViewClient);
         findViewById(R.id.imageView2back).setOnClickListener(v-> super.onBackPressed());
+        findViewById(R.id.button3PN).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), PersonalInfo.class)));
         findViewById(R.id.button6Stting).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), ActivitySetting.class)));
         findViewById(R.id.buttonmap).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Map.class)));
         findViewById(R.id.button4TopDriver).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), TopDriver.class)));

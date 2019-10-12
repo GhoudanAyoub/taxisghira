@@ -79,7 +79,7 @@
             app:layout_constraintTop_toBottomOf="@+id/view4" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/button3PN"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
@@ -88,7 +88,7 @@
             android:background="@drawable/instruction_background"
             android:fontFamily="@font/harmattan"
             android:gravity="center"
-            android:text="الاشعارات"
+            android:text="المعلومات الشخصية"
             android:textColor="@color/md_grey_800"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -112,7 +112,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button3" />
+            app:layout_constraintTop_toBottomOf="@+id/button3PN" />
 
         <Button
             android:id="@+id/button5"

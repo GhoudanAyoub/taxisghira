@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PutPhone;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
@@ -35,7 +36,6 @@ public class ActivitySetting  extends PreferenceActivity {
         Preference morePref = findPreference("key_more");
         Preference aboutPref = findPreference("key_about");
         Preference UpdateAccount = findPreference("UpdateAccount");
-        Preference DeleteAccount = findPreference("DeleteAccount");
         Preference dis = findPreference("dis");
         final Preference prefTerm = findPreference(getString(R.string.pref_title_term));
 
@@ -44,11 +44,7 @@ public class ActivitySetting  extends PreferenceActivity {
             startActivity(new Intent(getApplicationContext(), PutPhone.class));
         return true;});
         UpdateAccount.setOnPreferenceClickListener(preference -> {
-            startActivity(new Intent(getApplicationContext(), UpdateAccount.class));
-            return true;
-        } );
-        DeleteAccount.setOnPreferenceClickListener(preference -> {
-            startActivity(new Intent(getApplicationContext(), PutPhone.class));
+            startActivity(new Intent(getApplicationContext(), PersonalInfo.class));
             return true;
         } );
         ratePref.setOnPreferenceClickListener(preference -> {

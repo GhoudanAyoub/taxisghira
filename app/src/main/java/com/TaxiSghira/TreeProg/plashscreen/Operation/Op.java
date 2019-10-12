@@ -27,13 +27,12 @@ public class Op {
 
     public static void Signout(){auth.signOut(); }
 
-    public static void AddFAvor(DatabaseReference databaseReference, FirebaseAuth mAuth, String Name, String Chh_Num, int taxinum){
+    public static void AddFAvor(DatabaseReference databaseReference, String mAuth, String Name, String Chh_Num, String taxinum){
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String id = mAuth.getUid();
                 DatabaseReference newPost2 = databaseReference.push();
-                newPost2.child("id").setValue(id);
+                newPost2.child("id").setValue(mAuth);
                 newPost2.child("Ch_Name").setValue(Name);
                 newPost2.child("Ch_num").setValue(Chh_Num);
                 newPost2.child("Taxi_num").setValue(taxinum);

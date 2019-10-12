@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.firebase.database.DataSnapshot;
@@ -24,7 +25,7 @@ public class PersonalInfo extends AppCompatActivity {
     DatabaseReference databaseReference;
     EditText firstname, lastname, personalAdress;
     private ProgressDialog gProgress;
-
+    Client client;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,27 +38,53 @@ public class PersonalInfo extends AppCompatActivity {
         lastname = findViewById(R.id.lastname);
         personalAdress = findViewById(R.id.personalAdress);
         findViewById(R.id.gonext3).setOnClickListener(v -> addDataClient());
+        databaseReference.orderByChild("gmail").equalTo(PutPhone.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                        client = dataSnapshot1.getValue(Client.class);
+                    }
+                    firstname.setText(client.getFullname());
+                    personalAdress.setText(client.getTell());
+                    lastname.setText(client.getGmail());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
     public void addDataClient() {
         gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
         gProgress.show();
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.orderByChild("gmail").equalTo(PutPhone.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                DatabaseReference newdata = databaseReference.push();
-                String key = databaseReference.push().getKey();
-                newdata.child("ID").setValue(key);
-                newdata.child("WHosme").setValue(Op.user+GmailValidation.gmail);
-                newdata.child("firstName").setValue(firstname.getText().toString());
-                newdata.child("secondName").setValue(lastname.getText().toString());
-                newdata.child("adress").setValue(personalAdress.getText().toString());
-                newdata.child("gmail").setValue(GmailValidation.gmail);
-                newdata.child("tell").setValue(phoneNumber.tel);
-                gProgress.dismiss();
-                Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getApplicationContext(), Map.class));
+                if (dataSnapshot.exists()) {
+                    dataSnapshot.getRef().removeValue();
+                    DatabaseReference newdata = databaseReference.push();
+                    newdata.child("WHosme").setValue(Op.user+lastname.getText().toString());
+                    newdata.child("Fullname").setValue(firstname.getText().toString());
+                    newdata.child("tell").setValue(personalAdress.getText().toString());
+                    newdata.child("gmail").setValue(lastname.getText().toString());
+                    gProgress.dismiss();
+                    Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getApplicationContext(), Map.class));
+                }else {
+                    DatabaseReference newdata = databaseReference.push();
+                    newdata.child("WHosme").setValue(Op.user+lastname.getText().toString());
+                    newdata.child("Fullname").setValue(firstname.getText().toString());
+                    newdata.child("tell").setValue(personalAdress.getText().toString());
+                    newdata.child("gmail").setValue(lastname.getText().toString());
+                    gProgress.dismiss();
+                    Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getApplicationContext(), Map.class));
+                }
             }
 
             @Override
@@ -70,53 +97,4 @@ public class PersonalInfo extends AppCompatActivity {
     @Override
     public void onBackPressed() {
     }
-/*
-    private void openImageFile() {
-        Intent galinten = new Intent();
-        galinten.setType("image/*");
-        galinten.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(galinten, "SELECT IMAGE"), GALLERI_PIK);
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GALLERI_PIK && resultCode == RESULT_OK) {
-            imageUri = data.getData();
-        }
-    }
-    public void addDataChiffeur(){
-        gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
-        gProgress.show();
-
-        try {
-            StorageReference storageReference = storage.child("CIN_Image").child(imageUri.getLastPathSegment());
-            storageReference.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-               final Task<Uri> download = taskSnapshot.getStorage().getDownloadUrl();
-               final DatabaseReference newData2 = databaseReference2.push();
-               key2 = databaseReference2.push().getKey();
-               databaseReference2.addListenerForSingleValueEvent(new ValueEventListener() {
-                   @Override
-                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                       newData2.child("ID").setValue(key2);
-                       newData2.child("firstName").setValue(firstname.getText().toString());
-                       newData2.child("secondName").setValue(lastname.getText().toString());
-                       newData2.child("adress").setValue(personalAdress.getText().toString());
-                       newData2.child("CIN").setValue(CinCHIFOR.getText().toString());
-                       newData2.child("NUM").setValue(NumTAXI.getText().toString());
-                       newData2.child("Counteur").setValue(p);
-                       newData2.child("image").setValue(download.toString());
-                       gProgress.dismiss();
-                       Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
-                   }
-                   @Override
-                   public void onCancelled(@NonNull DatabaseError databaseError) { Toast.makeText(getApplicationContext(),
-                               "نواجه مشكل في التواصل\uD83D\uDE14", Toast.LENGTH_LONG).show(); }
-               });
-            });
-        }catch (Exception e){
-
-        }
-
-    }
-*/
 }
