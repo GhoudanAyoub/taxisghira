@@ -98,8 +98,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         Mapbox.getInstance(this, "sk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjanpjbzBkOGQwN2NwM2VxZ3hsd2k4YzZiIn0.4uzrxcklTabdmuS3RN9Stw");
         setContentView(R.layout.app_bar_map);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        findViewById(R.id.UtilTAxi).setVisibility(View.GONE);
-        findViewById(R.id.textViewtad).setVisibility(View.GONE);
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
 
@@ -125,8 +123,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         databaseReference5.orderByChild("gmail").equalTo(PutPhone.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) { }
-                    else {
+                if (!dataSnapshot.exists()) {
                     builder.setIcon(R.drawable.ic_account_circle_black);
                     builder.setTitle("المعلومات الشخصية");
                     builder.setMessage("المرجو ملأ معلوماتكم الشخصية");
@@ -142,6 +139,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
             }
         });
+        /*
         databaseReference3.orderByChild("ClientName").equalTo(PutPhone.name).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -175,6 +173,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
+         */
     }
 
     @Override
