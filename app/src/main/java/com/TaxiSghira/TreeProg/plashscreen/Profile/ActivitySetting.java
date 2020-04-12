@@ -17,9 +17,7 @@ import android.view.ViewGroup;
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
-import com.TaxiSghira.TreeProg.plashscreen.Both.PutPhone;
-import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
+import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 
@@ -41,7 +39,7 @@ public class ActivitySetting  extends PreferenceActivity {
 
         dis.setOnPreferenceClickListener(preference -> {
             Op.auth.signOut();
-            startActivity(new Intent(getApplicationContext(), PutPhone.class));
+            startActivity(new Intent(getApplicationContext(), Auth.class));
         return true;});
         UpdateAccount.setOnPreferenceClickListener(preference -> {
             startActivity(new Intent(getApplicationContext(), PersonalInfo.class));

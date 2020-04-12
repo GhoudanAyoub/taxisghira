@@ -12,11 +12,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.TaxiSghira.TreeProg.plashscreen.Both.PutPhone;
-import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
+import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Favor;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,7 +38,7 @@ public class Favor_Adpter extends RecyclerView.Adapter<Favor_Adpter.ImageViewHol
     @NonNull
     @Override
     public ImageViewHolder2 onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.favor_list, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.favor_driver_layout, parent, false);
         return new Favor_Adpter.ImageViewHolder2(view);
     }
 
@@ -48,7 +46,7 @@ public class Favor_Adpter extends RecyclerView.Adapter<Favor_Adpter.ImageViewHol
     public void onBindViewHolder(@NonNull ImageViewHolder2 holder, int position) {
          favor = mUploads.get(position);
 
-        databaseReference.orderByChild("id").equalTo(PutPhone.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.orderByChild("id").equalTo(Auth.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){

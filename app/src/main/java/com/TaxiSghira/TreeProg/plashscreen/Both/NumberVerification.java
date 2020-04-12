@@ -12,15 +12,13 @@ import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class MsgNumber extends AppCompatActivity {
+public class NumberVerification extends AppCompatActivity {
 
     EditText N1,N2,N3,N4,N5,N6;
     String txt,codeSent,destinationAddress;
@@ -28,7 +26,7 @@ public class MsgNumber extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_msg_number);
+        setContentView(R.layout.activity_number_verification);
 
         destinationAddress = getIntent().getStringExtra("tel");
         N1= findViewById(R.id.N1);
@@ -102,7 +100,7 @@ public class MsgNumber extends AppCompatActivity {
         if (!validateForm())return;
         txt = ""+N1.getText().toString()+""+N2.getText().toString()+""+N3.getText().toString()+""+N4.getText().toString()+""+N5.getText().toString()+""+N6.getText().toString();
         try{
-            startActivity(new Intent(getApplicationContext(),GmailValidation.class));
+            startActivity(new Intent(getApplicationContext(),Map.class));
             PhoneAuthCredential credential = PhoneAuthProvider.getCredential(codeSent,txt);
             signInWithPhoneAuthCredential(credential);
         }catch (Exception e){

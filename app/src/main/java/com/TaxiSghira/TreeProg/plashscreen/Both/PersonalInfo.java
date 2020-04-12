@@ -38,7 +38,7 @@ public class PersonalInfo extends AppCompatActivity {
         lastname = findViewById(R.id.lastname);
         personalAdress = findViewById(R.id.personalAdress);
         findViewById(R.id.gonext3).setOnClickListener(v -> addDataClient());
-        databaseReference.orderByChild("gmail").equalTo(PutPhone.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.orderByChild("gmail").equalTo(Auth.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
@@ -62,7 +62,7 @@ public class PersonalInfo extends AppCompatActivity {
     public void addDataClient() {
         gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
         gProgress.show();
-        databaseReference.orderByChild("gmail").equalTo(PutPhone.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.orderByChild("gmail").equalTo(Auth.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {

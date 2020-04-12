@@ -14,12 +14,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
-import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.hbb20.CountryCodePicker;
@@ -48,7 +45,7 @@ public class phoneNumber extends AppCompatActivity {
         editText =  findViewById(R.id.phoneText);
         findViewById(R.id.sendButton).setOnClickListener(v->sendVerificationCode());
 
-        returnbutton.setOnClickListener(v->startActivity(new Intent(getApplicationContext(), PutPhone.class)));
+        returnbutton.setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Auth.class)));
         checkForSmsPermission();
         countryCodePicker = findViewById(R.id.ccp);
     }
@@ -128,7 +125,7 @@ public class phoneNumber extends AppCompatActivity {
         @Override
         public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
             gProgress.dismiss();
-            startActivity(new Intent(getApplicationContext(),MsgNumber.class).putExtra("tel",tel));
+            startActivity(new Intent(getApplicationContext(), NumberVerification.class).putExtra("tel",tel));
         }
         @Override
         public void onVerificationFailed(FirebaseException e) {

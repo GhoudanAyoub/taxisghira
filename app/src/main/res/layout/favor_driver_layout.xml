@@ -78,7 +78,7 @@
             android:layout_gravity="center"
             android:layout_weight="0.5"
             android:background="@color/white"
-            android:src="@drawable/ic_local_phone_black_24dp" />
+            app:srcCompat="@drawable/ic_local_phone_black_24dp" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

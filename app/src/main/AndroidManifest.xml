@@ -25,17 +25,14 @@
         android:theme="@style/AppTheme"
         tools:replace="android:appComponentFactory">
         <activity android:name=".Profile.Util_List" />
-        <activity android:name=".Client.TopDriver" />
+        <activity android:name=".Client.FavorDrivers" />
         <activity
             android:name=".Client.Map"
             android:label="@string/title_activity_map"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".out.PhoneAuthActivity" />
-        <activity android:name=".Both.PersonalInfo" />
-        <activity android:name=".Both.GmailValidation" />
-        <activity android:name=".Both.MsgNumber" />
+        <activity android:name=".Both.NumberVerification" />
         <activity android:name=".Both.phoneNumber" />
-        <activity android:name=".Both.PutPhone" />
+        <activity android:name=".Both.Auth" />
         <activity android:name=".Profile.ActivitySetting" />
 
         <meta-data
