@@ -8,79 +8,69 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
+import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
+import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class PersonalInfo extends AppCompatActivity {
 
-
-    DatabaseReference databaseReference;
-    EditText firstname, lastname, personalAdress;
+    PersonalInfoModelViewClass personalInfoModelViewClass;
+    EditText fullname, Adress, Tell;
     private ProgressDialog gProgress;
-    Client client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal_info);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("Client");
+        personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
+        personalInfoModelViewClass.getClientInfo();
         gProgress = new ProgressDialog(this);
         findViewById(R.id.returnAnim).setOnClickListener(v -> super.onBackPressed());
-        firstname = findViewById(R.id.firstname);
-        lastname = findViewById(R.id.lastname);
-        personalAdress = findViewById(R.id.personalAdress);
+        fullname = findViewById(R.id.firstname);
+        Adress = findViewById(R.id.lastname);
+        Tell = findViewById(R.id.personalAdress);
         findViewById(R.id.gonext3).setOnClickListener(v -> addDataClient());
-        databaseReference.orderByChild("gmail").equalTo(Auth.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
-                        client = dataSnapshot1.getValue(Client.class);
-                    }
-                    firstname.setText(client.getFullname());
-                    personalAdress.setText(client.getTell());
-                    lastname.setText(client.getGmail());
-                }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+        personalInfoModelViewClass.clientMutableLiveData.observe(this, client -> {
+            fullname.setText(client.getFullname());
+            Adress.setText(client.getGmail());
+            Tell.setText(client.getTell());
         });
 
     }
 
-    public void addDataClient() {
+    private void addDataClient() {
+        DatabaseReference databaseReference = FireBaseClient.getFireBaseClient().getDatabaseReference().child("Client");
         gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
         gProgress.show();
-        databaseReference.orderByChild("gmail").equalTo(Auth.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.orderByChild("gmail").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getEmail()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     dataSnapshot.getRef().removeValue();
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.child("WHosme").setValue(Op.user+lastname.getText().toString());
-                    newdata.child("Fullname").setValue(firstname.getText().toString());
-                    newdata.child("tell").setValue(personalAdress.getText().toString());
-                    newdata.child("gmail").setValue(lastname.getText().toString());
+                    newdata.child("WHosme").setValue(Op.user + Adress.getText().toString());
+                    newdata.child("Fullname").setValue(fullname.getText().toString());
+                    newdata.child("tell").setValue(Tell.getText().toString());
+                    newdata.child("gmail").setValue(Adress.getText().toString());
                     gProgress.dismiss();
                     Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(getApplicationContext(), Map.class));
-                }else {
+                } else {
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.child("WHosme").setValue(Op.user+lastname.getText().toString());
-                    newdata.child("Fullname").setValue(firstname.getText().toString());
-                    newdata.child("tell").setValue(personalAdress.getText().toString());
-                    newdata.child("gmail").setValue(lastname.getText().toString());
+                    newdata.child("WHosme").setValue(Op.user + Adress.getText().toString());
+                    newdata.child("Fullname").setValue(fullname.getText().toString());
+                    newdata.child("tell").setValue(Tell.getText().toString());
+                    newdata.child("gmail").setValue(Adress.getText().toString());
                     gProgress.dismiss();
                     Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(getApplicationContext(), Map.class));

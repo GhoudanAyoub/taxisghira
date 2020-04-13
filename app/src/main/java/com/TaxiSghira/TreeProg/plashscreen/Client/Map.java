@@ -11,7 +11,6 @@ import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -22,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Accept;
@@ -31,8 +31,6 @@ import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
@@ -70,10 +68,11 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
 
 
-    private static final String TAG = "";
     public static String id;
-    DatabaseReference databaseReference,databaseReference2,databaseReference3,databaseReference4,databaseReference5;
+    public Accept accept;
     TextView Ch_Name, TaxiNum, Ch_Num;
+    AlertDialog.Builder builder;
+    Chifor chifor;
     private MapView mapView;
     private MapboxMap mapboxMap;
     private PermissionsManager permissionsManager;
@@ -81,17 +80,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private DirectionsRoute currentRoute;
     private NavigationMapRoute navigationMapRoute;
     private EditText WhereToGo;
-    AlertDialog.Builder builder;
     private ProgressDialog gProgress;
-    public Accept accept;
-    Chifor chifor;
     private boolean mLocationPermissionGranted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Mapbox.getInstance(this,"pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjanZzNjZ4YnEyNWY1M3lsZTkzY2dsbTRyIn0.kRrltAjtWtJIlviacEL5og");
+        Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjanZzNjZ4YnEyNWY1M3lsZTkzY2dsbTRyIn0.kRrltAjtWtJIlviacEL5og");
         setContentView(R.layout.app_bar_map);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
@@ -101,13 +97,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         gProgress = new ProgressDialog(this);
         builder = new AlertDialog.Builder(this);
         WhereToGo = findViewById(R.id.editText2);
-        databaseReference = FirebaseDatabase.getInstance().getReference("Favor");
-        databaseReference2 = FirebaseDatabase.getInstance().getReference("Demande");
-        databaseReference3 = FirebaseDatabase.getInstance().getReference("Accept");
-        databaseReference4 = FirebaseDatabase.getInstance().getReference("Chifor");
-        databaseReference5 = FirebaseDatabase.getInstance().getReference("Client");
-        databaseReference4.keepSynced(true);
-        databaseReference3.keepSynced(true);
 
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -116,17 +105,17 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         Ch_Name = findViewById(R.id.list_Ch_Name);
         Ch_Num = findViewById(R.id.list_Ch_num);
         TaxiNum = findViewById(R.id.list_Taxi_num);
-
-        databaseReference5.orderByChild("gmail").equalTo(Auth.gmail).addListenerForSingleValueEvent(new ValueEventListener() {
+        /*loook  down*/
+        FireBaseClient.getFireBaseClient().getDatabaseReference().child("Client").orderByChild("gmail").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getEmail()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) { }
-                else {
+                if (dataSnapshot.exists()) {
+                } else {
                     builder.setIcon(R.drawable.ic_account_circle_black);
                     builder.setTitle("المعلومات الشخصية");
                     builder.setMessage("المرجو ملأ معلوماتكم الشخصية");
                     builder.setPositiveButton("حسنا", (dialog, which) -> startActivity(new Intent(getApplicationContext(), PersonalInfo.class)));
-                    builder.setNegativeButton("",null);
+                    builder.setNegativeButton("", null);
                     builder.show();
                 }
 
@@ -152,6 +141,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         }
         return true;
     }
+
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("المرجو تشغيل GPS")
@@ -181,8 +171,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             getLocationPermission();
         }
     }
+
     @Override
-    public void onBackPressed() { }
+    public void onBackPressed() {
+    }
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
@@ -194,24 +186,24 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
-
             IconFactory iconFactory = IconFactory.getInstance(Map.this);
             Icon icon = iconFactory.fromResource(R.drawable.taxisymb);
             mapboxMap.addOnCameraMoveStartedListener(reason ->
-                    databaseReference4.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()){
-                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
-                            chifor = dataSnapshot1.getValue(Chifor.class);
+                    FireBaseClient.getFireBaseClient().getDatabaseReference().child("Chifor").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                                    chifor = dataSnapshot1.getValue(Chifor.class);
+                                }
+                                mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor.getLant(), chifor.getLong())).icon(icon));
+                            }
                         }
-                        mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor.getLant(), chifor.getLong())).icon(icon));
-                    }
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) { }
-            }));
 
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    }));
             findViewById(R.id.FindButton).setOnClickListener(v -> {
 
                 Point destinationPoint = null;
@@ -281,54 +273,53 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
                             Toast.makeText(getApplicationContext(), "Route Generated :)", Toast.LENGTH_SHORT).show();
 
-                            new Handler().postDelayed(()->{
+                            new Handler().postDelayed(() -> {
                                 builder.setIcon(R.drawable.ic_search_black_24dp);
                                 builder.setTitle("عملية البحت");
                                 builder.setMessage("هل تريد بدء عملبة البحت عن طاكسي?");
                                 builder.setPositiveButton("نعم", (dialog, which) -> {
                                     gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
-                                    Op.AddDemande(databaseReference2, Auth.name,WhereToGo.getText().toString(),locationComponent.getLastKnownLocation().getLatitude(),locationComponent.getLastKnownLocation().getLongitude());
-
+                                    Op.AddDemande(FireBaseClient.getFireBaseClient().getDatabaseReference().child("Demande"),FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(), locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
                                     //waitiing room !!!!!!!!!
+
                                     builder.setIcon(R.drawable.ic_search_black_24dp);
                                     builder.setTitle("عملية البحت");
                                     builder.setMessage("بدأت عملية البحت عن طاكسي\uD83D\uDE04\uD83D\uDE04");
-                                    builder.setNegativeButton("حسنا",(dialog2,which2)-> databaseReference3.orderByChild("ClientName").equalTo(Auth.name).addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            if (dataSnapshot.exists()){
-                                                for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()){
-                                                    accept = dataSnapshot1.getValue(Accept.class);
+                                    builder.setNegativeButton("حسنا", (dialog2, which2) ->
+                                            FireBaseClient.getFireBaseClient().getDatabaseReference().child("Accept").orderByChild("ClientName").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    if (dataSnapshot.exists()) {
+                                                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                                                            accept = dataSnapshot1.getValue(Accept.class);
+                                                        }
+                                                        //neeed to notify that driver Accept
+                                                    }
                                                 }
-                                                TaxiNum.setText(accept.Taxi_num);
-                                                Ch_Name.setText(accept.Ch_Name);
-                                                Ch_Num.setText(accept.Ch_num);
-                                                findViewById(R.id.UtilTAxi).setVisibility(View.VISIBLE);
-                                                findViewById(R.id.textViewtad).setVisibility(View.VISIBLE);
-                                                findViewById(R.id.Favories).setOnClickListener(v -> Op.AddFAvor(databaseReference, Auth.gmail, accept.Ch_Name, accept.Ch_num,accept.Taxi_num));
-                                            }
-                                        }
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) { }
-                                    }));
-                                    builder.setPositiveButton("رفض",(dialog1,which1)-> databaseReference2.orderByChild("ClientName").equalTo(Auth.name).addListenerForSingleValueEvent(new ValueEventListener() {
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                }
+                                            }));
+                                    builder.setPositiveButton("رفض", (dialog1, which1) -> FireBaseClient.getFireBaseClient().getDatabaseReference().child("Demande").orderByChild("ClientName").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName()).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                            if (dataSnapshot.exists()){
+                                            if (dataSnapshot.exists()) {
                                                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                                                     ds.getRef().removeValue();
-                                                }}
+                                                }
+                                            }
                                         }
+
                                         @Override
                                         public void onCancelled(DatabaseError databaseError) {
                                         }
                                     }));
-                                    new Handler().postDelayed(()-> builder.show(),2000);
+                                    new Handler().postDelayed(() -> builder.show(), 2000);
                                 });
-                                builder.setNegativeButton("لا",null);
+                                builder.setNegativeButton("لا", null);
                                 builder.show();
-                            },2000);
-
+                            }, 2000);
 
                             if (response.body() == null) {
                                 Toast.makeText(getApplicationContext(), "No routes found, make sure you set the right user and access token.", Toast.LENGTH_SHORT).show();

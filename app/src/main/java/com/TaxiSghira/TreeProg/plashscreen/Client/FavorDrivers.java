@@ -1,7 +1,7 @@
 package com.TaxiSghira.TreeProg.plashscreen.Client;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,61 +9,37 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.TaxiSghira.TreeProg.plashscreen.Adapters.Favor_Adpter;
+import com.TaxiSghira.TreeProg.plashscreen.Adapters.FavorAdapter;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Favor;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 public class FavorDrivers extends AppCompatActivity {
 
-    Favor_Adpter exerciceAdapter;
-    private List<Favor> FavorList;
     private RecyclerView Favor_Recycle;
-    private TextView txtEmptyFavoritesList;
-    DatabaseReference databaseReference;
+    FavorViewModel favorViewModel;
+    FavorAdapter favorAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favor_driver);
 
-        FavorList = new ArrayList<>();
-        exerciceAdapter = new Favor_Adpter(getApplicationContext(), FavorList);
-        Favor_Recycle = findViewById(R.id.Favor_Recycle);
-        txtEmptyFavoritesList = findViewById(R.id.content_favorite_emptylist);
-        Favor_Recycle.setHasFixedSize(true);
-        Favor_Recycle.setLayoutManager(new GridLayoutManager(getApplicationContext(), 1));
+        favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
+        favorViewModel.getFavor();
+
         findViewById(R.id.listAnim22).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Util_List.class)));
+        favorAdapter = new FavorAdapter(getApplicationContext());
+        Favor_Recycle = findViewById(R.id.Favor_Recycle);
+        Favor_Recycle.setLayoutManager(new GridLayoutManager(getApplicationContext(), 1));
+        Favor_Recycle.setHasFixedSize(true);
+        Favor_Recycle.setAdapter(favorAdapter);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("Favor");
-
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    FavorList.clear();
-                    for (DataSnapshot dataSnapshot1 :dataSnapshot.getChildren()){
-                        Favor favor = dataSnapshot1.getValue(Favor.class);
-                        FavorList.add(favor);
-                    }
-                    Favor_Recycle.setAdapter(new Favor_Adpter(getApplicationContext(),FavorList));
-                }else {
-                    txtEmptyFavoritesList.setText("لم تختر بعد سائقك المفضل!!");
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+        favorViewModel.mutableLiveData.observe(this, favors -> {
+            favorAdapter.setList(favors);
         });
-
-
     }
 }

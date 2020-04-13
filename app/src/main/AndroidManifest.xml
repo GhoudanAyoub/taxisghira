@@ -34,6 +34,7 @@
         <activity android:name=".Both.phoneNumber" />
         <activity android:name=".Both.Auth" />
         <activity android:name=".Profile.ActivitySetting" />
+        <activity android:name=".Both.PersonalInfo"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

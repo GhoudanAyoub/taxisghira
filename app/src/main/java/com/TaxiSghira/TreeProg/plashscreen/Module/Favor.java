@@ -15,4 +15,15 @@ public class Favor {
         this.id = id;
     }
 
+    public String getCh_Name() {
+        return Ch_Name;
+    }
+
+    public String getCh_num() {
+        return Ch_num;
+    }
+
+    public String getTaxi_num() {
+        return Taxi_num;
+    }
 }

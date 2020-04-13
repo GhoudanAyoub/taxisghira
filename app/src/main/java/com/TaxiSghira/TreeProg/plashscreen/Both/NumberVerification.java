@@ -65,28 +65,28 @@ public class NumberVerification extends AppCompatActivity {
             N2.setError(null);
         }
         String email3 = N3.getText().toString();
-        if (TextUtils.isEmpty(email1)) {
+        if (TextUtils.isEmpty(email3)) {
             N3.setError("املأ الفراغ من فضلك!!");
             valid = false;
         } else {
             N3.setError(null);
         }
         String email4 = N4.getText().toString();
-        if (TextUtils.isEmpty(email1)) {
+        if (TextUtils.isEmpty(email4)) {
             N4.setError("املأ الفراغ من فضلك!!");
             valid = false;
         } else {
             N4.setError(null);
         }
         String email5 = N5.getText().toString();
-        if (TextUtils.isEmpty(email1)) {
+        if (TextUtils.isEmpty(email5)) {
             N5.setError("املأ الفراغ من فضلك!!");
             valid = false;
         } else {
             N5.setError(null);
         }
         String email6 = N6.getText().toString();
-        if (TextUtils.isEmpty(email1)) {
+        if (TextUtils.isEmpty(email6)) {
             N6.setError("املأ الفراغ من فضلك!!");
             valid = false;
         } else {

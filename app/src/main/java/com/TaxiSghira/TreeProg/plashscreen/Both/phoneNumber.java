@@ -21,17 +21,17 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.hbb20.CountryCodePicker;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.TimeUnit;
 
 public class phoneNumber extends AppCompatActivity {
 
 
-    private LottieAnimationView returnbutton;
     EditText editText;
     String codeSent;
     static String tel;
     CountryCodePicker countryCodePicker;
-    private static final String TAG = phoneNumber.class.getSimpleName();
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
     private ProgressDialog gProgress;
 
@@ -39,7 +39,7 @@ public class phoneNumber extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phone_number);
-        returnbutton = findViewById(R.id.returnAnim);
+        LottieAnimationView returnbutton = findViewById(R.id.returnAnim);
 
         gProgress = new ProgressDialog(this);
         editText =  findViewById(R.id.phoneText);
@@ -77,15 +77,13 @@ public class phoneNumber extends AppCompatActivity {
         }
     }
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_SEND_SMS: {
-                if (permissions[0].equalsIgnoreCase(Manifest.permission.SEND_SMS) && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    enableSmsButton();
-                } else {
-                    Toast.makeText(this, getString(R.string.failure_permission), Toast.LENGTH_LONG).show();
-                    disableSmsButton();
-                }
+    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_SEND_SMS) {
+            if (permissions[0].equalsIgnoreCase(Manifest.permission.SEND_SMS) && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                enableSmsButton();
+            } else {
+                Toast.makeText(this, getString(R.string.failure_permission), Toast.LENGTH_LONG).show();
+                disableSmsButton();
             }
         }
     }
@@ -98,8 +96,6 @@ public class phoneNumber extends AppCompatActivity {
         Button smsButton = findViewById(R.id.sendButton);
         smsButton.setVisibility(View.VISIBLE);
     }
-
-
     //Firebase Verification  number
     private void sendVerificationCode(){
 

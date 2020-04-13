@@ -18,6 +18,7 @@ import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
+import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 
