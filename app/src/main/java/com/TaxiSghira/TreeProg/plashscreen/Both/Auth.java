@@ -64,6 +64,7 @@ public class Auth extends AppCompatActivity {
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        FireBaseClient.getFireBaseClient().setmGoogleSignInClient(mGoogleSignInClient);
     }
 
     private void signIn() {

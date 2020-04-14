@@ -147,7 +147,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("المرجو تشغيل GPS")
+        builder.setIcon(R.drawable.ic_gps_off_black_24dp)
+                .setMessage("المرجو تشغيل GPS")
                 .setCancelable(false)
                 .setPositiveButton("حسنا", (dialog, id) -> startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 333));
         final AlertDialog alert = builder.create();
@@ -216,8 +217,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     assert locationComponent.getLastKnownLocation() != null;
                     originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                             locationComponent.getLastKnownLocation().getLatitude());
-
-                    //use servce to  update data to  base every 30s
                 } catch (Exception e) {
                     startActivity(new Intent(getApplicationContext(), Map.class));
                 }
@@ -301,22 +300,23 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 .setCancelable(false)
                 .setPositiveButton("نعم", (dialog, which) -> {
                     gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
+                    gProgress.show();
 
                     assert locationComponent.getLastKnownLocation() != null;
                     UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
                     Demande d1 = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(),userLocation.getLnt(),userLocation.getLong());
                     mapViewModel.AddDemande(d1);
 
-                    //waitiing room !!!!!!!!!
+                    gProgress.dismiss();
                     final AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
                     builder2.setIcon(R.drawable.ic_search_black_24dp)
                             .setTitle("عملية البحت")
                             .setMessage("بدأت عملية البحت عن طاكسي\uD83D\uDE04\uD83D\uDE04")
-                            .setNegativeButton("حسنا", (dialog2, which2) ->
+                            .setPositiveButton("حسنا", (dialog2, which2) ->
                             mapViewModel.acceptMutableLiveData.observe(this,accept1 -> {
                                     //notify user that  he get accepted
                             }))
-                            .setPositiveButton("رفض", (dialog1, which1) -> mapViewModel.DelateDemande());
+                            .setNegativeButton("رفض", (dialog1, which1) -> mapViewModel.DelateDemande());
 
                     new Handler().postDelayed(() -> {
                         final AlertDialog alert2 = builder2.create();

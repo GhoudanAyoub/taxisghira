@@ -1,19 +1,19 @@
 package com.TaxiSghira.TreeProg.plashscreen.Profile;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
-import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.Client.FavorDrivers;
-import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
+import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.bumptech.glide.Glide;
 
@@ -35,7 +35,13 @@ public class Util_List extends AppCompatActivity {
         findViewById(R.id.button6Stting).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), ActivitySetting.class)));
         findViewById(R.id.buttonmap).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Map.class)));
         findViewById(R.id.button4TopDriver).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), FavorDrivers.class)));
-        findViewById(R.id.button8LogOut).setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), Auth.class)));
+        findViewById(R.id.button8LogOut).setOnClickListener(v -> {
+            FireBaseClient.getFireBaseClient().getmGoogleSignInClient()
+                    .signOut()
+                    .addOnCompleteListener(task ->
+                            Toast.makeText(getApplicationContext(), "لقد تم تسجيل خروجك من التطبيق", Toast.LENGTH_SHORT).show());
+            startActivity(new Intent(getApplicationContext(), Auth.class));
+        });
         findViewById(R.id.button7RuDriver).setOnClickListener(v->{
             try {
                 getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getApplicationContext().getPackageName())));
@@ -43,8 +49,11 @@ public class Util_List extends AppCompatActivity {
                 getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("" + getApplicationContext().getPackageName())));
             }});
 
+        try {
             textViewName.setText(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName());
             Glide.with(getApplicationContext()).load(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getPhotoUrl()).centerCrop().into(circleImageViewClient);
+        } catch (Exception e) {
+        }
     }
 
     @Override
