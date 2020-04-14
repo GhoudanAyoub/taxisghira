@@ -6,8 +6,22 @@ public class Demande {
     private String Arrive;
     private double Lnt;
     private double Long;
+    private UserLocation userLocation;
+
+    public Demande(String clientName, String arrive, UserLocation userLocation) {
+        ClientName = clientName;
+        Arrive = arrive;
+        this.userLocation = userLocation;
+    }
 
     public Demande() {
+    }
+
+    public Demande(String clientName, String arrive, double lnt, double aLong) {
+        ClientName = clientName;
+        Arrive = arrive;
+        Lnt = lnt;
+        Long = aLong;
     }
 
     public String getArrive() {
