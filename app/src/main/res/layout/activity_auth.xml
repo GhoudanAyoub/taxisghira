@@ -57,6 +57,7 @@
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:orientation="vertical"
+        android:padding="6"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -75,35 +76,6 @@
             android:textColor="@color/backgroundcolor"
             android:textSize="18sp"
             android:textStyle="bold" />
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:paddingTop="10dp">
-
-            <TextView
-                android:id="@+id/TxtGoogle"
-                android:layout_width="268dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="@string/google"
-                android:textColor="@color/yello"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textView10"
-                android:layout_width="278dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="@font/harmattan"
-                android:gravity="end"
-                android:text="@string/continue_with" />
-
-        </TableRow>
 
     </LinearLayout>
 
