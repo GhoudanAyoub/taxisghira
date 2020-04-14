@@ -9,11 +9,9 @@ import androidx.lifecycle.ViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Accept;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
@@ -84,7 +82,7 @@ public class MapViewModel extends ViewModel {
     }
 
     public void AddDemande(Demande demande){
-        FireBaseClient.getFireBaseClient().getFirebaseFirestore().collection("Demande").add(demande).addOnCompleteListener(task -> {});
+        FireBaseClient.getFireBaseClient().getFirebaseFirestore().collection("Demande").document(demande.getClientName()).set(demande).addOnCompleteListener(task -> {});
         /*
         FireBaseClient.getFireBaseClient().getDatabaseReference().child("Demande").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

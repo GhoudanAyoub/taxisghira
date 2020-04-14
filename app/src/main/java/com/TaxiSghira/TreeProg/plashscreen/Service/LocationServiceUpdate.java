@@ -9,9 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -25,7 +26,13 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.GeoPoint;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -49,15 +56,13 @@ public class LocationServiceUpdate extends Service {
 
         String CHANNEL_ID = "my_channel_01";
         String CHANNEL_NAME = "location_Channel";
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= 26) {
                 NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,CHANNEL_NAME,NotificationManager.IMPORTANCE_DEFAULT);
                 ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
                 Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setContentTitle("")
-                        .setContentText("").build();
+                        .setContentTitle("Location")
+                        .setContentText("Location update").build();
                 startForeground(1,notification);
-            }
         }
     }
 
@@ -97,18 +102,27 @@ public class LocationServiceUpdate extends Service {
 
     }
 
+
     private void updateUser(final UserLocation userLocation){
-        Demande demande = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(),
-                FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getEmail(),
-                userLocation);
+        UserLocation userLocation1 = new UserLocation(userLocation.getLnt(),userLocation.getLong(),FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName());
+
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
                 .collection("Demande")
-                .add(demande)
+                .document( userLocation1.getDisplayName())
+                .get()
                 .addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
-                        Timber.d("onComplete: \ninserted user location into database." +
-                                "\n latitude: " + userLocation.getLnt() +
-                                "\n longitude: " + userLocation.getLong());
+                    if (task.isSuccessful()){
+                        FireBaseClient.getFireBaseClient().getFirebaseFirestore()
+                                .collection("Demande")
+                                .document(userLocation1.getDisplayName())
+                                .update("lnt",userLocation1.getLnt(),"long",userLocation1.getLong())
+                                .addOnCompleteListener(task1 -> {
+                                    if(task1.isSuccessful()){
+                                        Timber.tag("ERR").d("onComplete: \ninserted user location into database." +
+                                                "\n latitude: " + userLocation.getLnt() +
+                                                "\n longitude: " + userLocation.getLong());
+                                    }
+                                });
                     }
                 });
 

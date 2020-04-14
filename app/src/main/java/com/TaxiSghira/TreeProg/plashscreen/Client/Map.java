@@ -11,7 +11,6 @@ import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -26,16 +25,13 @@ import androidx.lifecycle.ViewModelProviders;
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Accept;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
-import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
+import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
+import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -98,6 +94,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
+        startService(new Intent(getApplicationContext(),LocationServiceUpdate.class));
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
         personalInfoModelViewClass.getClientInfo();
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
@@ -306,7 +303,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
 
                     assert locationComponent.getLastKnownLocation() != null;
-                    Demande d1 = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(), locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
+                    UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
+                    Demande d1 = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(),userLocation.getLnt(),userLocation.getLong());
                     mapViewModel.AddDemande(d1);
 
                     //waitiing room !!!!!!!!!
