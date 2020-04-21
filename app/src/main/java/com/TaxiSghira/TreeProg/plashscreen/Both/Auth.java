@@ -83,7 +83,7 @@ public class Auth extends AppCompatActivity {
                 firebaseAuthWithGoogle(account);
                 FireBaseClient.getFireBaseClient().setUserLogEdInAccount(account);
             } catch (Exception e) {
-                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
             }
         }
     }

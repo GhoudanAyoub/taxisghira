@@ -13,6 +13,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -27,21 +28,16 @@ public class MapViewModel extends ViewModel {
     Accept accept;
 
     public void GetChiforDataLocation(){
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child("Chifor").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                       chifor = dataSnapshot1.getValue(Chifor.class);
+        FireBaseClient.getFireBaseClient().getFirebaseFirestore()
+                .collection("Chifor")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            chiforMutableLiveData.setValue(document.toObject(Chifor.class));
+                        }
                     }
-                    assert chifor != null;
-                    chiforMutableLiveData.setValue(chifor);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) { }
-        });
+                });
     }
 
     public void DelateDemande(){

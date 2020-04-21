@@ -89,11 +89,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjanZzNjZ4YnEyNWY1M3lsZTkzY2dsbTRyIn0.kRrltAjtWtJIlviacEL5og");
+        Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
+        checkMapServices();
         startService(new Intent(getApplicationContext(),LocationServiceUpdate.class));
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
         personalInfoModelViewClass.getClientInfo();
@@ -101,8 +101,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mapViewModel.GetChiforDataLocation();
         mapViewModel.GetAcceptDemandeList();
 
-
-        checkMapServices();
+        findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
         gProgress = new ProgressDialog(this);
         builder = new AlertDialog.Builder(this);
@@ -192,7 +191,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             mapboxMap.addOnCameraMoveStartedListener(reason ->
                     mapViewModel.chiforMutableLiveData.observe(this,chifor1 -> {
                         assert chifor1 != null;
-                        mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor1.getLant(), chifor1.getLong())).icon(icon));
+                        mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor1.getLnt(), chifor1.getLng())).icon(icon));
                     })
             );
             findViewById(R.id.FindButton).setOnClickListener(v -> {

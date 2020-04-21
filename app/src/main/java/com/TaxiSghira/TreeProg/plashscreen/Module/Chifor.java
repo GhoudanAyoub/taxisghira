@@ -1,97 +1,81 @@
 package com.TaxiSghira.TreeProg.plashscreen.Module;
 
-public class Chifor extends Client {
+public class Chifor {
 
-    private String ID;
-    private String firstName;
-    private String secondName;
-    private String tell;
-    private String CIN;
-    private String NUM;
-    private String gmail;
-    private String image;
-    private Float Lant;
-    private Float Long;
+
+    private String id;
+    private String fullname;
+    private String phone;
+    private String cin;
+    private String taxi_NUM;
+    private double lnt;
+    private double lng;
 
     public Chifor() { }
 
-    public String getID() {
-        return ID;
+    public Chifor(String id, String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng) {
+        this.id = id;
+        this.fullname = fullname;
+        this.phone = phone;
+        this.cin = cin;
+        this.taxi_NUM = taxi_NUM;
+        this.lnt = lnt;
+        this.lng = lng;
     }
 
-    public void setID(String ID) {
-        this.ID = ID;
+    public String getId() {
+        return id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public String getFullname() {
+        return fullname;
     }
 
-    public String getSecondName() {
-        return secondName;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
+    public String getPhone() {
+        return phone;
     }
 
-    public String getTell() {
-        return tell;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public void setTell(String tell) {
-        this.tell = tell;
+    public String getCin() {
+        return cin;
     }
 
-    public String getCIN() {
-        return CIN;
+    public void setCin(String cin) {
+        this.cin = cin;
     }
 
-    public void setCIN(String CIN) {
-        this.CIN = CIN;
+    public String getTaxi_NUM() {
+        return taxi_NUM;
     }
 
-    public String getNUM() {
-        return NUM;
+    public void setTaxi_NUM(String taxi_NUM) {
+        this.taxi_NUM = taxi_NUM;
     }
 
-    public void setNUM(String NUM) {
-        this.NUM = NUM;
+    public double getLnt() {
+        return lnt;
     }
 
-    public String getGmail() {
-        return gmail;
+    public void setLnt(double lnt) {
+        this.lnt = lnt;
     }
 
-    public void setGmail(String gmail) {
-        this.gmail = gmail;
+    public double getLng() {
+        return lng;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public Float getLant() {
-        return Lant;
-    }
-
-    public void setLant(Float lant) {
-        Lant = lant;
-    }
-
-    public Float getLong() {
-        return Long;
-    }
-
-    public void setLong(Float aLong) {
-        Long = aLong;
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 }

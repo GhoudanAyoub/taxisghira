@@ -3,6 +3,7 @@ package com.TaxiSghira.TreeProg.plashscreen.Both;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ public class PersonalInfo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal_info);
 
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
         personalInfoModelViewClass.getClientInfo();
         gProgress = new ProgressDialog(this);
