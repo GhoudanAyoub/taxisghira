@@ -41,7 +41,10 @@ public class MapViewModel extends ViewModel {
     }
 
     public void DelateDemande(){
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child("Demande").orderByChild("ClientName").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName()).addListenerForSingleValueEvent(new ValueEventListener() {
+        FireBaseClient.getFireBaseClient()
+                .getDatabaseReference().child("Demande")
+                .orderByChild("ClientName").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -59,7 +62,10 @@ public class MapViewModel extends ViewModel {
     }
 
     public void GetAcceptDemandeList(){
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child("Accept").orderByChild("ClientName").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName()).addListenerForSingleValueEvent(new ValueEventListener() {
+        FireBaseClient.getFireBaseClient()
+                .getDatabaseReference().child("Accept").orderByChild("ClientName")
+                .equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -78,20 +84,10 @@ public class MapViewModel extends ViewModel {
     }
 
     public void AddDemande(Demande demande){
-        FireBaseClient.getFireBaseClient().getFirebaseFirestore().collection("Demande").document(demande.getClientName()).set(demande).addOnCompleteListener(task -> {});
-        /*
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child("Demande").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                DatabaseReference NewOne = FireBaseClient.getFireBaseClient().getDatabaseReference().child("Demande").push();
-                NewOne.setValue(demande);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+        FireBaseClient.getFireBaseClient().getFirebaseFirestore()
+                .collection("Demande")
+                .document(demande.getClientName())
+                .set(demande).addOnCompleteListener(task -> {
         });
-         */
     }
 }

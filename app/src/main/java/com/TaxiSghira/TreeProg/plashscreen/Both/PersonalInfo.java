@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
-import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
 import com.google.firebase.database.DataSnapshot;
@@ -60,7 +59,7 @@ public class PersonalInfo extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     dataSnapshot.getRef().removeValue();
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.child("WHosme").setValue(Op.user + Adress.getText().toString());
+                    newdata.child("WHosme").setValue(FireBaseClient.getFireBaseClient().getUserLogEdInAccount()+ Adress.getText().toString());
                     newdata.child("Fullname").setValue(fullname.getText().toString());
                     newdata.child("tell").setValue(Tell.getText().toString());
                     newdata.child("gmail").setValue(Adress.getText().toString());
@@ -69,7 +68,7 @@ public class PersonalInfo extends AppCompatActivity {
                     startActivity(new Intent(getApplicationContext(), Map.class));
                 } else {
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.child("WHosme").setValue(Op.user + Adress.getText().toString());
+                    newdata.child("WHosme").setValue(FireBaseClient.getFireBaseClient().getUserLogEdInAccount()+ Adress.getText().toString());
                     newdata.child("Fullname").setValue(fullname.getText().toString());
                     newdata.child("tell").setValue(Tell.getText().toString());
                     newdata.child("gmail").setValue(Adress.getText().toString());

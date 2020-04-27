@@ -17,9 +17,9 @@ import android.view.ViewGroup;
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
-import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 
 public class ActivitySetting  extends PreferenceActivity {
@@ -39,7 +39,7 @@ public class ActivitySetting  extends PreferenceActivity {
         final Preference prefTerm = findPreference(getString(R.string.pref_title_term));
 
         dis.setOnPreferenceClickListener(preference -> {
-            Op.auth.signOut();
+            FireBaseClient.getFireBaseClient().getmGoogleSignInClient().signOut();
             startActivity(new Intent(getApplicationContext(), Auth.class));
         return true;});
         UpdateAccount.setOnPreferenceClickListener(preference -> {

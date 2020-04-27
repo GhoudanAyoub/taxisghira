@@ -2,9 +2,9 @@ package com.TaxiSghira.TreeProg.plashscreen.Module;
 
 public class Favor {
     private String id;
-    public String Ch_Name;
-    public String Ch_num;
-    public String Taxi_num;
+    private String Ch_Name;
+    private String Ch_num;
+    private String Taxi_num;
     public Favor() { }
 
     public String getId() {

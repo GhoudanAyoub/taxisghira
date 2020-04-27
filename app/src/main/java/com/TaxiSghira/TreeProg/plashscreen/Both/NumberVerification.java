@@ -8,8 +8,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
-import com.TaxiSghira.TreeProg.plashscreen.Operation.Op;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -108,7 +108,7 @@ public class NumberVerification extends AppCompatActivity {
         }
     }
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
-        Op.auth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
+        FireBaseClient.getFireBaseClient().getFirebaseAuth().signInWithCredential(credential).addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(getApplicationContext(), "تم التحقح من رقمك بنجاح\uD83D\uDE04", Toast.LENGTH_LONG).show();
                         startActivity(new Intent(getApplicationContext(), Map.class));

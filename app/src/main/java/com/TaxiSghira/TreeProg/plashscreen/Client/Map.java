@@ -9,10 +9,13 @@ import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,8 +33,11 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
+import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
+import com.airbnb.lottie.LottieAnimationView;
+import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -59,7 +65,14 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -73,7 +86,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     public static String id;
     public Accept accept;
-    TextView Ch_Name, TaxiNum, Ch_Num;
+    TextView ListTaxiNum, ListChName, ListChNum;
     AlertDialog.Builder builder;
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -85,6 +98,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private ProgressDialog gProgress;
     private boolean mLocationPermissionGranted = false;
     MapViewModel mapViewModel;
+    LottieAnimationView lottieAnimationView;
+    LinearLayout bottom_sheet;
+    FavorViewModel favorViewModel;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,20 +118,23 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
         mapViewModel.GetChiforDataLocation();
         mapViewModel.GetAcceptDemandeList();
+        favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
 
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
         gProgress = new ProgressDialog(this);
         builder = new AlertDialog.Builder(this);
         WhereToGo = findViewById(R.id.editText2);
+        lottieAnimationView = findViewById(R.id.progBar);
+
+        bottom_sheet = findViewById(R.id.bottom_sheet);
 
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-
-        Ch_Name = findViewById(R.id.list_Ch_Name);
-        Ch_Num = findViewById(R.id.list_Ch_num);
-        TaxiNum = findViewById(R.id.list_Taxi_num);
+        ListTaxiNum = findViewById(R.id.list_Taxi_num);
+        ListChName = findViewById(R.id.list_Ch_Name);
+        ListChNum = findViewById(R.id.list_Ch_num);
 
         personalInfoModelViewClass.clientMutableLiveData.observe(this, client -> {
             if (client==null){
@@ -219,11 +240,21 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 } catch (Exception e) {
                     startActivity(new Intent(getApplicationContext(), Map.class));
                 }
-                GeoJsonSource source = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
-                if (source != null) {
-                    source.setGeoJson(Feature.fromGeometry(destinationPoint));
+                //destination point
+                GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
+                if (dest != null) {
+                    dest.setGeoJson(Feature.fromGeometry(destinationPoint));
                 }
-                getRoute(originPoint, destinationPoint);
+                //location point
+                GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
+                if (origin != null) {
+                    origin.setGeoJson(Feature.fromGeometry(originPoint));
+                }
+                try {
+                    getRoute(originPoint, destinationPoint);
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
 
             });
         });
@@ -231,14 +262,25 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
         loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
-        GeoJsonSource geoJsonSource = new GeoJsonSource("destination-source-id");
-        loadedMapStyle.addSource(geoJsonSource);
+        loadedMapStyle.addSource(new GeoJsonSource("destination-source-id"));
         SymbolLayer destinationSymbolLayer = new SymbolLayer("destination-symbol-layer-id", "destination-source-id");
         destinationSymbolLayer.withProperties(
                 iconImage("destination-icon-id"),
                 iconIgnorePlacement(true)
         );
         loadedMapStyle.addLayer(destinationSymbolLayer);
+    }
+
+    //driver maps
+    private void addoriginIconSymbolLayer(@NonNull Style loadedMapStyle) {
+        loadedMapStyle.addImage("destination-icon-id2", BitmapFactory.decodeResource(this.getResources(), R.drawable.map_marker_light));
+        loadedMapStyle.addSource(new GeoJsonSource("destination-origin-id"));
+        SymbolLayer destinationSymbolLayer2 = new SymbolLayer("destination-symbol-layer-id2", "destination-origin-id");
+        destinationSymbolLayer2.withProperties(
+                iconImage("destination-icon-id2"),
+                iconIgnorePlacement(true)
+        );
+        loadedMapStyle.addLayer(destinationSymbolLayer2);
     }
 
     @SuppressWarnings({"MissingPermission"})
@@ -262,7 +304,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                             new Handler().postDelayed(() -> {
                                 buildAlertMessageSearchOperation();
-                            }, 2000);
+                            }, 1000);
 
                             if (response.body() == null) {
                                 Toast.makeText(getApplicationContext(), "لم يتم العثور على مسارات", Toast.LENGTH_SHORT).show();
@@ -293,6 +335,92 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
 
     private void buildAlertMessageSearchOperation() {
+        findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
+        RxView.clicks(findViewById(R.id.findDriver)).
+                throttleFirst(5, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer<Unit>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onNext(Unit unit) {
+                        assert locationComponent.getLastKnownLocation() != null;
+                        UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
+                        Demande d1 = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(), userLocation.getLnt(), userLocation.getLong());
+                        mapViewModel.AddDemande(d1);
+                        findViewById(R.id.findDriver).setVisibility(View.GONE);
+                        //lottieAnimationView.playAnimation();
+                        mapViewModel.acceptMutableLiveData.observe(Map.this, accept1 -> {
+                            //lottieAnimationView.setVisibility(View.GONE);
+                            //notify user that  he get accepted
+                            bottom_sheet.setVisibility(View.VISIBLE);
+                            ListTaxiNum.setText(accept1.Taxi_num);
+                            ListChName.setText(accept1.Ch_Name);
+                            ListChNum.setText(accept1.Ch_num);
+                            RxView.clicks(findViewById(R.id.Favories))
+                                    .throttleFirst(5, TimeUnit.SECONDS)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Observer<Unit>() {
+                                        @Override
+                                        public void onSubscribe(Disposable d) {
+                                            compositeDisposable.add(d);
+                                        }
+
+                                        @Override
+                                        public void onNext(Unit unit) {
+                                            favorViewModel.AddFAvor(Objects.requireNonNull(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getId())
+                                                    , accept1.Ch_Name, accept1.Ch_num, accept1.Taxi_num);
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            Timber.e(e);
+                                        }
+
+                                        @Override
+                                        public void onComplete() {
+                                        }
+                                    });
+                            RxView.clicks(findViewById(R.id.calls))
+                                    .throttleFirst(5, TimeUnit.SECONDS)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Observer<Unit>() {
+                                        @Override
+                                        public void onSubscribe(Disposable d) {
+                                            compositeDisposable.add(d);
+                                        }
+
+                                        @Override
+                                        public void onNext(Unit unit) {
+                                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(accept1.Ch_num)));
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            Timber.e(e);
+                                        }
+
+                                        @Override
+                                        public void onComplete() {
+                                        }
+                                    });
+                        });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Timber.e(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+        /*
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("هل تريد بدء عملبة البحت عن طاكسي?")
                 .setIcon(R.drawable.ic_search_black_24dp)
@@ -325,6 +453,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 .setNegativeButton("لا",null);
         final AlertDialog alert = builder.create();
         alert.show();
+        */
     }
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -399,6 +528,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+        compositeDisposable.clear();
     }
 
     @Override
