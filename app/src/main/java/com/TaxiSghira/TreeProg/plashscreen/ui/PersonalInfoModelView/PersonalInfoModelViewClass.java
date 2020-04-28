@@ -1,6 +1,7 @@
 package com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -11,8 +12,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 public class PersonalInfoModelViewClass extends ViewModel {
-    public MutableLiveData<Client> clientMutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<Client> clientMutableLiveData = new MutableLiveData<>();
     private Client client;
+
+    public LiveData<Client> getClientMutableLiveData() {
+        return clientMutableLiveData;
+    }
 
     public void getClientInfo() {
         String gmail = "gmail";

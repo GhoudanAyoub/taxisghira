@@ -41,7 +41,7 @@ public class PersonalInfo extends AppCompatActivity {
         Tell = findViewById(R.id.personalAdress);
         findViewById(R.id.gonext3).setOnClickListener(v -> addDataClient());
 
-        personalInfoModelViewClass.clientMutableLiveData.observe(this, client -> {
+        personalInfoModelViewClass.getClientMutableLiveData().observe(this, client -> {
             fullname.setText(client.getFullname());
             Adress.setText(client.getGmail());
             Tell.setText(client.getTell());

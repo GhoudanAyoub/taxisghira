@@ -71,7 +71,6 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -136,7 +135,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         ListChName = findViewById(R.id.list_Ch_Name);
         ListChNum = findViewById(R.id.list_Ch_num);
 
-        personalInfoModelViewClass.clientMutableLiveData.observe(this, client -> {
+        personalInfoModelViewClass.getClientMutableLiveData().observe(this, client -> {
             if (client==null){
                 buildAlertMessageNoDataFound();
             }
@@ -210,7 +209,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             IconFactory iconFactory = IconFactory.getInstance(Map.this);
             Icon icon = iconFactory.fromResource(R.drawable.taxisymb);
             mapboxMap.addOnCameraMoveStartedListener(reason ->
-                    mapViewModel.chiforMutableLiveData.observe(this,chifor1 -> {
+                    mapViewModel.getChiforMutableLiveData().observe(this, chifor1 -> {
                         assert chifor1 != null;
                         mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor1.getLnt(), chifor1.getLng())).icon(icon));
                     })
@@ -300,7 +299,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     .getRoute(new Callback<DirectionsResponse>() {
                         @Override
                         public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
-                            Toast.makeText(getApplicationContext(), "تم إنشاء الطريق", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(getApplicationContext(), "تم إنشاء الطريق", Toast.LENGTH_SHORT).show();
 
                             new Handler().postDelayed(() -> {
                                 buildAlertMessageSearchOperation();
@@ -337,9 +336,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void buildAlertMessageSearchOperation() {
         findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
         RxView.clicks(findViewById(R.id.findDriver)).
-                throttleFirst(5, TimeUnit.SECONDS)
+                throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
                 .subscribe(new Observer<Unit>() {
                     @Override
                     public void onSubscribe(Disposable d) {
@@ -354,7 +352,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         //lottieAnimationView.playAnimation();
-                        mapViewModel.acceptMutableLiveData.observe(Map.this, accept1 -> {
+                        mapViewModel.getAcceptMutableLiveData().observe(Map.this, accept1 -> {
                             //lottieAnimationView.setVisibility(View.GONE);
                             //notify user that  he get accepted
                             bottom_sheet.setVisibility(View.VISIBLE);

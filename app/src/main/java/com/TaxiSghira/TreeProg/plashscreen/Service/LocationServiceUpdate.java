@@ -64,6 +64,7 @@ public class LocationServiceUpdate extends Service {
                         .setContentText("Location update").build();
                 startForeground(1,notification);
         }
+        
     }
 
     @Override

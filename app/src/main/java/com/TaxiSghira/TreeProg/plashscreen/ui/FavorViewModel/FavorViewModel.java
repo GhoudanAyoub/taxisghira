@@ -3,6 +3,7 @@ package com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -23,8 +24,12 @@ import timber.log.Timber;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class FavorViewModel extends ViewModel {
-    public MutableLiveData<List<Favor>> mutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<List<Favor>> mutableLiveData = new MutableLiveData<>();
     private List<Favor> FavorList = new ArrayList<>();
+
+    public LiveData<List<Favor>> getMutableLiveData() {
+        return mutableLiveData;
+    }
 
     public List<Favor> getFavor() {
         FireBaseClient.getFireBaseClient().getDatabaseReference().child("Favor")

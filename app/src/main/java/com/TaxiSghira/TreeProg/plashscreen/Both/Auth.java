@@ -22,11 +22,9 @@ import com.jakewharton.rxbinding3.view.RxView;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import timber.log.Timber;
 
@@ -83,7 +81,7 @@ public class Auth extends AppCompatActivity {
                 firebaseAuthWithGoogle(account);
                 FireBaseClient.getFireBaseClient().setUserLogEdInAccount(account);
             } catch (Exception e) {
-                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
+                Timber.e(e);
             }
         }
     }
@@ -103,4 +101,5 @@ public class Auth extends AppCompatActivity {
         super.onDestroy();
         compositeDisposable.clear();
     }
+
 }

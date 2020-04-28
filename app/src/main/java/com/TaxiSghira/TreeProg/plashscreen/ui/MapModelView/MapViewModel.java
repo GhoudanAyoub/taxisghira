@@ -3,6 +3,7 @@ package com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -22,10 +23,18 @@ import timber.log.Timber;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class MapViewModel extends ViewModel {
-    public MutableLiveData<Chifor> chiforMutableLiveData = new MutableLiveData<>();
-    public MutableLiveData<Accept> acceptMutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<Chifor> chiforMutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<Accept> acceptMutableLiveData = new MutableLiveData<>();
     Chifor chifor ;
     Accept accept;
+
+    public LiveData<Chifor> getChiforMutableLiveData() {
+        return chiforMutableLiveData;
+    }
+
+    public LiveData<Accept> getAcceptMutableLiveData() {
+        return acceptMutableLiveData;
+    }
 
     public void GetChiforDataLocation(){
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
