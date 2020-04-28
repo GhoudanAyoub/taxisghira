@@ -12,10 +12,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 public class PersonalInfoModelViewClass extends ViewModel {
-    private MutableLiveData<Client> clientMutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<Client> clientMutableLiveData;
     private Client client;
 
     public LiveData<Client> getClientMutableLiveData() {
+        clientMutableLiveData = new MutableLiveData<>();
         return clientMutableLiveData;
     }
 

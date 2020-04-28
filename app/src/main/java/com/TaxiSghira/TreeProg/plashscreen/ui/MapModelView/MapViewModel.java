@@ -23,16 +23,18 @@ import timber.log.Timber;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class MapViewModel extends ViewModel {
-    private MutableLiveData<Chifor> chiforMutableLiveData = new MutableLiveData<>();
-    private MutableLiveData<Accept> acceptMutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<Chifor> chiforMutableLiveData ;
+    private MutableLiveData<Accept> acceptMutableLiveData ;
     Chifor chifor ;
     Accept accept;
 
     public LiveData<Chifor> getChiforMutableLiveData() {
+        chiforMutableLiveData = new MutableLiveData<>();
         return chiforMutableLiveData;
     }
 
     public LiveData<Accept> getAcceptMutableLiveData() {
+        acceptMutableLiveData = new MutableLiveData<>();
         return acceptMutableLiveData;
     }
 

@@ -24,10 +24,11 @@ import timber.log.Timber;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class FavorViewModel extends ViewModel {
-    private MutableLiveData<List<Favor>> mutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<List<Favor>> mutableLiveData ;
     private List<Favor> FavorList = new ArrayList<>();
 
     public LiveData<List<Favor>> getMutableLiveData() {
+        mutableLiveData = new MutableLiveData<>();
         return mutableLiveData;
     }
 
