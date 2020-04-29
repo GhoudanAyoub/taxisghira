@@ -201,7 +201,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
 
-        mapboxMap.setStyle(Style.SATELLITE, style -> {
+        mapboxMap.setStyle(Style.SATELLITE_STREETS, style -> {
             enableLocationComponent(style);
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
