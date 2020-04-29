@@ -351,7 +351,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         Demande d1 = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
-                        //lottieAnimationView.playAnimation();
+                        lottieAnimationView.playAnimation();
                         mapViewModel.getAcceptMutableLiveData().observe(Map.this, accept1 -> {
                             //lottieAnimationView.setVisibility(View.GONE);
                             //notify user that  he get accepted

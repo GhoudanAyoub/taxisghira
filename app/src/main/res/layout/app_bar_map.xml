@@ -75,7 +75,6 @@
         android:id="@+id/progBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
         android:layout_marginTop="2dp"
         android:maxHeight="150dp"
         android:visibility="visible"
@@ -85,7 +84,7 @@
         app:lottie_autoPlay="false"
         app:lottie_loop="true"
         app:lottie_rawRes="@raw/horizontal_progress_bar"
-        app:lottie_speed="1.6" />
+        app:lottie_speed="1.3" />
 
 
     <Button
