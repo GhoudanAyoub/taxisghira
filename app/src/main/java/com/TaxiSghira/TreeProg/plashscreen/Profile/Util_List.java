@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,12 +18,10 @@ import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.bumptech.glide.Glide;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class Util_List extends AppCompatActivity {
 
     TextView textViewName;
-    CircleImageView circleImageViewClient;
+    ImageView circleImageViewClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

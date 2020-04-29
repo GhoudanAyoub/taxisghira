@@ -237,6 +237,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                             locationComponent.getLastKnownLocation().getLatitude());
                 } catch (Exception e) {
+                    Timber.e(e);
                     startActivity(new Intent(getApplicationContext(), Map.class));
                 }
                 //destination point

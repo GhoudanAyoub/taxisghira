@@ -18,6 +18,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 import timber.log.Timber;
 
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
@@ -44,8 +46,10 @@ public class MapViewModel extends ViewModel {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            chiforMutableLiveData.setValue(document.toObject(Chifor.class));
+                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                            try {
+                                chiforMutableLiveData.setValue(document.toObject(Chifor.class));
+                            }catch (Exception e){Timber.e(e);}
                         }
                     }
                 });
