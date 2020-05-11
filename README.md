@@ -15,6 +15,7 @@ TaxiSghira is a simple Uber app, which uses some APIs to fetch The Location of c
 <li><a href="https://github.com/bumptech/glide">Glide</a></li>
 <li><a href="https://material.io/develop/android/docs/getting-started/">Material Design</a></li>
 <li><a href="https://github.com/lopspower/RxAnimation">RxAnimation</a></li>
+<li><a href="https://lottiefiles.com/">Lotties</a></li>
 <li><a href="https://github.com/loopeer/shadow">Shadow</a></li>
 <li><a href="https://docs.mapbox.com/android/navigation/overview/">MapBox</a></li>
 
