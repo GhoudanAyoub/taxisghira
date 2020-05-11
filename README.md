@@ -19,6 +19,9 @@ TaxiSghira is a simple Uber app, which uses some APIs to fetch The Location of c
 <li><a href="https://github.com/loopeer/shadow">Shadow</a></li>
 <li><a href="https://docs.mapbox.com/android/navigation/overview/">MapBox</a></li>
 
+## Testing 🧪
+<li><a href="https://firebase.google.com/docs/test-lab/">Test Lab</a></li>
+
 ## Architecture
 The app uses MVVM [Model-View-ViewModel] architecture to have a unidirectional flow of data, separation of concern, testability, and a lot more.
 
