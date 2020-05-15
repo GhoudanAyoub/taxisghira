@@ -13,4 +13,5 @@ public class Commun {
     public static final String Client_DataBase_Table = "Client";
 
     public static final String Gmail_String = "gmail";
+    public static final String ClientName_String = "ClientName";
 }

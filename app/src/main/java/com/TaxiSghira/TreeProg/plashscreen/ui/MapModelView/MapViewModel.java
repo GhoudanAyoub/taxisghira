@@ -56,9 +56,10 @@ public class MapViewModel extends ViewModel {
     }
 
     public void DelateDemande(){
-        FireBaseClient.getFireBaseClient()
-                .getDatabaseReference().child(Commun.Demande_DataBase_Table)
-                .orderByChild("ClientName").equalTo(Commun.Current_Client_DispalyName)
+        FireBaseClient.getFireBaseClient().getDatabaseReference()
+                .child(Commun.Demande_DataBase_Table)
+                .orderByChild(Commun.ClientName_String)
+                .equalTo(Commun.Current_Client_DispalyName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
@@ -77,8 +78,9 @@ public class MapViewModel extends ViewModel {
     }
 
     public void GetAcceptDemandeList(){
-        FireBaseClient.getFireBaseClient()
-                .getDatabaseReference().child(Commun.Pickup_DataBase_Table).orderByChild("ClientName")
+        FireBaseClient.getFireBaseClient().getDatabaseReference()
+                .child(Commun.Pickup_DataBase_Table)
+                .orderByChild(Commun.ClientName_String)
                 .equalTo(Commun.Current_Client_DispalyName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
