@@ -27,8 +27,8 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Accept;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
@@ -84,7 +84,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
 
     public static String id;
-    public Accept accept;
+    public Pickup pickup;
     TextView ListTaxiNum, ListChName, ListChNum;
     AlertDialog.Builder builder;
     private MapView mapView;
@@ -264,10 +264,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
         loadedMapStyle.addSource(new GeoJsonSource("destination-source-id"));
         SymbolLayer destinationSymbolLayer = new SymbolLayer("destination-symbol-layer-id", "destination-source-id");
-        destinationSymbolLayer.withProperties(
-                iconImage("destination-icon-id"),
-                iconIgnorePlacement(true)
-        );
+        destinationSymbolLayer.withProperties(iconImage("destination-icon-id"), iconIgnorePlacement(true));
         loadedMapStyle.addLayer(destinationSymbolLayer);
     }
 
@@ -353,13 +350,13 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         lottieAnimationView.playAnimation();
-                        mapViewModel.getAcceptMutableLiveData().observe(Map.this, accept1 -> {
+                        mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
                             //lottieAnimationView.setVisibility(View.GONE);
                             //notify user that  he get accepted
                             bottom_sheet.setVisibility(View.VISIBLE);
-                            ListTaxiNum.setText(accept1.Taxi_num);
-                            ListChName.setText(accept1.Ch_Name);
-                            ListChNum.setText(accept1.Ch_num);
+                            ListTaxiNum.setText(pickup1.Taxi_num);
+                            ListChName.setText(pickup1.Ch_Name);
+                            ListChNum.setText(pickup1.Ch_num);
                             RxView.clicks(findViewById(R.id.Favories))
                                     .throttleFirst(5, TimeUnit.SECONDS)
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -372,7 +369,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                         @Override
                                         public void onNext(Unit unit) {
                                             favorViewModel.AddFAvor(Objects.requireNonNull(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getId())
-                                                    , accept1.Ch_Name, accept1.Ch_num, accept1.Taxi_num);
+                                                    , pickup1.Ch_Name, pickup1.Ch_num, pickup1.Taxi_num);
                                         }
 
                                         @Override
@@ -395,7 +392,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                         @Override
                                         public void onNext(Unit unit) {
-                                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(accept1.Ch_num)));
+                                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.Ch_num)));
                                         }
 
                                         @Override

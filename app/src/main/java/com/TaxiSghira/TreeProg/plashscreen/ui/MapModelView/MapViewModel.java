@@ -8,9 +8,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Accept;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -26,16 +26,16 @@ import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class MapViewModel extends ViewModel {
     private MutableLiveData<Chifor> chiforMutableLiveData ;
-    private MutableLiveData<Accept> acceptMutableLiveData ;
+    Pickup pickup;
     Chifor chifor ;
-    Accept accept;
+    private MutableLiveData<Pickup> acceptMutableLiveData;
 
     public LiveData<Chifor> getChiforMutableLiveData() {
         chiforMutableLiveData = new MutableLiveData<>();
         return chiforMutableLiveData;
     }
 
-    public LiveData<Accept> getAcceptMutableLiveData() {
+    public LiveData<Pickup> getAcceptMutableLiveData() {
         acceptMutableLiveData = new MutableLiveData<>();
         return acceptMutableLiveData;
     }
@@ -85,9 +85,9 @@ public class MapViewModel extends ViewModel {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                        accept = dataSnapshot1.getValue(Accept.class);
+                        pickup = dataSnapshot1.getValue(Pickup.class);
                     }
-                    acceptMutableLiveData.setValue(accept);
+                    acceptMutableLiveData.setValue(pickup);
                 }
             }
 

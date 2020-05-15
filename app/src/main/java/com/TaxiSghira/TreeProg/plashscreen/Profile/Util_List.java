@@ -2,7 +2,6 @@ package com.TaxiSghira.TreeProg.plashscreen.Profile;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,9 +42,9 @@ public class Util_List extends AppCompatActivity {
         });
         findViewById(R.id.button7RuDriver).setOnClickListener(v->{
             try {
-                getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getApplicationContext().getPackageName())));
+                //  getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getApplicationContext().getPackageName())));
             } catch (ActivityNotFoundException e) {
-                getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("" + getApplicationContext().getPackageName())));
+                //   getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("" + getApplicationContext().getPackageName())));
             }});
 
         try {
