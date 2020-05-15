@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
@@ -38,6 +39,7 @@ import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
 import com.airbnb.lottie.LottieAnimationView;
 import com.jakewharton.rxbinding3.view.RxView;
+import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -50,7 +52,10 @@ import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
+import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -201,7 +206,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
 
-        mapboxMap.setStyle(Style.SATELLITE_STREETS, style -> {
+        mapboxMap.setStyle(Style.LIGHT, style -> {
             enableLocationComponent(style);
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
@@ -299,9 +304,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
                             // Toast.makeText(getApplicationContext(), "تم إنشاء الطريق", Toast.LENGTH_SHORT).show();
 
-                            new Handler().postDelayed(() -> {
-                                buildAlertMessageSearchOperation();
-                            }, 1000);
+                            new Handler().postDelayed(() -> buildAlertMessageSearchOperation(), 1000);
 
                             if (response.body() == null) {
                                 Toast.makeText(getApplicationContext(), "لم يتم العثور على مسارات", Toast.LENGTH_SHORT).show();
@@ -416,47 +419,35 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     public void onComplete() {
                     }
                 });
-        /*
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("هل تريد بدء عملبة البحت عن طاكسي?")
-                .setIcon(R.drawable.ic_search_black_24dp)
-                .setCancelable(false)
-                .setPositiveButton("نعم", (dialog, which) -> {
-                    gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
-                    gProgress.show();
-
-                    assert locationComponent.getLastKnownLocation() != null;
-                    UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
-                    Demande d1 = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(),userLocation.getLnt(),userLocation.getLong());
-                    mapViewModel.AddDemande(d1);
-
-                    gProgress.dismiss();
-                    final AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
-                    builder2.setIcon(R.drawable.ic_search_black_24dp)
-                            .setTitle("عملية البحت")
-                            .setMessage("بدأت عملية البحت عن طاكسي\uD83D\uDE04\uD83D\uDE04")
-                            .setPositiveButton("حسنا", (dialog2, which2) ->
-                            mapViewModel.acceptMutableLiveData.observe(this,accept1 -> {
-                                    //notify user that  he get accepted
-                            }))
-                            .setNegativeButton("رفض", (dialog1, which1) -> mapViewModel.DelateDemande());
-
-                    new Handler().postDelayed(() -> {
-                        final AlertDialog alert2 = builder2.create();
-                        alert2.show();
-                        }, 2000);
-                })
-                .setNegativeButton("لا",null);
-        final AlertDialog alert = builder.create();
-        alert.show();
-        */
     }
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             locationComponent = mapboxMap.getLocationComponent();
-            locationComponent.activateLocationComponent(this, loadedMapStyle);
+            locationComponent.activateLocationComponent(
+                    LocationComponentActivationOptions
+                            .builder(this, loadedMapStyle)
+                            .useDefaultLocationEngine(true)
+                            .locationEngineRequest(new LocationEngineRequest.Builder(750)
+                                    .setFastestInterval(750)
+                                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                                    .build())
+                            .build());
             locationComponent.setLocationComponentEnabled(true);
             locationComponent.setCameraMode(CameraMode.TRACKING_GPS);
+            locationComponent.setRenderMode(RenderMode.GPS);
+
+            LocationComponentOptions locationComponentOptions =
+                    LocationComponentOptions.builder(this)
+                            .trackingGesturesManagement(true)
+                            .bearingTintColor(Color.YELLOW)
+                            .accuracyAlpha(.4f)
+                            .build();
+            LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions
+                    .builder(this, loadedMapStyle)
+                    .locationComponentOptions(locationComponentOptions)
+                    .build();
+
+            locationComponent.activateLocationComponent(locationComponentActivationOptions);
         } else {
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(this);
