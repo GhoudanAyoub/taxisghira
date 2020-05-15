@@ -2,6 +2,7 @@ package com.TaxiSghira.TreeProg.plashscreen.Both;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -48,7 +49,7 @@ public class Auth extends AppCompatActivity {
                     public void onSubscribe(Disposable d) { compositeDisposable.add(d); }
 
                     @Override
-                    public void onNext(Unit unit) { signIn(); }
+                    public void onNext(Unit unit) {findViewById(R.id.buttonphone).setVisibility(View.GONE); signIn(); }
 
                     @Override
                     public void onError(Throwable e) { Timber.e(e); }

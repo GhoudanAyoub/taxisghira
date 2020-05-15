@@ -52,7 +52,8 @@ public class PersonalInfo extends AppCompatActivity {
     }
 
     private void addDataClient() {
-        DatabaseReference databaseReference = FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Client_DataBase_Table);
+        DatabaseReference databaseReference =
+                FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Client_DataBase_Table);
         gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
         gProgress.show();
         databaseReference.orderByChild(Commun.Gmail_String)
@@ -84,6 +85,5 @@ public class PersonalInfo extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-    }
+    public void onBackPressed() { }
 }

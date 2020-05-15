@@ -38,8 +38,6 @@ public class FavorDrivers extends AppCompatActivity {
         Favor_Recycle.setHasFixedSize(true);
         Favor_Recycle.setAdapter(favorAdapter);
 
-        favorViewModel.getMutableLiveData().observe(this, favors -> {
-            favorAdapter.setList(favors);
-        });
+        favorViewModel.getMutableLiveData().observe(this, favors -> favorAdapter.setList(favors));
     }
 }

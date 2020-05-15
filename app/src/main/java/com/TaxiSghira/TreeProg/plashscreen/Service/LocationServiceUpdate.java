@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -53,18 +54,6 @@ public class LocationServiceUpdate extends Service {
         super.onCreate();
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        String CHANNEL_ID = "my_channel_01";
-        String CHANNEL_NAME = "location_Channel";
-        if (Build.VERSION.SDK_INT >= 26) {
-                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,CHANNEL_NAME,NotificationManager.IMPORTANCE_DEFAULT);
-                ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
-                Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setContentTitle("Location")
-                        .setContentText("Location update").build();
-                startForeground(1,notification);
-        }
-        
     }
 
     @Override
@@ -108,25 +97,24 @@ public class LocationServiceUpdate extends Service {
         UserLocation userLocation1 = new UserLocation(userLocation.getLnt(),userLocation.getLong(),FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName());
 
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                .collection("Demande")
+                .collection(Commun.Demande_DataBase_Table)
                 .document( userLocation1.getDisplayName())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()){
                         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                                .collection("Demande")
+                                .collection(Commun.Demande_DataBase_Table)
                                 .document(userLocation1.getDisplayName())
                                 .update("lnt",userLocation1.getLnt(),"long",userLocation1.getLong())
                                 .addOnCompleteListener(task1 -> {
                                     if(task1.isSuccessful()){
-                                        Timber.tag("ERR").d("onComplete: \ninserted user location into database." +
+                                        Timber.log(1,"onComplete: \ninserted user location into database." +
                                                 "\n latitude: " + userLocation.getLnt() +
                                                 "\n longitude: " + userLocation.getLong());
                                     }
                                 });
                     }
                 });
-
     }
 }
 
