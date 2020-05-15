@@ -219,49 +219,67 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor1.getLnt(), chifor1.getLng())).icon(icon));
                     })
             );
-            findViewById(R.id.FindButton).setOnClickListener(v -> {
-                Toast.makeText(getApplicationContext(), "المرجو الانتظار جاري البحت عن طريق مناسب", Toast.LENGTH_LONG).show();
+            RxView.clicks(findViewById(R.id.FindButton))
+                    .throttleFirst(5, TimeUnit.SECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Unit>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            compositeDisposable.add(d);
+                        }
 
-                Point destinationPoint = null;
-                try {
-                    final Geocoder geocoder = new Geocoder(getApplicationContext());
-                    final String locName = WhereToGo.getText().toString();
+                        @Override
+                        public void onNext(Unit unit) {
+                            Toast.makeText(getApplicationContext(), "المرجو الانتظار جاري البحت عن طريق مناسب", Toast.LENGTH_LONG).show();
+                            Point destinationPoint = null;
+                            try {
+                                final Geocoder geocoder = new Geocoder(getApplicationContext());
+                                final String locName = WhereToGo.getText().toString();
 
-                    final List<Address> list = geocoder.getFromLocationName(locName, 1);
-                    if (!(list == null || list.isEmpty())) {
-                        final Address adress = list.get(0);
-                        destinationPoint = Point.fromLngLat(adress.getLongitude(), adress.getLatitude());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                                final List<Address> list = geocoder.getFromLocationName(locName, 1);
+                                if (!(list == null || list.isEmpty())) {
+                                    final Address adress = list.get(0);
+                                    destinationPoint = Point.fromLngLat(adress.getLongitude(), adress.getLatitude());
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            Point originPoint = null;
+                            try {
+                                assert locationComponent.getLastKnownLocation() != null;
+                                originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                                        locationComponent.getLastKnownLocation().getLatitude());
+                            } catch (Exception e) {
+                                Timber.e(e);
+                                startActivity(new Intent(getApplicationContext(), Map.class));
+                            }
+                            //destination point
+                            GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
+                            if (dest != null) {
+                                dest.setGeoJson(Feature.fromGeometry(destinationPoint));
+                            }
+                            //location point
+                            GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
+                            if (origin != null) {
+                                origin.setGeoJson(Feature.fromGeometry(originPoint));
+                            }
+                            try {
+                                getRoute(originPoint, destinationPoint);
+                            } catch (Exception e) {
+                                Timber.e(e);
+                            }
+                        }
 
-                Point originPoint = null;
-                try {
-                    assert locationComponent.getLastKnownLocation() != null;
-                    originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                            locationComponent.getLastKnownLocation().getLatitude());
-                } catch (Exception e) {
-                    Timber.e(e);
-                    startActivity(new Intent(getApplicationContext(), Map.class));
-                }
-                //destination point
-                GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
-                if (dest != null) {
-                    dest.setGeoJson(Feature.fromGeometry(destinationPoint));
-                }
-                //location point
-                GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
-                if (origin != null) {
-                    origin.setGeoJson(Feature.fromGeometry(originPoint));
-                }
-                try {
-                    getRoute(originPoint, destinationPoint);
-                } catch (Exception e) {
-                    Timber.e(e);
-                }
+                        @Override
+                        public void onError(Throwable e) {
+                            compositeDisposable.clear();
+                        }
 
-            });
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
         });
     }
 
@@ -271,18 +289,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         SymbolLayer destinationSymbolLayer = new SymbolLayer("destination-symbol-layer-id", "destination-source-id");
         destinationSymbolLayer.withProperties(iconImage("destination-icon-id"), iconIgnorePlacement(true));
         loadedMapStyle.addLayer(destinationSymbolLayer);
-    }
-
-    //driver maps
-    private void addoriginIconSymbolLayer(@NonNull Style loadedMapStyle) {
-        loadedMapStyle.addImage("destination-icon-id2", BitmapFactory.decodeResource(this.getResources(), R.drawable.map_marker_light));
-        loadedMapStyle.addSource(new GeoJsonSource("destination-origin-id"));
-        SymbolLayer destinationSymbolLayer2 = new SymbolLayer("destination-symbol-layer-id2", "destination-origin-id");
-        destinationSymbolLayer2.withProperties(
-                iconImage("destination-icon-id2"),
-                iconIgnorePlacement(true)
-        );
-        loadedMapStyle.addLayer(destinationSymbolLayer2);
     }
 
     @SuppressWarnings({"MissingPermission"})
