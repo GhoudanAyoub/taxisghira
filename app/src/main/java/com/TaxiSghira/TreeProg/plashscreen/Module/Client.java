@@ -8,6 +8,13 @@ public class Client {
     private String WHosme;
     public Client() { }
 
+    public Client(String fullname, String tell, String gmail, String WHosme) {
+        Fullname = fullname;
+        this.tell = tell;
+        this.gmail = gmail;
+        this.WHosme = WHosme;
+    }
+
     public String getWHosme() {
         return WHosme;
     }

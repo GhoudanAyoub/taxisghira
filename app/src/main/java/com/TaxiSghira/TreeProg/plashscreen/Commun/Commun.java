@@ -6,6 +6,7 @@ public class Commun {
 
     public static final String Current_Client_Id = FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getId();
     public static final String Current_Client_DispalyName = FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName();
+    public static final String Current_Client_Gmail = FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getEmail();
     public static final String Favor_DataBase_Table = "Favor";
     public static final String Chifor_DataBase_Table = "Chifor";
     public static final String Demande_DataBase_Table = "Demande";
