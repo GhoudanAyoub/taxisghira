@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Favor;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,7 +34,7 @@ public class FavorViewModel extends ViewModel {
     }
 
     public List<Favor> getFavor() {
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child("Favor")
+        FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Favor_DataBase_Table)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -56,15 +57,12 @@ public class FavorViewModel extends ViewModel {
     }
 
     public  void AddFAvor( String mAuth, String Name, String Chh_Num, String taxinum){
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child("Favor")
+        FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Favor_DataBase_Table)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                DatabaseReference newPost2 = FireBaseClient.getFireBaseClient().getDatabaseReference().child("Favor").push();
-                newPost2.child("id").setValue(mAuth);
-                newPost2.child("Ch_Name").setValue(Name);
-                newPost2.child("Ch_num").setValue(Chh_Num);
-                newPost2.child("Taxi_num").setValue(taxinum);
+                DatabaseReference newPost2 = FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Favor_DataBase_Table).push();
+                newPost2.setValue(new Favor(mAuth,Name,Chh_Num,taxinum));
                 Toast.makeText(getApplicationContext(),"تمت الاضافة بنجاح\uD83D\uDE04",Toast.LENGTH_SHORT).show();
             }
             @Override

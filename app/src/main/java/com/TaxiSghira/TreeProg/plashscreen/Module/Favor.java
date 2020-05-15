@@ -7,6 +7,13 @@ public class Favor {
     private String Taxi_num;
     public Favor() { }
 
+    public Favor(String id, String ch_Name, String ch_num, String taxi_num) {
+        this.id = id;
+        Ch_Name = ch_Name;
+        Ch_num = ch_num;
+        Taxi_num = taxi_num;
+    }
+
     public String getId() {
         return id;
     }

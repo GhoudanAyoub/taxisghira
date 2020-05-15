@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
@@ -27,7 +28,6 @@ import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 public class MapViewModel extends ViewModel {
     private MutableLiveData<Chifor> chiforMutableLiveData ;
     Pickup pickup;
-    Chifor chifor ;
     private MutableLiveData<Pickup> acceptMutableLiveData;
 
     public LiveData<Chifor> getChiforMutableLiveData() {
@@ -42,7 +42,7 @@ public class MapViewModel extends ViewModel {
 
     public void GetChiforDataLocation(){
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                .collection("Chifor")
+                .collection(Commun.Chifor_DataBase_Table)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -57,8 +57,8 @@ public class MapViewModel extends ViewModel {
 
     public void DelateDemande(){
         FireBaseClient.getFireBaseClient()
-                .getDatabaseReference().child("Demande")
-                .orderByChild("ClientName").equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName())
+                .getDatabaseReference().child(Commun.Demande_DataBase_Table)
+                .orderByChild("ClientName").equalTo(Commun.Current_Client_DispalyName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
@@ -78,8 +78,8 @@ public class MapViewModel extends ViewModel {
 
     public void GetAcceptDemandeList(){
         FireBaseClient.getFireBaseClient()
-                .getDatabaseReference().child("Accept").orderByChild("ClientName")
-                .equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName())
+                .getDatabaseReference().child(Commun.Pickup_DataBase_Table).orderByChild("ClientName")
+                .equalTo(Commun.Current_Client_DispalyName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -100,9 +100,8 @@ public class MapViewModel extends ViewModel {
 
     public void AddDemande(Demande demande){
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                .collection("Demande")
+                .collection(Commun.Demande_DataBase_Table)
                 .document(demande.getClientName())
-                .set(demande).addOnCompleteListener(task -> {
-        });
+                .set(demande);
     }
 }
