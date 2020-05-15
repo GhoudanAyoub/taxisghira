@@ -358,9 +358,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         Demande d1 = new Demande(Commun.Current_Client_DispalyName, WhereToGo.getText().toString(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
-                        lottieAnimationView.playAnimation();
                         mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
-                            //lottieAnimationView.setVisibility(View.GONE);
+                            lottieAnimationView.setVisibility(View.GONE);
                             //notify user that  he get accepted
                             bottom_sheet.setVisibility(View.VISIBLE);
                             ListTaxiNum.setText(pickup1.getTaxi_num());
