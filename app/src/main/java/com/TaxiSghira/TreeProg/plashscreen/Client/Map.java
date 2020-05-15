@@ -25,8 +25,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
@@ -346,7 +346,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     public void onNext(Unit unit) {
                         assert locationComponent.getLastKnownLocation() != null;
                         UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
-                        Demande d1 = new Demande(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName(), WhereToGo.getText().toString(), userLocation.getLnt(), userLocation.getLong());
+                        Demande d1 = new Demande(Commun.Current_Client_DispalyName, WhereToGo.getText().toString(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         lottieAnimationView.playAnimation();
@@ -354,9 +354,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             //lottieAnimationView.setVisibility(View.GONE);
                             //notify user that  he get accepted
                             bottom_sheet.setVisibility(View.VISIBLE);
-                            ListTaxiNum.setText(pickup1.Taxi_num);
-                            ListChName.setText(pickup1.Ch_Name);
-                            ListChNum.setText(pickup1.Ch_num);
+                            ListTaxiNum.setText(pickup1.getTaxi_num());
+                            ListChName.setText(pickup1.getCh_Name());
+                            ListChNum.setText(pickup1.getCh_num());
                             RxView.clicks(findViewById(R.id.Favories))
                                     .throttleFirst(5, TimeUnit.SECONDS)
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -368,8 +368,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                         @Override
                                         public void onNext(Unit unit) {
-                                            favorViewModel.AddFAvor(Objects.requireNonNull(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getId())
-                                                    , pickup1.Ch_Name, pickup1.Ch_num, pickup1.Taxi_num);
+                                            favorViewModel.AddFAvor(Objects.requireNonNull(Commun.Current_Client_Id)
+                                                    , pickup1.getCh_Name(), pickup1.getCh_num(), pickup1.getTaxi_num());
                                         }
 
                                         @Override
@@ -392,7 +392,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                         @Override
                                         public void onNext(Unit unit) {
-                                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.Ch_num)));
+                                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getCh_num())));
                                         }
 
                                         @Override
