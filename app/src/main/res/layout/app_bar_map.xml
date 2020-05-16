@@ -71,21 +71,6 @@
     </TableRow>
 
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/progBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxHeight="150dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_sheet"
-        app:layout_constraintEnd_toEndOf="@+id/tableRow2"
-        app:layout_constraintStart_toStartOf="@+id/tableRow2"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="true"
-        app:lottie_rawRes="@raw/horizontal_progress_bar"
-        app:lottie_speed="1.3" />
-
-
     <Button
         android:id="@+id/findDriver"
         android:layout_width="wrap_content"
@@ -105,6 +90,34 @@
         app:layout_constraintStart_toStartOf="@+id/tableRow2" />
 
     <LinearLayout
+        android:id="@+id/LyoutLoti"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_sheet"
+        app:layout_constraintEnd_toEndOf="@+id/tableRow2"
+        app:layout_constraintStart_toStartOf="@+id/tableRow2">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/progBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="150dp"
+            android:visibility="visible"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/horizontal_progress_bar"
+            app:lottie_speed="1.3" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_cancel_black_24dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -114,7 +127,7 @@
         android:layout_marginRight="32dp"
         android:layout_marginBottom="8dp"
         android:orientation="vertical"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/include"
         app:layout_constraintHorizontal_bias="0.528"

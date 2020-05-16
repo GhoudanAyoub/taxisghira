@@ -37,7 +37,6 @@ import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
-import com.airbnb.lottie.LottieAnimationView;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -102,7 +101,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private ProgressDialog gProgress;
     private boolean mLocationPermissionGranted = false;
     MapViewModel mapViewModel;
-    LottieAnimationView lottieAnimationView;
     LinearLayout bottom_sheet;
     FavorViewModel favorViewModel;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -129,8 +127,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         gProgress = new ProgressDialog(this);
         builder = new AlertDialog.Builder(this);
         WhereToGo = findViewById(R.id.editText2);
-        lottieAnimationView = findViewById(R.id.progBar);
-
         bottom_sheet = findViewById(R.id.bottom_sheet);
 
         mapView = findViewById(R.id.mapView);
@@ -358,9 +354,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         Demande d1 = new Demande(Commun.Current_Client_DispalyName, WhereToGo.getText().toString(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
+                        findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
                         mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
-                            lottieAnimationView.setVisibility(View.GONE);
-                            //notify user that  he get accepted
+
+                            findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
                             bottom_sheet.setVisibility(View.VISIBLE);
                             ListTaxiNum.setText(pickup1.getTaxi_num());
                             ListChName.setText(pickup1.getCh_Name());
@@ -417,7 +414,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                     @Override
                     public void onError(Throwable e) {
-                        Timber.e(e);
+                        Timber.log(4, e);
                     }
 
                     @Override
