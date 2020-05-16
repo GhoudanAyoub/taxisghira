@@ -355,6 +355,30 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
+
+                        RxView.clicks(findViewById(R.id.imageViewCancel)).
+                                throttleFirst(3, TimeUnit.SECONDS)
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Observer<Unit>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+                                        compositeDisposable.add(d);
+                                    }
+
+                                    @Override
+                                    public void onNext(Unit unit) {
+                                        mapViewModel.DelateDemande(d1);
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        Timber.log(4, e.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+                                    }
+                                });
                         mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
 
                             findViewById(R.id.LyoutLoti).setVisibility(View.GONE);

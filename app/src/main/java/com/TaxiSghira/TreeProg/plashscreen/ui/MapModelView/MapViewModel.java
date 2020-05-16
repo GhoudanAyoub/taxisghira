@@ -20,6 +20,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.concurrent.Delayed;
 
 import timber.log.Timber;
 
@@ -55,26 +56,11 @@ public class MapViewModel extends ViewModel {
                 });
     }
 
-    public void DelateDemande(){
-        FireBaseClient.getFireBaseClient().getDatabaseReference()
-                .child(Commun.Demande_DataBase_Table)
-                .orderByChild(Commun.ClientName_String)
-                .equalTo(Commun.Current_Client_DispalyName)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                        ds.getRef().removeValue();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NotNull DatabaseError databaseError) {
-                Timber.e(databaseError.getMessage());
-            }
-        });
+    public void DelateDemande(Demande demande){
+        FireBaseClient.getFireBaseClient().getFirebaseFirestore()
+                .collection(Commun.Demande_DataBase_Table)
+                .document(demande.getClientName())
+                .delete().addOnCompleteListener(task -> Toast.makeText(getApplicationContext(),"تم إلغاء الطلب",Toast.LENGTH_SHORT).show());
     }
 
     public void GetAcceptDemandeList(){
