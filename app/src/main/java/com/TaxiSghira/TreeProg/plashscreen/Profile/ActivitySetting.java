@@ -17,9 +17,6 @@ import android.view.ViewGroup;
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
-import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 
 public class ActivitySetting  extends PreferenceActivity {
@@ -34,18 +31,8 @@ public class ActivitySetting  extends PreferenceActivity {
         Preference ratePref = findPreference("key_rate");
         Preference morePref = findPreference("key_more");
         Preference aboutPref = findPreference("key_about");
-        Preference UpdateAccount = findPreference("UpdateAccount");
-        Preference dis = findPreference("dis");
         final Preference prefTerm = findPreference(getString(R.string.pref_title_term));
 
-        dis.setOnPreferenceClickListener(preference -> {
-            FireBaseClient.getFireBaseClient().getmGoogleSignInClient().signOut();
-            startActivity(new Intent(getApplicationContext(), Auth.class));
-        return true;});
-        UpdateAccount.setOnPreferenceClickListener(preference -> {
-            startActivity(new Intent(getApplicationContext(), PersonalInfo.class));
-            return true;
-        } );
         ratePref.setOnPreferenceClickListener(preference -> {
             try {
                 getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getApplicationContext().getPackageName())));

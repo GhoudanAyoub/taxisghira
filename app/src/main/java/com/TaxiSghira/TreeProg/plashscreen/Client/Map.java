@@ -129,6 +129,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         WhereToGo = findViewById(R.id.editText2);
         bottom_sheet = findViewById(R.id.bottom_sheet);
 
+        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -379,6 +380,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     public void onComplete() {
                                     }
                                 });
+
                         mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
 
                             findViewById(R.id.LyoutLoti).setVisibility(View.GONE);

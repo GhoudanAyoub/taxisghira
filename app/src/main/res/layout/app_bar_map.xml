@@ -96,7 +96,8 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/bottom_sheet"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
-        app:layout_constraintStart_toStartOf="@+id/tableRow2">
+        app:layout_constraintStart_toStartOf="@+id/tableRow2"
+        tools:visibility="gone">
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/progBar"
