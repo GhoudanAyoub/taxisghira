@@ -1,3 +1,4 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/739ef50584e34ec2ab28b08e1e49ee53)](https://www.codacy.com/manual/GhoudanAyoub/taxisghira?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GhoudanAyoub/taxisghira&amp;utm_campaign=Badge_Grade)
 # TaxiSghira
 ![appicon](https://github.com/GhoudanAyoub/taxisghira/blob/master/app/src/main/res/mipmap-xxhdpi/ll.png)
 
