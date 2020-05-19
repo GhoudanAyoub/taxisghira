@@ -12,15 +12,9 @@ import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
-import java.util.concurrent.Delayed;
 
 import timber.log.Timber;
 
@@ -64,26 +58,22 @@ public class MapViewModel extends ViewModel {
     }
 
     public void GetAcceptDemandeList(){
-        FireBaseClient.getFireBaseClient().getDatabaseReference()
-                .child(Commun.Pickup_DataBase_Table)
-                .orderByChild(Commun.ClientName_String)
-                .equalTo(Commun.Current_Client_DispalyName)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                        pickup = dataSnapshot1.getValue(Pickup.class);
+        FireBaseClient.getFireBaseClient().getFirebaseFirestore()
+                .collection(Commun.Pickup_DataBase_Table)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                            try {
+                                pickup = document.toObject(Pickup.class);
+                                if(Commun.ClientName_String.equals(pickup.getDemande().getClientName()))
+                                acceptMutableLiveData.setValue(document.toObject(Pickup.class));
+                            }catch (Throwable t){
+                                Timber.e(t);
+                            }
+                        }
                     }
-                    acceptMutableLiveData.setValue(pickup);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(),"لايوجد اي طلب الان !!!",Toast.LENGTH_LONG).show();
-            }
-        });
+                });
     }
 
     public void AddDemande(Demande demande){

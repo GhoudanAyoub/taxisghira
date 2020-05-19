@@ -49,6 +49,8 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -208,6 +210,20 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
+            findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
+
+                assert locationComponent.getLastKnownLocation() != null;
+
+                CameraPosition position = new CameraPosition.Builder()
+                        .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude()))
+                        .zoom(17) // Sets the zoom
+                        .bearing(180) // Rotate the camera
+                        .tilt(30)
+                        .build();
+
+                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
+
+            });
             IconFactory iconFactory = IconFactory.getInstance(Map.this);
             Icon icon = iconFactory.fromResource(R.drawable.taxisymb);
             mapboxMap.addOnCameraMoveStartedListener(reason ->
