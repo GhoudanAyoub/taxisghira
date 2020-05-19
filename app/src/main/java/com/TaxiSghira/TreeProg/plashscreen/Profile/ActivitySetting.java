@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.TaxiSghira.TreeProg.plashscreen.R;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ActivitySetting  extends PreferenceActivity {
 
     private AppCompatDelegate mDelegate;
@@ -96,10 +98,7 @@ public class ActivitySetting  extends PreferenceActivity {
     }
 
 
-    public androidx.appcompat.app.ActionBar getSupportActionBar() {
-        return getDelegate().getSupportActionBar();
-    }
-
+    @NotNull
     @Override
     public MenuInflater getMenuInflater() {
         return getDelegate().getMenuInflater();

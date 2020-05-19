@@ -206,18 +206,19 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
 
-        mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+        mapboxMap.setStyle(Style.LIGHT, style -> {
             enableLocationComponent(style);
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
             findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
                 assert locationComponent.getLastKnownLocation() != null;
-                CameraPosition position = new CameraPosition.Builder()
-                        .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude()))
+                CameraPosition position = new CameraPosition
+                        .Builder()
+                        .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
+                                locationComponent.getLastKnownLocation().getLongitude()))
                         .zoom(17)
-                        .bearing(180)
-                        .tilt(30)
+                        .bearing(180).tilt(30)
                         .build();
                 mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
             });
