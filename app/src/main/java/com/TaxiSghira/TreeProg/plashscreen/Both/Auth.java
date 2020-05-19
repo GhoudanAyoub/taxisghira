@@ -49,7 +49,7 @@ public class Auth extends AppCompatActivity {
                     public void onSubscribe(Disposable d) { compositeDisposable.add(d); }
 
                     @Override
-                    public void onNext(Unit unit) {findViewById(R.id.buttonphone).setVisibility(View.GONE); signIn(); }
+                    public void onNext(Unit unit) {findViewById(R.id.buttonphone).setClickable(false); signIn(); }
 
                     @Override
                     public void onError(Throwable e) { Timber.e(e); }

@@ -158,6 +158,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:background="@drawable/cerclebackroundwhitebuttom"
+                android:clickable="false"
                 android:fontFamily="@font/harmattan"
                 android:text="هل أنت سائق سيارة أجرة ؟"
                 android:textColor="@color/yello"

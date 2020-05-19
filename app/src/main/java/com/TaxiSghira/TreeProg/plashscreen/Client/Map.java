@@ -70,6 +70,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -205,25 +206,22 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
 
-        mapboxMap.setStyle(Style.LIGHT, style -> {
+        mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
             enableLocationComponent(style);
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
             findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
-
                 assert locationComponent.getLastKnownLocation() != null;
-
                 CameraPosition position = new CameraPosition.Builder()
                         .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude()))
-                        .zoom(17) // Sets the zoom
-                        .bearing(180) // Rotate the camera
+                        .zoom(17)
+                        .bearing(180)
                         .tilt(30)
                         .build();
-
                 mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
-
             });
+
             IconFactory iconFactory = IconFactory.getInstance(Map.this);
             Icon icon = iconFactory.fromResource(R.drawable.taxisymb);
             mapboxMap.addOnCameraMoveStartedListener(reason ->
@@ -307,6 +305,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     @SuppressWarnings({"MissingPermission"})
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        try {
+            List<Address> addressList = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+            if (addressList.size() > 0) {
+                WhereToGo.setText(addressList.get(0).getLocality());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
