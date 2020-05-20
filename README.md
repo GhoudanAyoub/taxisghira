@@ -30,9 +30,8 @@ The app uses MVVM [Model-View-ViewModel] architecture to have a unidirectional f
 
 
 ## Design
-Designed by Ayoub Bari [Dribble](https://dribbble.com/BariAyoub) 
+Designed by Ayoub Bari Dribble(https://dribbble.com/BariAyoub) 
 
-<h2 id="Outputs">Outputs</h2>
 
 <h2 id="license">License</h2>
 
