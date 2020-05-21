@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,9 +23,9 @@ public class PersonalInfoModelViewClass extends ViewModel {
 
     public void getClientInfo() {
         FireBaseClient.getFireBaseClient().getDatabaseReference()
-                .child(Commun.Client_DataBase_Table)
-                .orderByChild(Commun.Gmail_String).
-                equalTo(Commun.Current_Client_Gmail)
+                .child(Common.Client_DataBase_Table)
+                .orderByChild(Common.Gmail_String).
+                equalTo(Common.Current_Client_Gmail)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

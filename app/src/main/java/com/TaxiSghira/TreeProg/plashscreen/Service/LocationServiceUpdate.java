@@ -1,39 +1,25 @@
 package com.TaxiSghira.TreeProg.plashscreen.Service;
 
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.GeoPoint;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -97,13 +83,13 @@ public class LocationServiceUpdate extends Service {
         UserLocation userLocation1 = new UserLocation(userLocation.getLnt(),userLocation.getLong(),FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName());
 
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                .collection(Commun.Demande_DataBase_Table)
+                .collection(Common.Demande_DataBase_Table)
                 .document( userLocation1.getDisplayName())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()){
                         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                                .collection(Commun.Demande_DataBase_Table)
+                                .collection(Common.Demande_DataBase_Table)
                                 .document(userLocation1.getDisplayName())
                                 .update("lnt",userLocation1.getLnt(),"long",userLocation1.getLong())
                                 .addOnCompleteListener(task1 -> {

@@ -8,17 +8,15 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Favor;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -34,7 +32,7 @@ public class FavorViewModel extends ViewModel {
     }
 
     public List<Favor> getFavor() {
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Favor_DataBase_Table)
+        FireBaseClient.getFireBaseClient().getDatabaseReference().child(Common.Favor_DataBase_Table)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -57,11 +55,11 @@ public class FavorViewModel extends ViewModel {
     }
 
     public  void AddFAvor( String mAuth, String Name, String Chh_Num, String taxinum){
-        FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Favor_DataBase_Table)
+        FireBaseClient.getFireBaseClient().getDatabaseReference().child(Common.Favor_DataBase_Table)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                DatabaseReference newPost2 = FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Favor_DataBase_Table).push();
+                DatabaseReference newPost2 = FireBaseClient.getFireBaseClient().getDatabaseReference().child(Common.Favor_DataBase_Table).push();
                 newPost2.setValue(new Favor(mAuth,Name,Chh_Num,taxinum));
                 Toast.makeText(getApplicationContext(),"تمت الاضافة بنجاح\uD83D\uDE04",Toast.LENGTH_SHORT).show();
             }

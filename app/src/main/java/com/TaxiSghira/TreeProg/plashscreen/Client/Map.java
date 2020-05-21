@@ -25,7 +25,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
-import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
@@ -44,7 +44,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -111,7 +110,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         checkMapServices();
         startService(new Intent(getApplicationContext(),LocationServiceUpdate.class));
 
@@ -218,12 +216,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
             });
 
-            IconFactory iconFactory = IconFactory.getInstance(Map.this);
-            Icon icon = iconFactory.fromResource(R.drawable.taxisymb);
             mapboxMap.addOnCameraMoveStartedListener(reason ->
                     mapViewModel.getChiforMutableLiveData().observe(this, chifor1 -> {
                         assert chifor1 != null;
-                        mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor1.getLnt(), chifor1.getLng())).icon(icon));
+                        mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor1.getLnt(), chifor1.getLng()))
+                                .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.taxisymb)));
                     })
             );
             RxView.clicks(findViewById(R.id.FindButton))
@@ -241,7 +238,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             Point destinationPoint = null;
                             try {
                                 final Geocoder geocoder = new Geocoder(getApplicationContext());
-                                final String locName = WhereToGo.getEditText().getText().toString();
+                                final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
 
                                 final List<Address> list = geocoder.getFromLocationName(locName, 1);
                                 if (!(list == null || list.isEmpty())) {
@@ -305,7 +302,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         try {
             List<Address> addressList = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
             if (addressList.size() > 0) {
-                WhereToGo.getEditText().setText(addressList.get(0).getLocality());
+                Objects.requireNonNull(WhereToGo.getEditText()).setText(addressList.get(0).getLocality());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -371,7 +368,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     public void onNext(Unit unit) {
                         assert locationComponent.getLastKnownLocation() != null;
                         UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
-                        Demande d1 = new Demande(Commun.Current_Client_DispalyName, WhereToGo.getEditText().getText().toString(), userLocation.getLnt(), userLocation.getLong());
+                        Demande d1 = new Demande(Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
@@ -388,6 +385,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     @Override
                                     public void onNext(Unit unit) {
                                         mapViewModel.DelateDemande(d1);
+                                        navigationMapRoute.removeRoute();
+                                        WhereToGo.getEditText().setText("");
+                                        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
                                     }
 
                                     @Override
@@ -418,7 +418,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                         @Override
                                         public void onNext(Unit unit) {
-                                            favorViewModel.AddFAvor(Objects.requireNonNull(Commun.Current_Client_Id)
+                                            favorViewModel.AddFAvor(Objects.requireNonNull(Common.Current_Client_Id)
                                                     , pickup1.getCh_Name(), pickup1.getCh_num(), pickup1.getTaxi_num());
                                         }
 

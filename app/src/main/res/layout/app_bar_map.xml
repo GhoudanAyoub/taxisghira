@@ -59,16 +59,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:layout_weight="1 "
-            android:autofillHints=""
-            android:backgroundTint="@color/frutorial_title"
+            android:layout_weight="1"
             android:fontFamily="@font/harmattan"
             android:gravity="center|start"
             android:hint="@string/whereAreYouGoing"
             android:inputType="textPersonName"
             android:textColor="@color/black"
             android:textSize="18sp"
-            app:boxBackgroundMode="filled"
+            app:boxBackgroundMode="outline"
             app:boxStrokeColor="@color/frutorial_title"
             app:boxStrokeWidth="2dp"
             app:hintAnimationEnabled="true"
@@ -77,10 +75,14 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/frutorial_title"
                 android:fontFamily="@font/harmattan"
                 android:inputType="textEmailAddress"
                 android:singleLine="true"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textColorHighlight="@color/frutorial_title"
+                android:textColorHint="#FFFFFF"
+                android:textColorLink="#FFFFFF" />
         </com.google.android.material.textfield.TextInputLayout>
 
     </TableRow>
@@ -106,8 +108,12 @@
 
     <LinearLayout
         android:id="@+id/LyoutLoti"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
         app:layout_constraintStart_toStartOf="@+id/tableRow2"

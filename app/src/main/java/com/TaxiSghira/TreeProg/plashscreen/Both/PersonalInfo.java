@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
-import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
@@ -53,24 +53,24 @@ public class PersonalInfo extends AppCompatActivity {
 
     private void addDataClient() {
         DatabaseReference databaseReference =
-                FireBaseClient.getFireBaseClient().getDatabaseReference().child(Commun.Client_DataBase_Table);
+                FireBaseClient.getFireBaseClient().getDatabaseReference().child(Common.Client_DataBase_Table);
         gProgress.setMessage("المرجو الانتظار قليلا ⌛️");
         gProgress.show();
-        databaseReference.orderByChild(Commun.Gmail_String)
-                .equalTo(Commun.Current_Client_Gmail)
+        databaseReference.orderByChild(Common.Gmail_String)
+                .equalTo(Common.Current_Client_Gmail)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     dataSnapshot.getRef().removeValue();
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.setValue(new Client(fullname.getText().toString(), Tell.getText().toString(), Adress.getText().toString(), Commun.Current_Client_Id));
+                    newdata.setValue(new Client(fullname.getText().toString(), Tell.getText().toString(), Adress.getText().toString(), Common.Current_Client_Id));
                     gProgress.dismiss();
                     Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(getApplicationContext(), Map.class));
                 } else {
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.setValue(new Client(fullname.getText().toString(), Tell.getText().toString(), Adress.getText().toString(), Commun.Current_Client_Id));
+                    newdata.setValue(new Client(fullname.getText().toString(), Tell.getText().toString(), Adress.getText().toString(), Common.Current_Client_Id));
                     gProgress.dismiss();
                     Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(getApplicationContext(), Map.class));
