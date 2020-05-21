@@ -34,11 +34,11 @@
         android:id="@+id/tableRow2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginLeft="42dp"
         android:layout_marginTop="84dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="42dp"
+        android:layout_marginRight="42dp"
         android:background="@drawable/cerclebackgroundwhite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -53,23 +53,35 @@
             android:background="@drawable/ccp_selectable_bg"
             app:srcCompat="@drawable/ll" />
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editText2"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
             android:layout_weight="1 "
             android:autofillHints=""
             android:backgroundTint="@color/frutorial_title"
-            android:ems="10"
             android:fontFamily="@font/harmattan"
+            android:gravity="center|start"
             android:hint="@string/whereAreYouGoing"
             android:inputType="textPersonName"
             android:textColor="@color/black"
-            android:textColorHighlight="@color/yello"
-            android:textColorHint="@color/bottomNavigationTintColor"
-            android:textColorLink="@color/yello"
             android:textSize="18sp"
-            tools:targetApi="o" />
+            app:boxBackgroundMode="filled"
+            app:boxStrokeColor="@color/frutorial_title"
+            app:boxStrokeWidth="2dp"
+            app:hintAnimationEnabled="true"
+            app:hintEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/harmattan"
+                android:inputType="textEmailAddress"
+                android:singleLine="true"
+                android:textColor="@color/black" />
+        </com.google.android.material.textfield.TextInputLayout>
 
     </TableRow>
 
@@ -94,12 +106,12 @@
 
     <LinearLayout
         android:id="@+id/LyoutLoti"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_sheet"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
         app:layout_constraintStart_toStartOf="@+id/tableRow2"
+        app:layout_constraintTop_toBottomOf="@+id/tableRow2"
         tools:visibility="gone">
 
         <TableRow
@@ -109,7 +121,7 @@
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/progBar"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_weight="1"

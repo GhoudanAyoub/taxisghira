@@ -25,7 +25,7 @@ public class PersonalInfoModelViewClass extends ViewModel {
         FireBaseClient.getFireBaseClient().getDatabaseReference()
                 .child(Commun.Client_DataBase_Table)
                 .orderByChild(Commun.Gmail_String).
-                equalTo(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getEmail())
+                equalTo(Commun.Current_Client_Gmail)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

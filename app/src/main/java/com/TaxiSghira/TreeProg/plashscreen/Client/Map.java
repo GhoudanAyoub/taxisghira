@@ -1,7 +1,6 @@
 package com.TaxiSghira.TreeProg.plashscreen.Client;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,7 +14,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,7 +27,6 @@ import androidx.lifecycle.ViewModelProviders;
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Commun;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
@@ -37,6 +34,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
+import com.google.android.material.textfield.TextInputLayout;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -91,7 +89,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
 
     public static String id;
-    public Pickup pickup;
     TextView ListTaxiNum, ListChName, ListChNum;
     AlertDialog.Builder builder;
     private MapView mapView;
@@ -100,8 +97,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private LocationComponent locationComponent;
     private DirectionsRoute currentRoute;
     private NavigationMapRoute navigationMapRoute;
-    private EditText WhereToGo;
-    private ProgressDialog gProgress;
+    private TextInputLayout WhereToGo;
     private boolean mLocationPermissionGranted = false;
     MapViewModel mapViewModel;
     LinearLayout bottom_sheet;
@@ -115,19 +111,20 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         checkMapServices();
         startService(new Intent(getApplicationContext(),LocationServiceUpdate.class));
+
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
-        personalInfoModelViewClass.getClientInfo();
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
+        favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
+
+        personalInfoModelViewClass.getClientInfo();
         mapViewModel.GetChiforDataLocation();
         mapViewModel.GetAcceptDemandeList();
-        favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
 
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
-        gProgress = new ProgressDialog(this);
         builder = new AlertDialog.Builder(this);
         WhereToGo = findViewById(R.id.editText2);
         bottom_sheet = findViewById(R.id.bottom_sheet);
@@ -156,17 +153,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         alert.show();
     }
 
-    private boolean checkMapServices() {
-        return isMapsEnabled();
+    private void checkMapServices() {
+        isMapsEnabled();
     }
 
-    public boolean isMapsEnabled() {
+    public void isMapsEnabled() {
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessageNoGps();
-            return false;
         }
-        return true;
     }
 
     private void buildAlertMessageNoGps() {
@@ -246,7 +241,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             Point destinationPoint = null;
                             try {
                                 final Geocoder geocoder = new Geocoder(getApplicationContext());
-                                final String locName = WhereToGo.getText().toString();
+                                final String locName = WhereToGo.getEditText().getText().toString();
 
                                 final List<Address> list = geocoder.getFromLocationName(locName, 1);
                                 if (!(list == null || list.isEmpty())) {
@@ -310,7 +305,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         try {
             List<Address> addressList = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
             if (addressList.size() > 0) {
-                WhereToGo.setText(addressList.get(0).getLocality());
+                WhereToGo.getEditText().setText(addressList.get(0).getLocality());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -376,7 +371,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     public void onNext(Unit unit) {
                         assert locationComponent.getLastKnownLocation() != null;
                         UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
-                        Demande d1 = new Demande(Commun.Current_Client_DispalyName, WhereToGo.getText().toString(), userLocation.getLnt(), userLocation.getLong());
+                        Demande d1 = new Demande(Commun.Current_Client_DispalyName, WhereToGo.getEditText().getText().toString(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
