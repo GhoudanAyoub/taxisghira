@@ -21,7 +21,6 @@ import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class MapViewModel extends ViewModel {
     private MutableLiveData<Chifor> chiforMutableLiveData ;
-    Pickup pickup;
     private MutableLiveData<Pickup> acceptMutableLiveData;
 
     public LiveData<Chifor> getChiforMutableLiveData() {
@@ -64,8 +63,6 @@ public class MapViewModel extends ViewModel {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                             try {
-                                pickup = document.toObject(Pickup.class);
-                                if (Common.ClientName_String.equals(pickup.getDemande().getClientName()))
                                 acceptMutableLiveData.setValue(document.toObject(Pickup.class));
                             }catch (Throwable t){
                                 Timber.e(t);
