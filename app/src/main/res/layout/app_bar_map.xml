@@ -65,6 +65,7 @@
             android:hint="@string/whereAreYouGoing"
             android:inputType="textPersonName"
             android:textColor="@color/black"
+            android:textColorHint="@color/black"
             android:textSize="18sp"
             app:boxBackgroundMode="outline"
             app:boxStrokeColor="@color/frutorial_title"
@@ -76,13 +77,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/frutorial_title"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:fontFamily="@font/harmattan"
                 android:inputType="textEmailAddress"
                 android:singleLine="true"
                 android:textColor="@color/black"
                 android:textColorHighlight="@color/frutorial_title"
                 android:textColorHint="#FFFFFF"
-                android:textColorLink="#FFFFFF" />
+                android:textColorLink="#FFFFFF"
+                android:textCursorDrawable="@color/black" />
         </com.google.android.material.textfield.TextInputLayout>
 
     </TableRow>
