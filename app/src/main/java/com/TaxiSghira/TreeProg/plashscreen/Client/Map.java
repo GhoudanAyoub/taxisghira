@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -109,7 +108,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         checkMapServices();
         startService(new Intent(getApplicationContext(),LocationServiceUpdate.class));
 
@@ -204,6 +203,62 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
+
+            mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
+
+                findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
+                bottom_sheet.setVisibility(View.VISIBLE);
+                ListTaxiNum.setText(pickup1.getTaxi_num());
+                ListChName.setText(pickup1.getCh_Name());
+                ListChNum.setText(pickup1.getCh_num());
+                RxView.clicks(findViewById(R.id.Favories))
+                        .throttleFirst(5, TimeUnit.SECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<Unit>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                                compositeDisposable.add(d);
+                            }
+
+                            @Override
+                            public void onNext(Unit unit) {
+                                favorViewModel.AddFAvor(Objects.requireNonNull(Common.Current_Client_Id)
+                                        , pickup1.getCh_Name(), pickup1.getCh_num(), pickup1.getTaxi_num());
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Timber.e(e);
+                            }
+
+                            @Override
+                            public void onComplete() {
+                            }
+                        });
+                RxView.clicks(findViewById(R.id.calls))
+                        .throttleFirst(5, TimeUnit.SECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<Unit>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                                compositeDisposable.add(d);
+                            }
+
+                            @Override
+                            public void onNext(Unit unit) {
+                                startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getCh_num())));
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Timber.e(e);
+                            }
+
+                            @Override
+                            public void onComplete() {
+                            }
+                        });
+            });
             findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
                 assert locationComponent.getLastKnownLocation() != null;
                 CameraPosition position = new CameraPosition
@@ -215,7 +270,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         .build();
                 mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
             });
-
             mapboxMap.addOnCameraMoveStartedListener(reason ->
                     mapViewModel.getChiforMutableLiveData().observe(this, chifor1 -> {
                         assert chifor1 != null;
@@ -371,7 +425,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         Demande d1 = new Demande(Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
-                        findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
+                        //findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
 
                         RxView.clicks(findViewById(R.id.imageViewCancel)).
                                 throttleFirst(3, TimeUnit.SECONDS)
@@ -400,61 +454,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     }
                                 });
 
-                        mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
-
-                            findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-                            bottom_sheet.setVisibility(View.VISIBLE);
-                            ListTaxiNum.setText(pickup1.getTaxi_num());
-                            ListChName.setText(pickup1.getCh_Name());
-                            ListChNum.setText(pickup1.getCh_num());
-                            RxView.clicks(findViewById(R.id.Favories))
-                                    .throttleFirst(5, TimeUnit.SECONDS)
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new Observer<Unit>() {
-                                        @Override
-                                        public void onSubscribe(Disposable d) {
-                                            compositeDisposable.add(d);
-                                        }
-
-                                        @Override
-                                        public void onNext(Unit unit) {
-                                            favorViewModel.AddFAvor(Objects.requireNonNull(Common.Current_Client_Id)
-                                                    , pickup1.getCh_Name(), pickup1.getCh_num(), pickup1.getTaxi_num());
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable e) {
-                                            Timber.e(e);
-                                        }
-
-                                        @Override
-                                        public void onComplete() {
-                                        }
-                                    });
-                            RxView.clicks(findViewById(R.id.calls))
-                                    .throttleFirst(5, TimeUnit.SECONDS)
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new Observer<Unit>() {
-                                        @Override
-                                        public void onSubscribe(Disposable d) {
-                                            compositeDisposable.add(d);
-                                        }
-
-                                        @Override
-                                        public void onNext(Unit unit) {
-                                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getCh_num())));
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable e) {
-                                            Timber.e(e);
-                                        }
-
-                                        @Override
-                                        public void onComplete() {
-                                        }
-                                    });
-                        });
                     }
 
                     @Override
