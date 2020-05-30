@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
@@ -34,6 +35,7 @@ import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.FirebaseApp;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -108,6 +110,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
+        FirebaseApp.initializeApp(getApplicationContext());
+
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         checkMapServices();
         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
@@ -279,8 +283,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             mapboxMap.addOnCameraMoveStartedListener(reason ->
                     mapViewModel.getChiforMutableLiveData().observe(this, chifor1 -> {
                         assert chifor1 != null;
-                        mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor1.getLnt(), chifor1.getLng()))
-                                .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.taxisymb)));
+                        for (Chifor chifor : chifor1) {
+                            mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor.getLnt(), chifor.getLng()))
+                                    .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.taxisymb)));
+                        }
                     })
             );
             RxView.clicks(findViewById(R.id.FindButton))

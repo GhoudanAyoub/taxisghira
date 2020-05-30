@@ -13,6 +13,8 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import timber.log.Timber;
@@ -20,10 +22,11 @@ import timber.log.Timber;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class MapViewModel extends ViewModel {
-    private MutableLiveData<Chifor> chiforMutableLiveData ;
+    private MutableLiveData<List<Chifor>> chiforMutableLiveData ;
     private MutableLiveData<Pickup> acceptMutableLiveData;
+    private List<Chifor> chiforList = new ArrayList<>();
 
-    public LiveData<Chifor> getChiforMutableLiveData() {
+    public LiveData<List<Chifor>> getChiforMutableLiveData() {
         chiforMutableLiveData = new MutableLiveData<>();
         return chiforMutableLiveData;
     }
@@ -41,9 +44,11 @@ public class MapViewModel extends ViewModel {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                             try {
-                                chiforMutableLiveData.setValue(document.toObject(Chifor.class));
+                                Chifor chifor = document.toObject(Chifor.class);
+                                chiforList.add(chifor);
                             }catch (Exception e){Timber.e(e);}
                         }
+                        chiforMutableLiveData.setValue(chiforList);
                     }
                 });
     }
