@@ -551,6 +551,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+        startActivity(new Intent(getApplicationContext(), Map.class));
     }
 
     @Override
