@@ -17,15 +17,18 @@ import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Objects;
+
 public class PersonalInfo extends AppCompatActivity {
 
     PersonalInfoModelViewClass personalInfoModelViewClass;
-    EditText fullname, Adress, Tell;
+    TextInputLayout fullname, Adress, Tell;
     private ProgressDialog gProgress;
 
     @Override
@@ -44,9 +47,9 @@ public class PersonalInfo extends AppCompatActivity {
         findViewById(R.id.gonext3).setOnClickListener(v -> addDataClient());
 
         personalInfoModelViewClass.getClientMutableLiveData().observe(this, client -> {
-            fullname.setText(client.getFullname());
-            Adress.setText(client.getGmail());
-            Tell.setText(client.getTell());
+            Objects.requireNonNull(fullname.getEditText()).setText(client.getFullname());
+            Objects.requireNonNull(Adress.getEditText()).setText(client.getGmail());
+            Objects.requireNonNull(Tell.getEditText()).setText(client.getTell());
         });
 
     }
@@ -64,13 +67,15 @@ public class PersonalInfo extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     dataSnapshot.getRef().removeValue();
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.setValue(new Client(fullname.getText().toString(), Tell.getText().toString(), Adress.getText().toString(), Common.Current_Client_Id));
+                    newdata.setValue(new Client(Objects.requireNonNull(fullname.getEditText()).getText().toString(), Objects.requireNonNull(Tell.getEditText()).getText().toString(),
+                            Objects.requireNonNull(Adress.getEditText()).getText().toString(), Common.Current_Client_Id));
                     gProgress.dismiss();
                     Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(getApplicationContext(), Map.class));
                 } else {
                     DatabaseReference newdata = databaseReference.push();
-                    newdata.setValue(new Client(fullname.getText().toString(), Tell.getText().toString(), Adress.getText().toString(), Common.Current_Client_Id));
+                    newdata.setValue(new Client(Objects.requireNonNull(fullname.getEditText()).getText().toString(), Objects.requireNonNull(Tell.getEditText()).getText().toString(),
+                            Objects.requireNonNull(Adress.getEditText()).getText().toString(), Common.Current_Client_Id));
                     gProgress.dismiss();
                     Toast.makeText(getApplicationContext(), "تم التسجيل بنحاح\uD83E\uDD29", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(getApplicationContext(), Map.class));

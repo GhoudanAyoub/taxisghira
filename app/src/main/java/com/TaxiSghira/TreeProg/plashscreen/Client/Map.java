@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
@@ -103,7 +105,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private TextInputLayout WhereToGo;
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,9 +112,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
         FirebaseApp.initializeApp(getApplicationContext());
-
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         checkMapServices();
+        views();
         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
 
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
@@ -125,24 +125,32 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mapViewModel.GetAcceptDemandeList();
 
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
-
-        builder = new AlertDialog.Builder(this);
-        WhereToGo = findViewById(R.id.editText2);
-        bottom_sheet = findViewById(R.id.bottom_sheet);
-
         findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-        mapView = findViewById(R.id.mapView);
+
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-        ListTaxiNum = findViewById(R.id.list_Taxi_num);
-        ListChName = findViewById(R.id.list_Ch_Name);
-        ListChNum = findViewById(R.id.list_Ch_num);
 
+        builder = new AlertDialog.Builder(this);
         personalInfoModelViewClass.getClientMutableLiveData().observe(this, client -> {
             if (client == null) {
                 buildAlertMessageNoDataFound();
             }
         });
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        findViewById(R.id.floatingActionButton2).setOnClickListener(view ->
+                mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
+
+        // handler.post(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
+    }
+
+    private void views() {
+        WhereToGo = findViewById(R.id.editText2);
+        bottom_sheet = findViewById(R.id.bottom_sheet);
+        ListTaxiNum = findViewById(R.id.list_Taxi_num);
+        ListChName = findViewById(R.id.list_Ch_Name);
+        ListChNum = findViewById(R.id.list_Ch_num);
+        mapView = findViewById(R.id.mapView);
     }
 
     private void buildAlertMessageNoDataFound() {
@@ -209,66 +217,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
-
-            mapViewModel.getAcceptMutableLiveData().observe(Map.this, pickup1 -> {
-                try {
-                    Timber.tag("wtf").e("Inside");
-                    findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-                    bottom_sheet.setVisibility(View.VISIBLE);
-                    ListTaxiNum.setText(pickup1.getTaxi_num());
-                    ListChName.setText(pickup1.getCh_Name());
-                    ListChNum.setText(pickup1.getCh_num());
-                    RxView.clicks(findViewById(R.id.Favories))
-                            .throttleFirst(5, TimeUnit.SECONDS)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Observer<Unit>() {
-                                @Override
-                                public void onSubscribe(Disposable d) {
-                                    compositeDisposable.add(d);
-                                }
-
-                                @Override
-                                public void onNext(Unit unit) {
-                                    favorViewModel.AddFAvor(Objects.requireNonNull(Common.Current_Client_Id)
-                                            , pickup1.getCh_Name(), pickup1.getCh_num(), pickup1.getTaxi_num(), Common.Current_Client_DispalyName);
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Timber.e(e);
-                                }
-
-                                @Override
-                                public void onComplete() {
-                                }
-                            });
-                    RxView.clicks(findViewById(R.id.calls))
-                            .throttleFirst(5, TimeUnit.SECONDS)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Observer<Unit>() {
-                                @Override
-                                public void onSubscribe(Disposable d) {
-                                    compositeDisposable.add(d);
-                                }
-
-                                @Override
-                                public void onNext(Unit unit) {
-                                    startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getCh_num())));
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Timber.e(e);
-                                }
-
-                                @Override
-                                public void onComplete() {
-                                }
-                            });
-                } catch (Throwable t) {
-                    Timber.e(t);
-                }
-            });
+            mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
             findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
                 assert locationComponent.getLastKnownLocation() != null;
                 CameraPosition position = new CameraPosition
@@ -285,7 +234,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         assert chifor1 != null;
                         for (Chifor chifor : chifor1) {
                             mapboxMap.addMarker(new MarkerOptions().position(new LatLng(chifor.getLnt(), chifor.getLng()))
-                                    .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.taxisymb)));
+                                    .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2)));
                         }
                     })
             );
@@ -350,10 +299,68 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                         }
                     });
-
         });
     }
 
+    private void ShowDriverDashboard(Pickup pickup1) {
+        try {
+            Timber.tag("wtf").e("Inside");
+            findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
+            bottom_sheet.setVisibility(View.VISIBLE);
+            ListTaxiNum.setText(pickup1.getTaxi_num());
+            ListChName.setText(pickup1.getCh_Name());
+            ListChNum.setText(pickup1.getCh_num());
+            RxView.clicks(findViewById(R.id.Favories))
+                    .throttleFirst(5, TimeUnit.SECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Unit>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            compositeDisposable.add(d);
+                        }
+
+                        @Override
+                        public void onNext(Unit unit) {
+                            favorViewModel.AddFAvor(Objects.requireNonNull(Common.Current_Client_Id)
+                                    , pickup1.getCh_Name(), pickup1.getCh_num(), pickup1.getTaxi_num(), Common.Current_Client_DispalyName);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Timber.e(e);
+                        }
+
+                        @Override
+                        public void onComplete() {
+                        }
+                    });
+            RxView.clicks(findViewById(R.id.calls))
+                    .throttleFirst(5, TimeUnit.SECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Unit>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            compositeDisposable.add(d);
+                        }
+
+                        @Override
+                        public void onNext(Unit unit) {
+                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getCh_num())));
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Timber.e(e);
+                        }
+
+                        @Override
+                        public void onComplete() {
+                        }
+                    });
+        } catch (Throwable t) {
+            Timber.e(t);
+        }
+    }
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
         loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
         loadedMapStyle.addSource(new GeoJsonSource("destination-source-id"));
@@ -494,7 +501,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             .build());
             locationComponent.setLocationComponentEnabled(true);
             locationComponent.setCameraMode(CameraMode.TRACKING_GPS);
-            locationComponent.setRenderMode(RenderMode.GPS);
+            locationComponent.setRenderMode(RenderMode.COMPASS);
 
             LocationComponentOptions locationComponentOptions =
                     LocationComponentOptions.builder(this)
@@ -551,7 +558,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     protected void onResume() {
         super.onResume();
         mapView.onResume();
-        startActivity(new Intent(getApplicationContext(), Map.class));
     }
 
     @Override

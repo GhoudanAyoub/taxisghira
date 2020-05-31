@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -73,6 +74,7 @@ public class LocationServiceUpdate extends Service {
                     UserLocation userLocation = new UserLocation( geoPoint.getLatitude(),geoPoint.getLongitude());
                     updateUser(userLocation);
                 }
+
             }
         }, Looper.myLooper());
 

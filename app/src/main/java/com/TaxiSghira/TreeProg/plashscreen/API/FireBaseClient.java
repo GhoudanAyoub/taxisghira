@@ -14,8 +14,16 @@ public class FireBaseClient {
     private FirebaseFirestore firebaseFirestore;
     private GoogleSignInAccount UserLogEdInAccount;
     private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseDatabase firebaseDatabase;
 
     private FireBaseClient() { }
+
+    public FirebaseDatabase getFirebaseDatabase() {
+        if (firebaseDatabase == null){
+            firebaseDatabase = FirebaseDatabase.getInstance();
+        }
+        return firebaseDatabase;
+    }
 
     public DatabaseReference getDatabaseReference() {
         if (databaseReference == null){
