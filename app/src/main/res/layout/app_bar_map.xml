@@ -17,19 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <ImageButton
-        android:id="@+id/listAnim"
-        android:layout_width="40dp"
-        android:layout_height="30dp"
-        android:layout_margin="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/ccp_selectable_bg"
-        app:srcCompat="@drawable/ic_menu_black_24dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TableRow
         android:id="@+id/tableRow2"
         android:layout_width="match_parent"
@@ -311,4 +298,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:rippleColor="@color/colorAccentt"
         app:srcCompat="@drawable/ic_refresh_black_24dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/listAnim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        app:backgroundTint="@color/bottomNavigationBackground"
+        app:backgroundTintMode="multiply"
+        app:borderWidth="1dp"
+        app:elevation="10dp"
+        app:fabSize="mini"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_menu_black_24dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

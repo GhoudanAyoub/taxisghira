@@ -137,10 +137,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             }
         });
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        findViewById(R.id.floatingActionButton2).setOnClickListener(view ->
-                mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
+        findViewById(R.id.floatingActionButton2).setOnClickListener(view -> {
+            mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
+            mapView.getMapAsync(this);
+        });
 
+        Handler handler = new Handler(Looper.getMainLooper());
         // handler.post(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
     }
 
