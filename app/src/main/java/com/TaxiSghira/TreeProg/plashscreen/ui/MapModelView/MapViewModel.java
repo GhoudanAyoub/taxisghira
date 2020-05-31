@@ -69,13 +69,17 @@ public class MapViewModel extends ViewModel {
     public void GetAcceptDemandeList(){
         FireBaseClient.getFireBaseClient().getFirebaseDatabase()
                 .getReference(Common.Pickup_DataBase_Table)
-                .orderByChild("clientName")
-                .equalTo(Common.Current_Client_DispalyName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            acceptMutableLiveData.setValue(dataSnapshot.getValue(Pickup.class));
+                            for (DataSnapshot dataSnapshot1 :dataSnapshot.getChildren()){
+                                Pickup p = dataSnapshot1.getValue(Pickup.class);
+                                assert p != null;
+                                if (p.getDemande().getClientName().equals(Common.Current_Client_DispalyName)){
+                                    acceptMutableLiveData.setValue(p);
+                                }
+                            }
                         }
                     }
 

@@ -140,6 +140,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         findViewById(R.id.floatingActionButton2).setOnClickListener(view -> {
             mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
             mapView.getMapAsync(this);
+            startActivity(new Intent(getApplicationContext(), Map.class));
         });
 
         Handler handler = new Handler(Looper.getMainLooper());
