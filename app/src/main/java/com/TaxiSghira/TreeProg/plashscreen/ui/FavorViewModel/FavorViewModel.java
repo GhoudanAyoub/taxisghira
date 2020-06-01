@@ -31,6 +31,8 @@ public class FavorViewModel extends ViewModel {
     public void getFavor() {
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
                 .collection(Common.Favor_DataBase_Table)
+                .document(Objects.requireNonNull(Common.Current_Client_DispalyName))
+                .collection("FavorClient")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -52,7 +54,9 @@ public class FavorViewModel extends ViewModel {
     public void AddFAvor(String mAuth, String Name, String Chh_Num, String taxinum, String clientname) {
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
                 .collection(Common.Favor_DataBase_Table)
-                .document(Common.Current_Client_DispalyName)
+                .document(Objects.requireNonNull(Common.Current_Client_DispalyName))
+                .collection("FavorClient")
+                .document()
                 .set(new Favor(mAuth, Name, Chh_Num, taxinum, clientname))
                 .addOnCompleteListener(task -> Toast.makeText(getApplicationContext(), "تمت الاضافة", Toast.LENGTH_SHORT).show());
     }
