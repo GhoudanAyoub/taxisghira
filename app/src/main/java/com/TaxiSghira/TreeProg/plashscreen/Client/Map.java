@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -105,6 +107,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private TextInputLayout WhereToGo;
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private String refreshedToken = FirebaseInstanceId.getInstance().getToken();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +119,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         views();
         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
 
+        Log.d("FIREBASETOKEN", refreshedToken);
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
         favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
@@ -445,7 +449,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     public void onNext(Unit unit) {
                         assert locationComponent.getLastKnownLocation() != null;
                         UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
-                        Demande d1 = new Demande(Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), userLocation.getLnt(), userLocation.getLong());
+                        Demande d1 = new Demande(Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), userLocation.getLnt(), userLocation.getLong(), refreshedToken);
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         //findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);

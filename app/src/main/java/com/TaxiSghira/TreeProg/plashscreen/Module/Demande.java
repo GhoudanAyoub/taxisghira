@@ -6,14 +6,24 @@ public class Demande {
     private String Arrive;
     private double Lnt;
     private double Long;
+    private String customerId;
     public Demande() {
     }
 
-    public Demande(String clientName, String arrive, double lnt, double aLong) {
+    public Demande(String clientName, String arrive, double lnt, double aLong, String customerId) {
         ClientName = clientName;
         Arrive = arrive;
         Lnt = lnt;
         Long = aLong;
+        this.customerId = customerId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 
     public String getArrive() {
