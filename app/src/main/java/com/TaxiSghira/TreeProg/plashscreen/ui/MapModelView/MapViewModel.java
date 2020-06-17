@@ -74,11 +74,13 @@ public class MapViewModel extends ViewModel {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot dataSnapshot1 :dataSnapshot.getChildren()){
-                                Pickup p = dataSnapshot1.getValue(Pickup.class);
-                                assert p != null;
-                                if (p.getDemande().getClientName().equals(Common.Current_Client_DispalyName)){
-                                    acceptMutableLiveData.setValue(p);
-                                }
+                                try {
+                                    Pickup p = dataSnapshot1.getValue(Pickup.class);
+                                    assert p != null;
+                                    if (p.getDemande().getClientName().equals(Common.Current_Client_DispalyName)){
+                                        acceptMutableLiveData.setValue(p);
+                                    }
+                                }catch (Exception e){ }
                             }
                         }
                     }
