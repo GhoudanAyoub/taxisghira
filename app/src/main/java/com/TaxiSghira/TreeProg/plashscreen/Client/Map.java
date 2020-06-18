@@ -130,6 +130,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
         findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
+        findViewById(R.id.findDriver).setVisibility(View.GONE);
+        findViewById(R.id.progBar).setVisibility(View.GONE);
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -148,7 +150,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         });
 
         Handler handler = new Handler(Looper.getMainLooper());
-        // handler.post(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
+        handler.post(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
     }
 
     private void views() {
@@ -312,6 +314,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void ShowDriverDashboard(Pickup pickup1) {
         try {
             Timber.tag("wtf").e("Inside");
+            findViewById(R.id.progBar).setVisibility(View.GONE);
             findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
             bottom_sheet.setVisibility(View.VISIBLE);
             ListTaxiNum.setText(pickup1.getTaxi_num());
@@ -383,7 +386,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         try {
             List<Address> addressList = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
             if (addressList.size() > 0) {
-                Objects.requireNonNull(WhereToGo.getEditText()).setText(addressList.get(0).getLocality());
+                Objects.requireNonNull(WhereToGo.getEditText()).setText(addressList.get(0).getAddressLine(0));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -436,7 +439,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     private void buildAlertMessageSearchOperation() {
         findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
-        RxView.clicks(findViewById(R.id.findDriver)).
+        RxView.clicks(findViewById(R.id.findDriver2)).
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Unit>() {
@@ -452,6 +455,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         Demande d1 = new Demande(Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), userLocation.getLnt(), userLocation.getLong(), refreshedToken);
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
+                        findViewById(R.id.progBar).setVisibility(View.VISIBLE);
                         //findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
 
                         RxView.clicks(findViewById(R.id.imageViewCancel)).
