@@ -1,5 +1,6 @@
 package com.TaxiSghira.TreeProg.plashscreen.Client;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -108,6 +109,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -371,6 +373,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             Timber.e(t);
         }
     }
+
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
         loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
         loadedMapStyle.addSource(new GeoJsonSource("destination-source-id"));
@@ -510,6 +513,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                                     .build())
                             .build());
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             locationComponent.setLocationComponentEnabled(true);
             locationComponent.setCameraMode(CameraMode.TRACKING_GPS);
             locationComponent.setRenderMode(RenderMode.COMPASS);

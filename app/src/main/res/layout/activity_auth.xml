@@ -9,7 +9,7 @@
 
     <LinearLayout
         android:id="@+id/linearLayout3"
-        android:layout_width="363dp"
+        android:layout_width="0dp"
         android:layout_height="367dp"
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
@@ -24,7 +24,7 @@
 
         <ImageView
             android:id="@+id/linearLayout"
-            android:layout_width="291dp"
+            android:layout_width="match_parent"
             android:layout_height="191dp"
             android:layout_gravity="center"
             android:background="@drawable/ccp_selectable_bg"
@@ -34,7 +34,7 @@
         <TextView
             android:id="@+id/textView9"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:layout_marginLeft="32dp"
             android:layout_marginTop="50dp"
@@ -51,12 +51,8 @@
 
     <LinearLayout
         android:id="@+id/linearLayout2"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginRight="32dp"
         android:layout_marginBottom="24dp"
         android:gravity="center"
         android:orientation="vertical"
@@ -68,7 +64,7 @@
 
         <Button
             android:id="@+id/buttonphone"
-            android:layout_width="match_parent"
+            android:layout_width="351dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@drawable/cerclebackgroundpurple"
