@@ -24,12 +24,13 @@
         android:alpha="1"
         android:maxHeight="150dp"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@+id/tableRow2"
-        app:layout_constraintStart_toStartOf="@+id/tableRow2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
         app:lottie_rawRes="@raw/researsh" />
+
 
     <TableRow
         android:id="@+id/tableRow2"
@@ -81,15 +82,14 @@
                 android:focusableInTouchMode="true"
                 android:fontFamily="@font/harmattan"
                 android:inputType="textEmailAddress"
-                android:textColorHint="#FFFFFF"
-                android:textColorLink="#FFFFFF"
                 android:singleLine="true"
                 android:textColor="@color/black"
+                android:textColorHint="#FFFFFF"
+                android:textColorLink="#FFFFFF"
                 android:textCursorDrawable="@color/black" />
         </com.google.android.material.textfield.TextInputLayout>
 
     </TableRow>
-
 
     <LinearLayout
         android:id="@+id/findDriver"
