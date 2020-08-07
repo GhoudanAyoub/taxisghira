@@ -45,7 +45,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listAnim">
+        app:layout_constraintTop_toBottomOf="@+id/listAnim"
+        tools:visibility="visible">
 
         <ImageButton
             android:id="@+id/FindButton"
@@ -93,27 +94,27 @@
 
     <LinearLayout
         android:id="@+id/findDriver"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/cerclebackgroundwhite"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_sheet"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
         app:layout_constraintStart_toStartOf="@+id/tableRow2"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <Button
             android:id="@+id/findDriver2"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:background="@drawable/cerclebackgroundpurple"
             android:clickable="true"
-            android:fontFamily="@font/harmattan"
+            android:fontFamily="@font/roboto"
             android:text=" ابدء عملبة البحت عن طاكسي"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:visibility="visible"
             app:layout_constraintHorizontal_bias="0.551" />
@@ -150,40 +151,43 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
+        android:background="@drawable/cerclebackgroundwhite"
         android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/floatingActionButton2"
-        app:layout_constraintHorizontal_bias="0.528"
-        app:layout_constraintStart_toStartOf="parent">
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/findDriver"
+        app:layout_constraintEnd_toEndOf="@+id/tableRow2"
+        app:layout_constraintStart_toStartOf="@+id/tableRow2">
 
-        <TextView
-            android:id="@+id/textViewtad"
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:fontFamily="@font/harmattan"
-            android:gravity="center"
-            android:text="انتظر قليلا الطاكسي جاي"
-            android:textColor="@color/statusBarColor"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/textViewtad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/roboto"
+                android:gravity="center"
+                android:text="انتظر قليلا الطاكسي جاي"
+                android:textAllCaps="false"
+                android:textColor="@color/statusBarColor"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </TableRow>
 
         <TableRow
             android:id="@+id/UtilTAxi"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="bottom|center|center_vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
             android:layout_weight="1"
             android:background="@drawable/cerclebackroundwhitebuttom">
 
@@ -191,8 +195,8 @@
                 android:id="@+id/list_Taxi_num"
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:fontFamily="@font/black_ops_one"
+                android:layout_weight="0.2"
+                android:fontFamily="@font/roboto"
                 android:gravity="center"
                 android:text="15"
                 android:textColor="@color/frutorial_title"
@@ -201,66 +205,73 @@
             <LinearLayout
                 android:layout_width="21dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.8"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/list_Ch_Name"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/harmattan"
-                    android:gravity="center|start"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:text="Ghoudan ayoub"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/list_Ch_num"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/harmattan"
-                    android:gravity="center|start"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:text="0639603352"
-                    android:textSize="18sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/Favories"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/ccp_selectable_bg"
-                    android:fontFamily="@font/harmattan"
-                    android:gravity="center"
-                    android:text="أضف الى لائحة المفضلين" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
 
-                <Button
-                    android:id="@+id/calls"
+                    <TextView
+                        android:id="@+id/list_Ch_Name"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|start"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:text="Ghoudan ayoub"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/Favories"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/ccp_selectable_bg"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center"
+                        android:text="أضف الى لائحة المفضلين"
+                        android:textSize="12sp" />
+                </TableRow>
+
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_weight="1"
-                    android:background="@drawable/ccp_selectable_bg"
-                    android:enabled="false"
-                    android:fontFamily="@font/harmattan"
-                    android:gravity="center"
-                    android:text="@string/make_a_call"
-                    android:textColor="@color/frutorial_title"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/list_Ch_num"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|start"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:text="0639603352"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/calls"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="end"
+                        android:layout_weight="1"
+                        android:background="@drawable/ccp_selectable_bg"
+                        android:enabled="false"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center"
+                        android:text="@string/make_a_call"
+                        android:textColor="@color/frutorial_title"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
             </LinearLayout>
+
         </TableRow>
     </LinearLayout>
 
@@ -268,17 +279,17 @@
         android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="16dp"
         android:clickable="true"
         app:backgroundTint="@color/bottomNavigationBackground"
         app:backgroundTintMode="multiply"
         app:borderWidth="1dp"
         app:elevation="10dp"
         app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/floatingActionButton2"
         app:rippleColor="@color/colorAccentt"
         app:srcCompat="@drawable/ic_my_location_black_24dp" />
 
@@ -286,17 +297,17 @@
         android:id="@+id/floatingActionButton2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
         android:clickable="true"
         app:backgroundTint="@color/bottomNavigationBackground"
         app:backgroundTintMode="multiply"
         app:borderWidth="1dp"
         app:elevation="10dp"
         app:fabSize="mini"
-        app:layout_constraintBottom_toTopOf="@+id/floatingActionButton"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:rippleColor="@color/colorAccentt"
         app:srcCompat="@drawable/ic_refresh_black_24dp" />
 
@@ -316,4 +327,44 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/progBar"
         app:srcCompat="@drawable/ic_menu_black_24dp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/cerclebackgroundwhite"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_sheet"
+        app:layout_constraintEnd_toEndOf="@+id/tableRow2"
+        app:layout_constraintStart_toStartOf="@+id/tableRow2">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:fontFamily="@font/roboto"
+            android:gravity="center|center_vertical"
+            android:text="Afak, Maroc"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/ic_baseline_trending_flat_24" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:fontFamily="@font/roboto"
+            android:gravity="center|center_vertical"
+            android:text="Afak, Maroc"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

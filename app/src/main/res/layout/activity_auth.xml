@@ -35,18 +35,18 @@
             android:id="@+id/textView9"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginLeft="32dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="50dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginRight="32dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
             android:fontFamily="@font/roboto"
             android:gravity="center"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
             android:text="@string/get_a_ride_wherever_you_are_whenever_you_want"
             android:textColor="@color/bottomNavigationTintColor"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -69,11 +69,11 @@
             android:layout_margin="10dp"
             android:background="@drawable/cerclebackgroundpurple"
             android:clickable="true"
-            android:fontFamily="@font/roboto"
+            android:fontFamily="@font/roboto_light"
             android:gravity="center"
             android:text="@string/continue_with_phone_number"
             android:textColor="@color/backgroundcolor"
-            android:textSize="18sp"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
     </LinearLayout>

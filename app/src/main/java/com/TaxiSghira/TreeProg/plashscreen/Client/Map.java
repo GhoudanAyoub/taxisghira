@@ -375,7 +375,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
-        loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
+        loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.maps_and_flags));
         loadedMapStyle.addSource(new GeoJsonSource("destination-source-id"));
         SymbolLayer destinationSymbolLayer = new SymbolLayer("destination-symbol-layer-id", "destination-source-id");
         destinationSymbolLayer.withProperties(iconImage("destination-icon-id"), iconIgnorePlacement(true));
