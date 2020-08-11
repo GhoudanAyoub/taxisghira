@@ -94,7 +94,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
 
     public static String id;
-    TextView ListTaxiNum, ListChName, ListChNum;
+    TextView ListTaxiNum, ListChName, ListChNum,GoingTO,ComingFrom;
     AlertDialog.Builder builder;
     MapViewModel mapViewModel;
     LinearLayout bottom_sheet;
@@ -133,6 +133,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
         findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
         findViewById(R.id.findDriver).setVisibility(View.GONE);
+        findViewById(R.id.location_panel).setVisibility(View.GONE);
         findViewById(R.id.progBar).setVisibility(View.GONE);
 
         mapView.onCreate(savedInstanceState);
@@ -439,9 +440,22 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             e.printStackTrace();
         }
     }
-
     private void buildAlertMessageSearchOperation() {
+        assert locationComponent.getLastKnownLocation() != null;
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        GoingTO.setText(Objects.requireNonNull(WhereToGo.getEditText()).getText());
+        try {
+            List<Address> currentAddress = geocoder.getFromLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude(), 1);
+            if (currentAddress.size() > 0) {
+                ComingFrom.setText(currentAddress.get(0).getAddressLine(0));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
+        findViewById(R.id.location_panel).setVisibility(View.VISIBLE);
+
         RxView.clicks(findViewById(R.id.findDriver2)).
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -453,11 +467,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                     @Override
                     public void onNext(Unit unit) {
-                        assert locationComponent.getLastKnownLocation() != null;
                         UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
                         Demande d1 = new Demande(Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), userLocation.getLnt(), userLocation.getLong(), refreshedToken);
                         mapViewModel.AddDemande(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
+                        findViewById(R.id.location_panel).setVisibility(View.GONE);
                         findViewById(R.id.progBar).setVisibility(View.VISIBLE);
                         //findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
 
@@ -502,7 +516,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
 
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+        if (PermissionsManager.areLocationPermissionsGranted(this)&&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
             locationComponent = mapboxMap.getLocationComponent();
             locationComponent.activateLocationComponent(
                     LocationComponentActivationOptions
@@ -513,9 +531,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                                     .build())
                             .build());
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
             locationComponent.setLocationComponentEnabled(true);
             locationComponent.setCameraMode(CameraMode.TRACKING_GPS);
             locationComponent.setRenderMode(RenderMode.COMPASS);
