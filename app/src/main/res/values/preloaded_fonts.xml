@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="preloaded_fonts" translatable="false">
+        <item>@font/lateef</item>
         <item>@font/roboto</item>
         <item>@font/roboto_light</item>
+        <item>@font/scheherazade</item>
+        <item>@font/scheherazade_bold</item>
     </array>
 </resources>

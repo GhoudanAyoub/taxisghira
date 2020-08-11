@@ -40,13 +40,13 @@
             android:layout_marginTop="50dp"
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
-            android:fontFamily="@font/roboto"
+            android:fontFamily="@font/scheherazade_bold"
             android:gravity="center"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
             android:text="@string/get_a_ride_wherever_you_are_whenever_you_want"
             android:textColor="@color/bottomNavigationTintColor"
-            android:textSize="15sp" />
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
