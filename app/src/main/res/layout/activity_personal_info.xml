@@ -50,6 +50,7 @@
                 app:errorEnabled="true"
                 app:hintAnimationEnabled="true"
                 app:hintEnabled="true"
+                app:hintTextColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -62,7 +63,7 @@
                     android:backgroundTint="@color/frutorial_title"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:fontFamily="@font/harmattan"
+                    android:fontFamily="@font/source_code_pro_semibold"
                     android:gravity="start"
                     android:inputType="textEmailAddress"
                     android:singleLine="true"
@@ -70,7 +71,8 @@
                     android:textColorHighlight="@color/frutorial_title"
                     android:textColorHint="#FFFFFF"
                     android:textColorLink="#FFFFFF"
-                    android:textCursorDrawable="@color/black" />
+                    android:textCursorDrawable="@color/black"
+                    android:textSize="12sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -97,6 +99,7 @@
                 app:errorEnabled="true"
                 app:hintAnimationEnabled="true"
                 app:hintEnabled="true"
+                app:hintTextColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -109,7 +112,7 @@
                     android:backgroundTint="@color/frutorial_title"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:fontFamily="@font/harmattan"
+                    android:fontFamily="@font/source_code_pro_semibold"
                     android:gravity="start"
                     android:inputType="textEmailAddress"
                     android:singleLine="true"
@@ -117,7 +120,8 @@
                     android:textColorHighlight="@color/frutorial_title"
                     android:textColorHint="#FFFFFF"
                     android:textColorLink="#FFFFFF"
-                    android:textCursorDrawable="@color/black" />
+                    android:textCursorDrawable="@color/black"
+                    android:textSize="12sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -145,6 +149,7 @@
                 app:errorEnabled="true"
                 app:hintAnimationEnabled="true"
                 app:hintEnabled="true"
+                app:hintTextColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -157,7 +162,7 @@
                     android:backgroundTint="@color/frutorial_title"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:fontFamily="@font/harmattan"
+                    android:fontFamily="@font/source_code_pro_semibold"
                     android:gravity="start"
                     android:inputType="textEmailAddress"
                     android:singleLine="true"
@@ -165,7 +170,8 @@
                     android:textColorHighlight="@color/frutorial_title"
                     android:textColorHint="#FFFFFF"
                     android:textColorLink="#FFFFFF"
-                    android:textCursorDrawable="@color/black" />
+                    android:textCursorDrawable="@color/black"
+                    android:textSize="12sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button

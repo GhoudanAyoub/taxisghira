@@ -165,6 +165,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         ListChName = findViewById(R.id.list_Ch_Name);
         ListChNum = findViewById(R.id.list_Ch_num);
         mapView = findViewById(R.id.mapView);
+        ComingFrom = findViewById(R.id.textView);
+        GoingTO = findViewById(R.id.textView2);
     }
 
     private void buildAlertMessageNoDataFound() {
@@ -448,19 +450,19 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
     private void buildAlertMessageSearchOperation() {
         assert locationComponent.getLastKnownLocation() != null;
+
+        findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
+        findViewById(R.id.location_panel).setVisibility(View.VISIBLE);
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        GoingTO.setText(Objects.requireNonNull(WhereToGo.getEditText()).getText());
         try {
             List<Address> currentAddress = geocoder.getFromLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude(), 1);
             if (currentAddress.size() > 0) {
                 ComingFrom.setText(currentAddress.get(0).getAddressLine(0));
+                GoingTO.setText(Objects.requireNonNull(WhereToGo.getEditText()).getText());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
-        findViewById(R.id.location_panel).setVisibility(View.VISIBLE);
 
         RxView.clicks(findViewById(R.id.findDriver2)).
                 throttleFirst(2, TimeUnit.SECONDS)
@@ -522,11 +524,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
 
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
-        if (PermissionsManager.areLocationPermissionsGranted(this)&&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
             locationComponent = mapboxMap.getLocationComponent();
             locationComponent.activateLocationComponent(
                     LocationComponentActivationOptions

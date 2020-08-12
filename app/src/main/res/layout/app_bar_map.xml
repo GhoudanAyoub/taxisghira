@@ -58,6 +58,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editText2"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -73,19 +74,19 @@
             app:boxStrokeColor="@color/frutorial_title"
             app:boxStrokeWidth="2dp"
             app:hintAnimationEnabled="true"
-            app:hintEnabled="true">
+            app:hintEnabled="true"
+            app:hintTextColor="@color/black">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:fontFamily="@font/scheherazade_bold"
+                android:fontFamily="@font/scheherazade"
                 android:inputType="textEmailAddress"
                 android:singleLine="true"
                 android:textColor="@color/black"
-                android:textColorHint="#FFFFFF"
-                android:textColorLink="#FFFFFF"
+                android:textColorHint="@color/black"
                 android:textCursorDrawable="@color/black" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -153,10 +154,10 @@
         android:layout_marginBottom="8dp"
         android:background="@drawable/cerclebackgroundwhite"
         android:orientation="vertical"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/findDriver"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
-        app:layout_constraintStart_toStartOf="@+id/tableRow2"
-        tools:visibility="gone">
+        app:layout_constraintStart_toStartOf="@+id/tableRow2">
 
         <TableRow
             android:layout_width="match_parent"
@@ -283,7 +284,6 @@
         android:layout_marginRight="8dp"
         android:clickable="true"
         app:backgroundTint="@color/bottomNavigationBackground"
-        app:backgroundTintMode="multiply"
         app:borderWidth="1dp"
         app:elevation="10dp"
         app:fabSize="mini"
@@ -296,12 +296,11 @@
         android:id="@+id/floatingActionButton2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:clickable="true"
         app:backgroundTint="@color/bottomNavigationBackground"
-        app:backgroundTintMode="multiply"
         app:borderWidth="1dp"
         app:elevation="10dp"
         app:fabSize="mini"
@@ -316,10 +315,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:clickable="true"
         app:backgroundTint="@color/bottomNavigationBackground"
-        app:backgroundTintMode="multiply"
         app:borderWidth="1dp"
         app:elevation="10dp"
         app:fabSize="mini"
@@ -337,11 +335,11 @@
         app:layout_constraintBottom_toTopOf="@+id/bottom_sheet"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
         app:layout_constraintStart_toStartOf="@+id/tableRow2"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:fontFamily="@font/roboto"
@@ -359,7 +357,7 @@
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:fontFamily="@font/roboto"

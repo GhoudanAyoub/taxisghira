@@ -77,7 +77,7 @@ public class Auth extends AppCompatActivity {
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setAvailableProviders(providers)
-                        .setIsSmartLockEnabled(false)
+                        .setIsSmartLockEnabled(true)
                         .setAuthMethodPickerLayout(authMethodPickerLayout)
                         .setTheme(R.style.AppTheme)      // Set theme
                         .build(),
