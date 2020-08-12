@@ -7,6 +7,11 @@ import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+
 public class SpachScreen extends AppCompatActivity {
 
     @Override

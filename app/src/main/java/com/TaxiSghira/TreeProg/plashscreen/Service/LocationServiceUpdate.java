@@ -82,7 +82,7 @@ public class LocationServiceUpdate extends Service {
 
 
     private void updateUser(final UserLocation userLocation){
-        UserLocation userLocation1 = new UserLocation(userLocation.getLnt(),userLocation.getLong(),FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName());
+        UserLocation userLocation1 = new UserLocation(userLocation.getLnt(),userLocation.getLong(),FireBaseClient.getFireBaseClient().getFirebaseUser().getDisplayName());
 
         FireBaseClient.getFireBaseClient().getFirebaseFirestore()
                 .collection(Common.Demande_DataBase_Table)

@@ -34,10 +34,8 @@ public class Util_List extends AppCompatActivity {
         findViewById(R.id.buttonmap).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Map.class)));
         findViewById(R.id.button4TopDriver).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), FavorDrivers.class)));
         findViewById(R.id.button8LogOut).setOnClickListener(v -> {
-            FireBaseClient.getFireBaseClient().getmGoogleSignInClient()
-                    .signOut()
-                    .addOnCompleteListener(task ->
-                            Toast.makeText(getApplicationContext(), "لقد تم تسجيل خروجك من التطبيق", Toast.LENGTH_SHORT).show());
+            FireBaseClient.getFireBaseClient().getFirebaseAuth()
+                    .signOut();
             startActivity(new Intent(getApplicationContext(), Auth.class));
         });
         findViewById(R.id.button7RuDriver).setOnClickListener(v->{
@@ -48,8 +46,8 @@ public class Util_List extends AppCompatActivity {
             }});
 
         try {
-            textViewName.setText(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getDisplayName());
-            Glide.with(getApplicationContext()).load(FireBaseClient.getFireBaseClient().getUserLogEdInAccount().getPhotoUrl()).centerCrop().into(circleImageViewClient);
+            textViewName.setText(FireBaseClient.getFireBaseClient().getFirebaseUser().getDisplayName());
+            Glide.with(getApplicationContext()).load(FireBaseClient.getFireBaseClient().getFirebaseUser().getPhotoUrl()).centerCrop().into(circleImageViewClient);
         } catch (Exception e) {
         }
     }

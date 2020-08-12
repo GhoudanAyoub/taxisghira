@@ -3,6 +3,7 @@ package com.TaxiSghira.TreeProg.plashscreen.API;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -12,9 +13,8 @@ public class FireBaseClient {
     private DatabaseReference databaseReference;
     private FirebaseAuth firebaseAuth ;
     private FirebaseFirestore firebaseFirestore;
-    private GoogleSignInAccount UserLogEdInAccount;
-    private GoogleSignInClient mGoogleSignInClient;
     private FirebaseDatabase firebaseDatabase;
+    private FirebaseUser firebaseUser;
 
     private FireBaseClient() { }
 
@@ -46,20 +46,12 @@ public class FireBaseClient {
         return firebaseFirestore;
     }
 
-    public GoogleSignInAccount getUserLogEdInAccount() {
-        return UserLogEdInAccount;
+    public FirebaseUser getFirebaseUser() {
+        return firebaseUser;
     }
 
-    public void setUserLogEdInAccount(GoogleSignInAccount userLogEdInAccount) {
-        UserLogEdInAccount = userLogEdInAccount;
-    }
-
-    public GoogleSignInClient getmGoogleSignInClient() {
-        return mGoogleSignInClient;
-    }
-
-    public void setmGoogleSignInClient(GoogleSignInClient mGoogleSignInClient) {
-        this.mGoogleSignInClient = mGoogleSignInClient;
+    public void setFirebaseUser(FirebaseUser firebaseUser) {
+        this.firebaseUser = firebaseUser;
     }
 
     public static FireBaseClient getFireBaseClient() {

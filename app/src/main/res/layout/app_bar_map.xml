@@ -58,7 +58,6 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editText2"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -154,7 +153,6 @@
         android:layout_marginBottom="8dp"
         android:background="@drawable/cerclebackgroundwhite"
         android:orientation="vertical"
-        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/findDriver"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
         app:layout_constraintStart_toStartOf="@+id/tableRow2"

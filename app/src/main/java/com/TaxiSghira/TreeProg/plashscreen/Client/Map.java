@@ -38,6 +38,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -120,6 +121,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         checkMapServices();
         views();
         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
+
 
         Log.d("FIREBASETOKEN", refreshedToken);
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
@@ -232,14 +234,18 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
             findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
                 assert locationComponent.getLastKnownLocation() != null;
-                CameraPosition position = new CameraPosition
-                        .Builder()
-                        .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
-                                locationComponent.getLastKnownLocation().getLongitude()))
-                        .zoom(17)
-                        .bearing(180).tilt(30)
-                        .build();
-                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
+                try {
+                    CameraPosition position = new CameraPosition
+                            .Builder()
+                            .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
+                                    locationComponent.getLastKnownLocation().getLongitude()))
+                            .zoom(17)
+                            .bearing(180).tilt(30)
+                            .build();
+                    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
             mapboxMap.addOnCameraMoveStartedListener(reason ->
                     mapViewModel.getChiforMutableLiveData().observe(this, chifor1 -> {
