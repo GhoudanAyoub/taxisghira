@@ -1,13 +1,15 @@
 package com.TaxiSghira.TreeProg.plashscreen.Commun;
 
-import androidx.constraintlayout.solver.widgets.Helper;
-
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
+import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
+import com.mapbox.mapboxsdk.annotations.Marker;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Common {
 
@@ -27,5 +29,7 @@ public class Common {
     public static final String Drivers_LOCATION_REFERENCES = "DriversLocation";
     public static final String city = "city";
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
+    public static Set<DriverGeoModel> driversFound = new HashSet<>();
+    public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();
 }
 

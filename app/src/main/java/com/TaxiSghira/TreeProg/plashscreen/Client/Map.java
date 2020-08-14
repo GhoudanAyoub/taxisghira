@@ -9,12 +9,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,10 +29,14 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.PersonalInfo;
+import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseDriverInfoListener;
+import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseFailedListener;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
+import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
+import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
@@ -43,6 +47,13 @@ import com.TaxiSghira.TreeProg.plashscreen.ui.MapViewModel;
 import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelViewClass;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
@@ -50,7 +61,9 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.location.LocationEngineRequest;
@@ -89,10 +102,12 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -102,12 +117,11 @@ import timber.log.Timber;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
-public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
+public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener, IFirebaseDriverInfoListener, IFirebaseFailedListener {
 
 
     public static String id;
     TextView ListTaxiNum, ListChName, ListChNum, GoingTO, ComingFrom;
-    AlertDialog.Builder builder;
     MapViewModel mapViewModel;
     LinearLayout bottom_sheet;
     FavorViewModel favorViewModel;
@@ -125,21 +139,38 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private Demande d1;
 
     //online System
-    private DatabaseReference currentUserRef, ClientLocationRef;
+    private DatabaseReference currentUserRef, ClientLocationRef, driver_location_ref;
     private GeoFire geoFire;
+
+
+    private static final String TAG = "LocationService";
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+    private double distances = 1.0;
+    private double LIMIT_RANGE = 5.0;
+    private Location previousLocation, CurrentLocation;
+    private Boolean firstTime = true;
+    private String cityName;
+
+    //Listeners
+    IFirebaseDriverInfoListener iFirebaseDriverInfoListener;
+    IFirebaseFailedListener iFirebaseFailedListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
-
         FirebaseApp.initializeApp(getApplicationContext());
+
         checkMapServices();
         views();
+        init();
         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
 
-        Log.d("FIREBASETOKEN", refreshedToken);
+        //Log.d("FIREBASETOKEN", refreshedToken);
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
         mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
         favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
@@ -148,16 +179,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mapViewModel.GetChiforDataLocation();
         mapViewModel.GetPickDemand();
 
-        findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
-        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-        findViewById(R.id.findDriver).setVisibility(View.GONE);
-        findViewById(R.id.location_panel).setVisibility(View.GONE);
-        findViewById(R.id.progBar).setVisibility(View.GONE);
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        builder = new AlertDialog.Builder(this);
         personalInfoModelViewClass.getClientMutableLiveData().observe(this, client -> {
             if (client == null)
                 buildAlertMessageNoDataFound();
@@ -165,14 +190,193 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 Current_Client = client;
         });
 
-        findViewById(R.id.floatingActionButton2).setOnClickListener(view -> {
-            mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
-            mapView.getMapAsync(this);
-            startActivity(new Intent(getApplicationContext(), Map.class));
-        });
+    }
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
+    private void init() {
+        iFirebaseDriverInfoListener = this;
+        iFirebaseFailedListener = this;
+
+        locationRequest = new LocationRequest();
+        locationRequest.setSmallestDisplacement(10f);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(3000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        locationCallback = new LocationCallback(){
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    Location location = locationResult.getLastLocation();
+
+                    if (location != null) {
+                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                    }
+
+                    //if user Has Change Location Cal and Load Driver Again
+
+                    if (firstTime) {
+                        previousLocation = CurrentLocation = locationResult.getLastLocation();
+                        firstTime = false;
+                    } else {
+                        previousLocation = CurrentLocation;
+                        CurrentLocation = locationResult.getLastLocation();
+                    }
+
+                    if (previousLocation.distanceTo(CurrentLocation) / 1000 < LIMIT_RANGE)
+                        loadAvailableDrivers();
+                    else {
+                        // do noting
+                    }
+
+
+                }
+        };
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+        loadAvailableDrivers();
+    }
+
+    private void loadAvailableDrivers() {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Timber.e(getString(R.string.permission_not_granted));
+            return;
+        }
+        mFusedLocationClient.getLastLocation()
+                .addOnFailureListener(Throwable::printStackTrace)
+                .addOnSuccessListener(location -> {
+                    //load All Drivers in City
+                    Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                    List<Address> addressList;
+                    try {
+                        addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                        cityName = addressList.get(0).getLocality();
+
+                        //query
+                        driver_location_ref = FirebaseDatabase.getInstance()
+                                .getReference(Common.Drivers_LOCATION_REFERENCES)
+                                .child(cityName);
+                        GeoFire geoFire = new GeoFire(driver_location_ref);
+                        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), distances);
+                        geoQuery.removeAllListeners();
+
+                        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                            @Override
+                            public void onKeyEntered(String key, GeoLocation location) {
+                                Common.driversFound.add(new DriverGeoModel(key, location));
+                            }
+
+                            @Override
+                            public void onKeyExited(String key) {
+
+                            }
+
+                            @Override
+                            public void onKeyMoved(String key, GeoLocation location) {
+
+                            }
+
+                            @Override
+                            public void onGeoQueryReady() {
+                                if (distances <= LIMIT_RANGE) {
+                                    distances++;
+                                    loadAvailableDrivers();
+                                } else {
+                                    distances = 1.0;
+                                    addDriverMarker();
+                                }
+                            }
+
+                            @Override
+                            public void onGeoQueryError(DatabaseError error) {
+                                Timber.e(error.getMessage());
+                            }
+                        });
+
+                        //listen to new Driver In Range
+                        driver_location_ref.addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                                GeoQueryModel geoQueryModel = snapshot.getValue(GeoQueryModel.class);
+                                GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0),geoQueryModel.getL().get(1));
+                                DriverGeoModel driverGeoModel = new DriverGeoModel(snapshot.getKey(),geoLocation);
+                                Location newDriverLocation = new Location("");
+                                newDriverLocation.setLatitude(geoLocation.latitude);
+                                newDriverLocation.setLongitude(geoLocation.longitude);
+                                float newDistance = location.distanceTo(newDriverLocation)/1000;
+                                if (newDistance <= LIMIT_RANGE)
+                                    FindDriversByID(driverGeoModel);
+                            }
+
+                            @Override
+                            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    private void addDriverMarker() {
+        if (Common.driversFound.size() > 0) {
+            Observable.fromIterable(Common.driversFound)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(driverGeoModel -> {
+                        FindDriversByID(driverGeoModel);
+                    }, throwable -> {
+                        Timber.e(throwable.getMessage());
+                    }, () -> {
+
+                    });
+
+        } else {
+            Timber.i(getString(R.string.driver_not_Found));
+        }
+    }
+
+    private void FindDriversByID(DriverGeoModel driverGeoModel) {
+        FireBaseClient.getFireBaseClient().getFirebaseDatabase()
+                .getReference(Common.Chifor_DataBase_Table)
+                .child(driverGeoModel.getKey())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.hasChildren()) {
+                            driverGeoModel.setChifor(snapshot.getValue(Chifor.class));
+                            iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel);
+                        } else
+                            iFirebaseFailedListener.onFirebaseLoadFailed(getString(R.string.not_found_key));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        iFirebaseFailedListener.onFirebaseLoadFailed(error.getMessage());
+                    }
+                });
+
     }
 
     private void init(LocationComponent locationComponent) {
@@ -198,6 +402,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mapView = findViewById(R.id.mapView);
         ComingFrom = findViewById(R.id.textView);
         GoingTO = findViewById(R.id.textView2);
+        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
+        findViewById(R.id.findDriver).setVisibility(View.GONE);
+        findViewById(R.id.location_panel).setVisibility(View.GONE);
+        findViewById(R.id.progBar).setVisibility(View.GONE);
+        findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
+
     }
 
     private void buildAlertMessageNoDataFound() {
@@ -262,7 +472,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mapboxMap.setStyle(Style.LIGHT, style -> {
             enableLocationComponent(style);
             addDestinationIconSymbolLayer(style);
-            mapboxMap.addOnMapClickListener(Map.this);;
+            mapboxMap.addOnMapClickListener(Map.this);
+
             //get current Location animation
             findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
                 assert locationComponent.getLastKnownLocation() != null;
@@ -280,23 +491,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 }
             });
 
-
             //getAcceptData
             mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
-            //Show List of Drivers
-            mapboxMap.addOnCameraMoveStartedListener(reason ->
-                    mapViewModel.getChiforMutableLiveData().observe(this, chifor1 -> {
-                        assert chifor1 != null;
-                        for (Chifor chifor : chifor1) {
-                            mapboxMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(chifor.getLnt(), chifor.getLng()))
-                                    .title(chifor.getFullname())
-                                    .snippet(chifor.getPhone())
-                                    .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2)));
-                        }
-                    })
-            );
-
 
             //Find Button For Lunch Search Request
             RxView.clicks(findViewById(R.id.FindButton))
@@ -310,7 +506,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                         @Override
                         public void onNext(Unit unit) {
-                            ListenMoreDrivers();
                             Toast.makeText(getApplicationContext(), "المرجو الانتظار جاري البحت عن طريق مناسب", Toast.LENGTH_LONG).show();
                             Point destinationPoint = null;
                             try {
@@ -363,59 +558,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         });
     }
 
-    private void ListenMoreDrivers(){
-        //Todo : Need To be Changed To CLIENT_LOCATION_REFERENCES
-        try {
-            Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-            List<Address> addressList = geocoder.getFromLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude(), 1);
-            String Client_city = addressList.get(0).getLocality();
-            FireBaseClient.getFireBaseClient().getDatabaseReference()
-                    .child(Common.Drivers_LOCATION_REFERENCES)
-                    .child(Client_city)
-                    .addChildEventListener(new ChildEventListener() {
-                        @Override
-                        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-                            if (dataSnapshot.exists()) {
-                                try {
-                                    for (DataSnapshot Ds1 : dataSnapshot.getChildren()) {
-                                        Chifor ch1 = Ds1.getValue(Chifor.class);
-                                        Common.Drivers_Locations_List.add(ch1);
-                                        mapboxMap.addMarker(new MarkerOptions()
-                                                .position(new LatLng(ch1.getLnt(), ch1.getLng()))
-                                                .title(ch1.getFullname())
-                                                .snippet(ch1.getPhone())
-                                                .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2)));
-                                    }
-                                } catch (Throwable t) {
-                                    Timber.e(t);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                        }
-
-                        @Override
-                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                        }
-
-                        @Override
-                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void ShowDriverDashboard(Pickup pickup1) {
         try {
@@ -656,7 +798,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 });
     }
 
-    private void enableLocationComponent(@NonNull Style loadedMapStyle)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         {
+    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             locationComponent = mapboxMap.getLocationComponent();
             locationComponent.activateLocationComponent(
@@ -727,14 +869,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     @Override
     protected void onStart() {
         super.onStart();
-        mapView.onStart();}
+        mapView.onStart();
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
         mapView.onResume();
-        Completable.timer(500,TimeUnit.MILLISECONDS,AndroidSchedulers.mainThread())
-                .subscribe(()-> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
+        Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .subscribe(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
     }
 
 
@@ -763,7 +906,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         stopService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
         geoFire.removeLocation(Common.Current_Client_Id);
         //remove  demand
-       // geoFire.getDatabaseReference().child(Common.Demande_DataBase_Table).child(d1.getCity()).removeValue();
+        // geoFire.getDatabaseReference().child(Common.Demande_DataBase_Table).child(d1.getCity()).removeValue();
         compositeDisposable.clear();
     }
 
@@ -771,5 +914,46 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+    }
+
+    @Override
+    public void onDriverInfoLoadSuccess(DriverGeoModel driverGeoModel) {
+        if (!Common.marerList.containsKey(driverGeoModel.getKey()))
+            Common.marerList.put(driverGeoModel.getKey(),
+                    mapboxMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(driverGeoModel.getGeoLocation().latitude,
+                            driverGeoModel.getGeoLocation().longitude))
+                    .title(driverGeoModel.getChifor().getFullname())
+                    .snippet(driverGeoModel.getChifor().getPhone())
+                    .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2))));
+        if (!TextUtils.isEmpty(cityName)){
+            DatabaseReference driverLocation = FireBaseClient.getFireBaseClient()
+                    .getDatabaseReference()
+                    .child(Common.Drivers_LOCATION_REFERENCES)
+                    .child(cityName)
+                    .child(driverGeoModel.getKey());
+            driverLocation.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (!snapshot.hasChildren()) {
+                        if (Common.marerList.get(driverGeoModel.getKey()) != null)
+                            Common.marerList.get(driverGeoModel.getKey()).remove();
+                        Common.marerList.remove(driverGeoModel.getKey());
+                        driverLocation.removeEventListener(this);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Timber.e(error.getMessage());
+                }
+            });
+        }
+
+    }
+
+    @Override
+    public void onFirebaseLoadFailed(String message) {
+        Timber.e(message);
     }
 }
