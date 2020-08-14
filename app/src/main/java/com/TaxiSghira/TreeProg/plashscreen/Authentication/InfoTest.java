@@ -84,7 +84,7 @@ public class InfoTest extends Fragment {
 
     void AddData(String fullname, String phone, String city, String email) {
         Client client = new Client(FireBaseClient.getFireBaseClient()
-                .getFirebaseAuth().getCurrentUser().getUid(),fullname,phone,email,city);
+                .getFirebaseAuth().getCurrentUser().getUid(),fullname,phone,email,city.toLowerCase());
         FireBaseClient.getFireBaseClient()
                 .getFirebaseDatabase()
                 .getReference(Common.Client_DataBase_Table)

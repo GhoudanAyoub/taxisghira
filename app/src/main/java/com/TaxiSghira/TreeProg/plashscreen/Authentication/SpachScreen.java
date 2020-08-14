@@ -48,6 +48,8 @@ public class SpachScreen extends AppCompatActivity {
                             startActivity(new Intent(getApplication(), Auth.class));
                     });
         }
+        else
+            startActivity(new Intent(getApplication(), SpachScreen.class));
     }
 
     private boolean checkMapServices() {

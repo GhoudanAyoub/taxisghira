@@ -1,8 +1,13 @@
 package com.TaxiSghira.TreeProg.plashscreen.Commun;
 
+import androidx.constraintlayout.solver.widgets.Helper;
+
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Common {
 
@@ -19,5 +24,8 @@ public class Common {
     public static final String Gmail_String = "gmail";
     public static final String ClientName_String = "ClientName";
     public static final String CLIENT_LOCATION_REFERENCES = "ClientLocation";
+    public static final String Drivers_LOCATION_REFERENCES = "DriversLocation";
+    public static final String city = "city";
+    public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
 }
 

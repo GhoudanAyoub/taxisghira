@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
@@ -12,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -21,6 +22,12 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.GeoPoint;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -72,7 +79,7 @@ public class LocationServiceUpdate extends Service {
                 if (location != null) {
                     GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
                     UserLocation userLocation = new UserLocation( geoPoint.getLatitude(),geoPoint.getLongitude());
-                   // updateUser(userLocation);
+                    updateUser(userLocation);
                 }
 
             }
@@ -82,27 +89,23 @@ public class LocationServiceUpdate extends Service {
 
 
     private void updateUser(final UserLocation userLocation){
-        UserLocation userLocation1 = new UserLocation(userLocation.getLnt(),userLocation.getLong(),FireBaseClient.getFireBaseClient().getFirebaseUser().getDisplayName());
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put("/l/0" , userLocation.getLnt());
+        childUpdates.put("/l/1" , userLocation.getLong());
+        try {
+            List<Address> addressList = geocoder.getFromLocation(userLocation.getLnt(), userLocation.getLong(), 1);
+            String city = addressList.get(0).getLocality();
+            FireBaseClient.getFireBaseClient()
+                    .getDatabaseReference()
+                    .child(Common.CLIENT_LOCATION_REFERENCES)
+                    .child(city)
+                    .child(Common.Current_Client_Id)
+                    .updateChildren(childUpdates);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                .collection(Common.Demande_DataBase_Table)
-                .document( userLocation1.getDisplayName())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()){
-                        FireBaseClient.getFireBaseClient().getFirebaseFirestore()
-                                .collection(Common.Demande_DataBase_Table)
-                                .document(userLocation1.getDisplayName())
-                                .update("lnt",userLocation1.getLnt(),"long",userLocation1.getLong())
-                                .addOnCompleteListener(task1 -> {
-                                    if(task1.isSuccessful()){
-                                        Timber.log(1,"onComplete: \ninserted user location into database." +
-                                                "\n latitude: " + userLocation.getLnt() +
-                                                "\n longitude: " + userLocation.getLong());
-                                    }
-                                });
-                    }
-                });
     }
 }
 

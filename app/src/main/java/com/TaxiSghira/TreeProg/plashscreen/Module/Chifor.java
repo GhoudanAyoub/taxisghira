@@ -10,10 +10,11 @@ public class Chifor {
     private String taxi_NUM;
     private double lnt;
     private double lng;
+    private String Status;
 
     public Chifor() { }
 
-    public Chifor(String id, String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng) {
+    public Chifor(String id, String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng, String status) {
         this.id = id;
         this.fullname = fullname;
         this.phone = phone;
@@ -21,6 +22,15 @@ public class Chifor {
         this.taxi_NUM = taxi_NUM;
         this.lnt = lnt;
         this.lng = lng;
+        Status = status;
+    }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String status) {
+        Status = status;
     }
 
     public String getId() {
