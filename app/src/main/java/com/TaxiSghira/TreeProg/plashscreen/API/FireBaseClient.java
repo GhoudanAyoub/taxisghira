@@ -54,6 +54,7 @@ public class FireBaseClient {
         this.firebaseUser = firebaseUser;
     }
 
+
     public static FireBaseClient getFireBaseClient() {
         if (fireBaseClient == null){
             fireBaseClient = new FireBaseClient();

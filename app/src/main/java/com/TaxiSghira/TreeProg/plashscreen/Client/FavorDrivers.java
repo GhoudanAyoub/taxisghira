@@ -7,16 +7,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.TextView;
 
 import com.TaxiSghira.TreeProg.plashscreen.Adapters.FavorAdapter;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Favor;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
-
-import java.util.Observable;
-import java.util.Observer;
+import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
 
 public class FavorDrivers extends AppCompatActivity {
 

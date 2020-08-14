@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.TaxiSghira.TreeProg.plashscreen">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -15,6 +14,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <permission android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService" />
 
@@ -28,7 +28,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:appComponentFactory">
-
+        <activity android:name=".Authentication.Create_Account"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -41,20 +41,15 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
         <activity android:name=".Profile.Util_List" />
         <activity android:name=".Client.FavorDrivers" />
         <activity
             android:name=".Client.Map"
             android:label="@string/title_activity_map"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".Both.NumberVerification" />
-        <activity android:name=".Both.phoneNumber" />
-        <activity android:name=".Both.Auth" />
+        <activity android:name=".Authentication.Auth" />
         <activity android:name=".Profile.ActivitySetting" />
-        <activity android:name=".Both.PersonalInfo" />
+        <activity android:name=".Authentication.PersonalInfo" />
 
         <service
             android:name=".Service.MyFirebaseInstanceIDService"
@@ -68,7 +63,7 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <activity android:name=".Both.SpachScreen">
+        <activity android:name=".Authentication.SpachScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

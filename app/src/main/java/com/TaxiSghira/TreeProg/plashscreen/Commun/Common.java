@@ -2,6 +2,8 @@ package com.TaxiSghira.TreeProg.plashscreen.Commun;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 
+import java.security.PublicKey;
+
 public class Common {
 
     public static final String Current_Client_Id = FireBaseClient.getFireBaseClient().getFirebaseUser().getUid();
@@ -13,7 +15,9 @@ public class Common {
     public static final String Pickup_DataBase_Table = "Pickup";
     public static final String Client_DataBase_Table = "Client";
 
+    public static final String Client_Id_String = "id";
     public static final String Gmail_String = "gmail";
     public static final String ClientName_String = "ClientName";
+    public static final String CLIENT_LOCATION_REFERENCES = "ClientLocation";
 }
 

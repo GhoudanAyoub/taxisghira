@@ -13,7 +13,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import com.TaxiSghira.TreeProg.plashscreen.Both.SpachScreen;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.SpachScreen;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;

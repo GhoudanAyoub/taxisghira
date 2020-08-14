@@ -72,7 +72,7 @@ public class LocationServiceUpdate extends Service {
                 if (location != null) {
                     GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
                     UserLocation userLocation = new UserLocation( geoPoint.getLatitude(),geoPoint.getLongitude());
-                    updateUser(userLocation);
+                   // updateUser(userLocation);
                 }
 
             }

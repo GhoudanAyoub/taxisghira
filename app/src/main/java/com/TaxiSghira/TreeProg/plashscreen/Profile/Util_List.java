@@ -5,13 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.Both.Auth;
-import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.Auth;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Client.FavorDrivers;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.R;

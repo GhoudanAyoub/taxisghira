@@ -1,4 +1,4 @@
-package com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView;
+package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -12,6 +12,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import timber.log.Timber;
+
 public class PersonalInfoModelViewClass extends ViewModel {
     private MutableLiveData<Client> clientMutableLiveData;
     private Client client;
@@ -24,8 +26,8 @@ public class PersonalInfoModelViewClass extends ViewModel {
     public void getClientInfo() {
         FireBaseClient.getFireBaseClient().getDatabaseReference()
                 .child(Common.Client_DataBase_Table)
-                .orderByChild(Common.Gmail_String).
-                equalTo(Common.Current_Client_Gmail)
+                .orderByChild("id")
+                .equalTo(Common.Current_Client_Id)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -39,10 +41,8 @@ public class PersonalInfoModelViewClass extends ViewModel {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Timber.e(databaseError.getMessage());
             }
         });
     }
-
-
 }

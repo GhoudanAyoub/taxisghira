@@ -1,6 +1,5 @@
 package com.TaxiSghira.TreeProg.plashscreen.Client;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -26,21 +25,29 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.TaxiSghira.TreeProg.plashscreen.Both.PersonalInfo;
+import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
-import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel.FavorViewModel;
-import com.TaxiSghira.TreeProg.plashscreen.ui.MapModelView.MapViewModel;
-import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelView.PersonalInfoModelViewClass;
+import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
+import com.TaxiSghira.TreeProg.plashscreen.ui.MapViewModel;
+import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelViewClass;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.location.LocationEngineRequest;
@@ -78,6 +85,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Completable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -110,18 +118,37 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+    private Client Current_Client;
+    private Demande d1;
+
+    //online System
+    private DatabaseReference currentUserRef,ClientLocationRef;
+    private GeoFire geoFire;
+    private ValueEventListener OnlineValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            if (dataSnapshot.exists()&& currentUserRef!=null){
+                currentUserRef.onDisconnect().removeValue();
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            Timber.e(databaseError.getMessage());
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
+
         FirebaseApp.initializeApp(getApplicationContext());
         checkMapServices();
         views();
         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
-
 
         Log.d("FIREBASETOKEN", refreshedToken);
         PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
@@ -130,7 +157,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
         personalInfoModelViewClass.getClientInfo();
         mapViewModel.GetChiforDataLocation();
-        mapViewModel.GetAcceptDemandeList();
+        mapViewModel.GetPickDemand();
 
         findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
         findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
@@ -143,9 +170,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
         builder = new AlertDialog.Builder(this);
         personalInfoModelViewClass.getClientMutableLiveData().observe(this, client -> {
-            if (client == null) {
+            if (client == null)
                 buildAlertMessageNoDataFound();
-            }
+            else
+                Current_Client = client;
         });
 
         findViewById(R.id.floatingActionButton2).setOnClickListener(view -> {
@@ -157,6 +185,20 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
     }
+
+    private void init(LocationComponent locationComponent) {
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        try {
+            List<Address> addressList = geocoder.getFromLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude(), 1);
+            String city = addressList.get(0).getLocality();
+            ClientLocationRef = FireBaseClient.getFireBaseClient().getDatabaseReference().child(Common.CLIENT_LOCATION_REFERENCES)
+                    .child(city);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        geoFire = new GeoFire(ClientLocationRef);
+    }
+
 
     private void views() {
         WhereToGo = findViewById(R.id.editText2);
@@ -233,6 +275,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
+            //getAcceptData
             mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
             findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
                 assert locationComponent.getLastKnownLocation() != null;
@@ -274,11 +317,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             try {
                                 final Geocoder geocoder = new Geocoder(getApplicationContext());
                                 final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
-
                                 final List<Address> list = geocoder.getFromLocationName(locName, 1);
                                 if (!(list == null || list.isEmpty())) {
-                                    final Address adress = list.get(0);
-                                    destinationPoint = Point.fromLngLat(adress.getLongitude(), adress.getLatitude());
+                                    final Address address = list.get(0);
+                                    destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -311,13 +353,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                         @Override
                         public void onError(Throwable e) {
-                            compositeDisposable.clear();
+                            Timber.e(e);compositeDisposable.clear();
                         }
 
                         @Override
-                        public void onComplete() {
-
-                        }
+                        public void onComplete() { }
                     });
         });
     }
@@ -352,8 +392,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         }
 
                         @Override
-                        public void onComplete() {
-                        }
+                        public void onComplete() { }
                     });
             RxView.clicks(findViewById(R.id.calls))
                     .throttleFirst(5, TimeUnit.SECONDS)
@@ -417,10 +456,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     .getRoute(new Callback<DirectionsResponse>() {
                         @Override
                         public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
-                            // Toast.makeText(getApplicationContext(), "تم إنشاء الطريق", Toast.LENGTH_SHORT).show();
-
-                            new Handler().postDelayed(() -> buildAlertMessageSearchOperation(), 1000);
-
+                            Completable.timer(500,TimeUnit.MILLISECONDS,AndroidSchedulers.mainThread())
+                                    .subscribe(() -> buildAlertMessageSearchOperation());
                             if (response.body() == null) {
                                 Toast.makeText(getApplicationContext(), "لم يتم العثور على مسارات", Toast.LENGTH_SHORT).show();
                                 return;
@@ -428,7 +465,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                 Toast.makeText(getApplicationContext(), "لم يتم العثور على مسارات", Toast.LENGTH_SHORT).show();
                                 return;
                             }
-
                             currentRoute = response.body().routes().get(0);
                             if (navigationMapRoute != null) {
                                 navigationMapRoute.removeRoute();
@@ -475,9 +511,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                     @Override
                     public void onNext(Unit unit) {
+                        UploadLocation();
                         UserLocation userLocation = new UserLocation(locationComponent.getLastKnownLocation().getLatitude(), locationComponent.getLastKnownLocation().getLongitude());
-                        Demande d1 = new Demande(Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), userLocation.getLnt(), userLocation.getLong(), refreshedToken);
-                        mapViewModel.AddDemande(d1);
+                        d1 = new Demande(Common.Current_Client_Id,Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(),Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
+                        mapViewModel.AddDemand(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
                         findViewById(R.id.location_panel).setVisibility(View.GONE);
                         findViewById(R.id.progBar).setVisibility(View.VISIBLE);
@@ -494,7 +531,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                     @Override
                                     public void onNext(Unit unit) {
-                                        mapViewModel.DelateDemande(d1);
+                                        RemoveDemand(d1);
                                         navigationMapRoute.removeRoute();
                                         WhereToGo.getEditText().setText("");
                                         findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
@@ -502,27 +539,63 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                     @Override
                                     public void onError(Throwable e) {
-                                        Timber.log(4, e.getMessage());
+                                        Timber.e(e);
                                     }
 
                                     @Override
-                                    public void onComplete() {
-                                    }
+                                    public void onComplete() { }
                                 });
 
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Timber.log(4, e);
+                        Timber.e(e);
                     }
 
                     @Override
-                    public void onComplete() {
-                    }
+                    public void onComplete() { }
                 });
     }
 
+    private void UploadLocation() {
+        //updateLocation
+        if (locationComponent.getLastKnownLocation()!=null) {
+            init(locationComponent);
+            geoFire.setLocation(Common.Current_Client_Id,
+                    new GeoLocation(locationComponent.getLastKnownLocation().getLatitude(),
+                            locationComponent.getLastKnownLocation().getLongitude()),
+                    (key, error) -> {
+                        if (error != null)
+                            Timber.e(error.getMessage());
+                        else
+                            Snackbar.make(Objects.requireNonNull(this.getCurrentFocus()), "يبحث .....", Snackbar.LENGTH_LONG)
+                                    .show();
+                    });
+        }
+    }
+
+    public void RemoveDemand(Demande demande) {
+        geoFire.getDatabaseReference()
+                .child(Common.Demande_DataBase_Table)
+                .child(demande.getCity())
+                .orderByChild("clientId")
+                .equalTo(Common.Current_Client_Id)
+                .removeEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            dataSnapshot.getRef().removeValue();
+                            Timber.i("DemandRemovedDone");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Timber.e(databaseError.getMessage());
+                    }
+                });
+    }
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             locationComponent = mapboxMap.getLocationComponent();
@@ -587,14 +660,16 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     @Override
     protected void onStart() {
         super.onStart();
-        mapView.onStart();
-    }
+        mapView.onStart();}
 
     @Override
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+        Completable.timer(500,TimeUnit.MILLISECONDS,AndroidSchedulers.mainThread())
+                .subscribe(()-> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
     }
+
 
     @Override
     protected void onPause() {
@@ -618,6 +693,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+        geoFire.removeLocation(Common.Current_Client_Id);
+        //remove  demande
+        geoFire.getDatabaseReference().child(Common.Demande_DataBase_Table).child(d1.getCity()).removeValue();
         compositeDisposable.clear();
     }
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_create_account"
+    app:startDestination="@id/phoneTest">
+    <fragment
+        android:id="@+id/phoneTest"
+        android:name="com.TaxiSghira.TreeProg.plashscreen.Authentication.phoneTest"
+        android:label="phone_test_fragment"
+        tools:layout="@layout/phone_test_fragment" >
+        <action
+            android:id="@+id/action_phoneTest_to_infoTest"
+            app:destination="@id/infoTest" />
+    </fragment>
+    <fragment
+        android:id="@+id/infoTest"
+        android:name="com.TaxiSghira.TreeProg.plashscreen.Authentication.InfoTest"
+        android:label="info_test_fragment"
+        tools:layout="@layout/info_test_fragment" />
+</navigation>

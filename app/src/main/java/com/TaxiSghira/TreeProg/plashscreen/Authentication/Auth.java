@@ -1,10 +1,11 @@
-package com.TaxiSghira.TreeProg.plashscreen.Both;
+package com.TaxiSghira.TreeProg.plashscreen.Authentication;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,9 +16,11 @@ import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.rxbinding3.view.RxView;
 
 import java.util.Collections;
@@ -33,15 +36,22 @@ import kotlin.Unit;
 import timber.log.Timber;
 
 
+
 public class Auth extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 1000;
     private CompositeDisposable compositeDisposable;
+    private List<AuthUI.IdpConfig> providers;
+    private FirebaseAuth firebaseAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        // Choose authentication
+        providers = Collections.singletonList(
+                new AuthUI.IdpConfig.GoogleBuilder().build());
         compositeDisposable = new CompositeDisposable();
         RxView.clicks(findViewById(R.id.buttonphone))
                 .throttleFirst(5, TimeUnit.SECONDS)
@@ -51,7 +61,7 @@ public class Auth extends AppCompatActivity {
                     public void onSubscribe(Disposable d) { compositeDisposable.add(d); }
 
                     @Override
-                    public void onNext(Unit unit) {findViewById(R.id.buttonphone).setClickable(false); PreBuildLogin(); }
+                    public void onNext(Unit unit) {findViewById(R.id.buttonphone).setClickable(false);PreBuildLogin(); }
 
                     @Override
                     public void onError(Throwable e) { Timber.e(e); }
@@ -59,14 +69,36 @@ public class Auth extends AppCompatActivity {
                     @Override
                     public void onComplete() { Timber.e("Map Activity : Called");}
                 });
+    }
+
+    private void checkUserFromDataBase(FirebaseUser user) {
+        FireBaseClient.getFireBaseClient()
+                .getFirebaseDatabase()
+                .getReference("Client")
+                .orderByChild("id")
+                .equalTo(firebaseAuth.getCurrentUser().getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()){
+                            FireBaseClient.getFireBaseClient().setFirebaseUser(user);
+                            Toast.makeText(getApplicationContext()," مرحبا بعودتك "+user.getDisplayName(),Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(getApplicationContext(), Map.class));
+                        }else {
+                            FireBaseClient.getFireBaseClient().setFirebaseUser(user);
+                            startActivity(new Intent(getApplicationContext(), Create_Account.class));
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(getApplicationContext(), databaseError.getCode(), Toast.LENGTH_LONG).show();
+                    }
+                });
 
     }
 
-    //***********************
     private void PreBuildLogin(){
-        // Choose authentication providers
-        List<AuthUI.IdpConfig> providers = Collections.singletonList(
-                new AuthUI.IdpConfig.GoogleBuilder().build());
 
         AuthMethodPickerLayout authMethodPickerLayout = new AuthMethodPickerLayout
                 .Builder(R.layout.activity_auth)
@@ -77,7 +109,7 @@ public class Auth extends AppCompatActivity {
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setAvailableProviders(providers)
-                        .setIsSmartLockEnabled(true)
+                        .setIsSmartLockEnabled(false)
                         .setAuthMethodPickerLayout(authMethodPickerLayout)
                         .setTheme(R.style.AppTheme)      // Set theme
                         .build(),
@@ -95,7 +127,7 @@ public class Auth extends AppCompatActivity {
                     FireBaseClient.getFireBaseClient().setFirebaseUser(user);
                 } catch (Exception e) {
                     Timber.e(e);
-                }startActivity(new Intent(getApplicationContext(), Map.class));
+                }
             }
 
             else{
@@ -127,13 +159,10 @@ public class Auth extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseUser user = FireBaseClient.getFireBaseClient().getFirebaseAuth().getCurrentUser();
-        if (user!=null){
-            FireBaseClient.getFireBaseClient().setFirebaseUser(user);
-//                Snackbar.make(Objects.requireNonNull(getCurrentFocus()), "مرحبا بكم\uD83D\uDE04", Snackbar.LENGTH_SHORT).show();
-            startActivity(new Intent(getApplicationContext(), Map.class));
-        }else {
-            PreBuildLogin();
-        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 }

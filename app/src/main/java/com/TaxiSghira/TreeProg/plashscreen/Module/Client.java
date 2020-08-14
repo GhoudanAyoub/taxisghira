@@ -2,25 +2,35 @@ package com.TaxiSghira.TreeProg.plashscreen.Module;
 
 public class Client {
 
+    private String id;
     private String Fullname;
     private String tell;
     private String gmail;
-    private String WHosme;
+    private String city;
     public Client() { }
 
-    public Client(String fullname, String tell, String gmail, String WHosme) {
+    public Client(String id, String fullname, String tell, String gmail, String city) {
+        this.id = id;
         Fullname = fullname;
         this.tell = tell;
         this.gmail = gmail;
-        this.WHosme = WHosme;
+        this.city = city;
     }
 
-    public String getWHosme() {
-        return WHosme;
+    public String getId() {
+        return id;
     }
 
-    public void setWHosme(String WHosme) {
-        this.WHosme = WHosme;
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getGmail() {
