@@ -1,8 +1,10 @@
 package com.TaxiSghira.TreeProg.plashscreen.Authentication;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -43,11 +45,13 @@ public class Auth extends AppCompatActivity {
     private CompositeDisposable compositeDisposable;
     private List<AuthUI.IdpConfig> providers;
     private FirebaseAuth firebaseAuth;
+    private ProgressDialog progressDialog ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
 
+        progressDialog = new ProgressDialog(this);
         firebaseAuth = FirebaseAuth.getInstance();
         // Choose authentication
         providers = Collections.singletonList(
@@ -99,7 +103,8 @@ public class Auth extends AppCompatActivity {
     }
 
     private void PreBuildLogin(){
-
+        progressDialog.setMessage("المرجو الانتظار قليلا ⌛️");
+        progressDialog.show();
         AuthMethodPickerLayout authMethodPickerLayout = new AuthMethodPickerLayout
                 .Builder(R.layout.activity_auth)
                 .setGoogleButtonId(R.id.buttonphone)
@@ -125,6 +130,8 @@ public class Auth extends AppCompatActivity {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 try {
                     FireBaseClient.getFireBaseClient().setFirebaseUser(user);
+                    progressDialog.dismiss();
+                    startActivity(new Intent(getApplicationContext(),Create_Account.class));
                 } catch (Exception e) {
                     Timber.e(e);
                 }

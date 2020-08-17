@@ -50,6 +50,7 @@ public class SpachScreen extends AppCompatActivity {
         }
         else
             startActivity(new Intent(getApplication(), SpachScreen.class));
+
     }
 
     private boolean checkMapServices() {
@@ -60,8 +61,8 @@ public class SpachScreen extends AppCompatActivity {
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessageNoGps();
             return false;
-        }else
-            return true;
+        }
+        return true;
     }
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -83,7 +84,6 @@ public class SpachScreen extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()){
                             FireBaseClient.getFireBaseClient().setFirebaseUser(user);
-                            Toast.makeText(getApplicationContext()," مرحبا بعودتك "+user.getDisplayName(),Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(), Map.class));
                         }else {
                             FireBaseClient.getFireBaseClient().setFirebaseUser(user);

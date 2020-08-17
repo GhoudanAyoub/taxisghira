@@ -41,14 +41,14 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".Profile.Util_List" />
+        <activity android:name=".Authentication.Util_List" />
         <activity android:name=".Client.FavorDrivers" />
         <activity
             android:name=".Client.Map"
             android:label="@string/title_activity_map"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Authentication.Auth" />
-        <activity android:name=".Profile.ActivitySetting" />
+        <activity android:name=".Authentication.ActivitySetting" />
         <activity android:name=".Authentication.PersonalInfo" />
 
         <service

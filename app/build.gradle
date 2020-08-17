@@ -82,5 +82,13 @@ dependencies {
     implementation "com.jakewharton.rxbinding3:rxbinding:3.0.0-alpha2"
 
     implementation 'com.firebase:geofire-android:3.0.0'
+    implementation 'com.google.android.libraries.places:places:2.3.0'
+    implementation 'com.sothree.slidinguppanel:library:3.3.1'
+
+    //Butter knife
+
+    implementation 'com.jakewharton:butterknife:10.2.3'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
+
 }
 apply plugin: 'com.google.gms.google-services'

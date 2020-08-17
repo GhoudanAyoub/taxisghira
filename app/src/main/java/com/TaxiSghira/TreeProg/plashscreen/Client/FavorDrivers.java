@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.TaxiSghira.TreeProg.plashscreen.Adapters.FavorAdapter;
-import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
 

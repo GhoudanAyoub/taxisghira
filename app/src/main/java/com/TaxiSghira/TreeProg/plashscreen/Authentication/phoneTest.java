@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.TaxiSghira.TreeProg.plashscreen.R;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
@@ -219,10 +220,7 @@ public class phoneTest extends Fragment {
             Navigation.findNavController(root).navigate(R.id.infoTest, bundle);
         } else {
             //will be Removed after
-            Bundle bundle = new Bundle();
-            bundle.putString("phone", phone);
-            Navigation.findNavController(root).navigate(R.id.infoTest, bundle);
-            Toast.makeText(getActivity(), "المرجو ادخال الارقام الاربعة الصحيحة!"+Code, Toast.LENGTH_SHORT).show();
+            Snackbar.make(root.findViewById(android.R.id.content),"المرجو ادخال الارقام الاربعة الصحيحة!", Snackbar.LENGTH_LONG).show();
         }
     }
 }

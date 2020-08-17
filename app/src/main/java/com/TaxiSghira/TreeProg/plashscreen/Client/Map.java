@@ -39,7 +39,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
-import com.TaxiSghira.TreeProg.plashscreen.Profile.Util_List;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
@@ -101,6 +101,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -119,24 +121,35 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
 public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener, IFirebaseDriverInfoListener, IFirebaseFailedListener {
 
-
-    public static String id;
-    TextView ListTaxiNum, ListChName, ListChNum, GoingTO, ComingFrom;
-    MapViewModel mapViewModel;
+    @BindView(R.id.textView5)
+    TextView WelcomeText;
+    @BindView(R.id.textView)
+    TextView ComingFrom;
+    @BindView(R.id.textView2)
+    TextView GoingTO;
+    @BindView(R.id.list_Taxi_num)
+    TextView ListTaxiNum;
+    @BindView(R.id.list_Ch_Name)
+    TextView ListChName;
+    @BindView(R.id.list_Ch_num)
+    TextView ListChNum;
+    @BindView(R.id.editText2)
+    TextInputLayout WhereToGo;
+    MapView mapView;
     LinearLayout bottom_sheet;
-    FavorViewModel favorViewModel;
-    private MapView mapView;
+    public static String id;
     private MapboxMap mapboxMap;
     private PermissionsManager permissionsManager;
     private LocationComponent locationComponent;
     private DirectionsRoute currentRoute;
     private NavigationMapRoute navigationMapRoute;
-    private TextInputLayout WhereToGo;
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private String refreshedToken = FirebaseInstanceId.getInstance().getToken();
     private Client Current_Client;
     private Demande d1;
+    FavorViewModel favorViewModel;
+    MapViewModel mapViewModel;
 
     //online System
     private DatabaseReference currentUserRef, ClientLocationRef, driver_location_ref;
@@ -190,7 +203,20 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     }
 
+    private void views() {
+        ButterKnife.bind(this,findViewById(android.R.id.content));
+        Common.SetWelcomeMessage(WelcomeText);
+        bottom_sheet = findViewById(R.id.bottom_sheet);
+        mapView = findViewById(R.id.mapView);
+        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
+        findViewById(R.id.findDriver).setVisibility(View.GONE);
+        findViewById(R.id.location_panel).setVisibility(View.GONE);
+        findViewById(R.id.progBar).setVisibility(View.GONE);
+        findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
+    }
+
     private void init() {
+
         iFirebaseDriverInfoListener = this;
         iFirebaseFailedListener = this;
 
@@ -207,6 +233,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     Location location = locationResult.getLastLocation();
 
                     if (location != null) {
+                        Common.SetWelcomeMessage(WelcomeText);
                         GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
                         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
                         UploadLocation(location);
@@ -403,9 +430,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(driverGeoModel -> FindDriversByID(driverGeoModel),
-                            throwable -> Timber.e(throwable.getMessage()), () -> { });
+                            throwable -> Snackbar.make(findViewById(android.R.id.content),throwable.getMessage(), Snackbar.LENGTH_SHORT).show(),
+                                    () -> { });
         } else {
-            Timber.i(getString(R.string.driver_not_Found));
+            Snackbar.make(findViewById(android.R.id.content),getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -441,23 +469,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             e.printStackTrace();
         }
         geoFire = new GeoFire(ClientLocationRef);
-    }
-
-    private void views() {
-        WhereToGo = findViewById(R.id.editText2);
-        bottom_sheet = findViewById(R.id.bottom_sheet);
-        ListTaxiNum = findViewById(R.id.list_Taxi_num);
-        ListChName = findViewById(R.id.list_Ch_Name);
-        ListChNum = findViewById(R.id.list_Ch_num);
-        mapView = findViewById(R.id.mapView);
-        ComingFrom = findViewById(R.id.textView);
-        GoingTO = findViewById(R.id.textView2);
-        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-        findViewById(R.id.findDriver).setVisibility(View.GONE);
-        findViewById(R.id.location_panel).setVisibility(View.GONE);
-        findViewById(R.id.progBar).setVisibility(View.GONE);
-        findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
-
     }
 
     private void buildAlertMessageNoDataFound() {
@@ -519,7 +530,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
 
-        mapboxMap.setStyle(Style.LIGHT, style -> {
+        mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
             enableLocationComponent(style);
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
@@ -671,7 +682,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         }
     }
 
-    private void buildAlertMessageSearchOperation(Location location) {
+    private void buildAlertMessageSearchOperation(@NotNull Location location) {
         assert location != null;
 
         findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
@@ -702,7 +713,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemand(d1);
                         findViewById(R.id.findDriver).setVisibility(View.GONE);
-                        findViewById(R.id.location_panel).setVisibility(View.GONE);
                         findViewById(R.id.progBar).setVisibility(View.VISIBLE);
                         //findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
 
@@ -863,8 +873,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     protected void onResume() {
         super.onResume();
         mapView.onResume();
-        Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                .subscribe(() -> mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard));
     }
 
 

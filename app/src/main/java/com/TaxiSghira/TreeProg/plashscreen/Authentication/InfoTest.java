@@ -92,8 +92,10 @@ public class InfoTest extends Fragment {
                 .setValue(client)
                 .addOnFailureListener(Timber::e)
                 .addOnSuccessListener(v->{
-                    startActivity(new Intent(getApplicationContext(), Map.class));
-                    Toast.makeText(getApplicationContext(),"أهلا بك",Toast.LENGTH_SHORT).show();});
+                    try {
+                        startActivity(new Intent(getApplicationContext(), Map.class));
+                        Toast.makeText(getApplicationContext(),"أهلا بك",Toast.LENGTH_SHORT).show();
+                    }catch (Throwable throwable){Timber.e(throwable);}});
     }
     private boolean validateForm() {
         boolean valid = true;

@@ -1,11 +1,14 @@
 package com.TaxiSghira.TreeProg.plashscreen.Commun;
 
+import android.widget.TextView;
+
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.mapbox.mapboxsdk.annotations.Marker;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,5 +34,13 @@ public class Common {
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
     public static Set<DriverGeoModel> driversFound = new HashSet<>();
     public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();
+
+    public static void SetWelcomeMessage(TextView textView){
+        int houre = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        if (houre>=1 && houre <= 12 )
+            textView.setText(new StringBuilder(" صباح الخير "+Current_Client_DispalyName));
+        else
+            textView.setText(new StringBuilder(" مساء الخير "+Current_Client_DispalyName));
+    }
 }
 

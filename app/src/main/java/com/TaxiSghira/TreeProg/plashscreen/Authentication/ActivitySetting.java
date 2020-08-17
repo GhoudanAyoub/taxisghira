@@ -1,4 +1,4 @@
-package com.TaxiSghira.TreeProg.plashscreen.Profile;
+package com.TaxiSghira.TreeProg.plashscreen.Authentication;
 
 import android.app.Activity;
 import android.app.AlertDialog;
