@@ -23,49 +23,45 @@ import java.util.List;
 import timber.log.Timber;
 
 public class MapViewModel extends ViewModel {
-    private MutableLiveData<List<Chifor>> chiforMutableLiveData;
     private MutableLiveData<Pickup> acceptMutableLiveData;
-    private List<Chifor> chiforList = new ArrayList<>();
 
-    public LiveData<List<Chifor>> getChiforMutableLiveData() {
-        chiforMutableLiveData = new MutableLiveData<>();
-        return chiforMutableLiveData;
-    }
 
     public LiveData<Pickup> getAcceptMutableLiveData() {
         acceptMutableLiveData = new MutableLiveData<>();
         return acceptMutableLiveData;
     }
 
-    public void GetChiforDataLocation() {
-
-        FireBaseClient.getFireBaseClient().getDatabaseReference()
-                .child(Common.Chifor_DataBase_Table)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            try {
-                                for (DataSnapshot Ds1 : dataSnapshot.getChildren()) {
-                                    Chifor ch1 = Ds1.getValue(Chifor.class);
-                                    chiforList.add(ch1);
-                                }
-                                chiforMutableLiveData.setValue(chiforList);
-                            } catch (Throwable t) {
-                                Timber.e(t);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Timber.e(databaseError.getMessage());
-                    }
-                });
-    }
-
 
     public void GetPickDemand() {
+        FireBaseClient.getFireBaseClient()
+                .getFirebaseDatabase()
+                .getReference(Common.Pickup_DataBase_Table)
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                    }
+
+                    @Override
+                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
         FireBaseClient.getFireBaseClient()
                 .getFirebaseDatabase()
                 .getReference(Common.Pickup_DataBase_Table)

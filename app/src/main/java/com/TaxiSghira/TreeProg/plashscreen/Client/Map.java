@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +55,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
@@ -103,6 +105,7 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -121,22 +124,24 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
 public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener, IFirebaseDriverInfoListener, IFirebaseFailedListener {
 
-    @BindView(R.id.textView5)
-    TextView WelcomeText;
-    @BindView(R.id.textView)
-    TextView ComingFrom;
-    @BindView(R.id.textView2)
-    TextView GoingTO;
-    @BindView(R.id.list_Taxi_num)
-    TextView ListTaxiNum;
-    @BindView(R.id.list_Ch_Name)
-    TextView ListChName;
-    @BindView(R.id.list_Ch_num)
-    TextView ListChNum;
-    @BindView(R.id.editText2)
-    TextInputLayout WhereToGo;
+    @BindView(R.id.textView5) TextView WelcomeText;
+    @BindView(R.id.textView) TextView ComingFrom;
+    @BindView(R.id.textView2) TextView GoingTO;
+    @BindView(R.id.list_Taxi_num) TextView ListTaxiNum;
+    @BindView(R.id.list_Ch_Name) TextView ListChName;
+    @BindView(R.id.list_Ch_num) TextView ListChNum;
+    @BindView(R.id.editText2) TextInputLayout WhereToGo;
+    @BindView(R.id.findDriver2) Button findDriver2;
+    @BindView(R.id.DeleteDemand) Button DeleteDemand;
+    @BindView(R.id.layout_location_display_info) LinearLayout layout_location_display_info;
+    @BindView(R.id.layout_driver_display_info) LinearLayout layout_driver_display_info;
+    @BindView(R.id.listAnim) Button listAnim;
+    @OnClick(R.id.DeleteDemand) void removedData(){
+        RemoveDemand(d1);
+    }
+
+
     MapView mapView;
-    LinearLayout bottom_sheet;
     public static String id;
     private MapboxMap mapboxMap;
     private PermissionsManager permissionsManager;
@@ -206,13 +211,13 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void views() {
         ButterKnife.bind(this,findViewById(android.R.id.content));
         Common.SetWelcomeMessage(WelcomeText);
-        bottom_sheet = findViewById(R.id.bottom_sheet);
         mapView = findViewById(R.id.mapView);
-        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-        findViewById(R.id.findDriver).setVisibility(View.GONE);
-        findViewById(R.id.location_panel).setVisibility(View.GONE);
         findViewById(R.id.progBar).setVisibility(View.GONE);
-        findViewById(R.id.listAnim).setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
+        findDriver2.setVisibility(View.GONE);
+        layout_driver_display_info.setVisibility(View.GONE);
+        layout_location_display_info.setVisibility(View.GONE);
+        DeleteDemand.setVisibility(View.GONE);
+        listAnim.setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Util_List.class)));
     }
 
     private void init() {
@@ -562,8 +567,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         try {
             Timber.tag("wtf").e("Inside");
             findViewById(R.id.progBar).setVisibility(View.GONE);
-            findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-            bottom_sheet.setVisibility(View.VISIBLE);
+            layout_location_display_info.setVisibility(View.GONE);
+            layout_driver_display_info.setVisibility(View.VISIBLE);
             ListTaxiNum.setText(pickup1.getTaxi_num());
             ListChName.setText(pickup1.getCh_Name());
             ListChNum.setText(pickup1.getCh_num());
@@ -685,8 +690,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
         assert location != null;
 
-        findViewById(R.id.findDriver).setVisibility(View.VISIBLE);
-        findViewById(R.id.location_panel).setVisibility(View.VISIBLE);
+        layout_location_display_info.setVisibility(View.VISIBLE);
+        findDriver2.setVisibility(View.VISIBLE);
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
             List<Address> currentAddress = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
@@ -698,7 +703,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             e.printStackTrace();
         }
 
-        RxView.clicks(findViewById(R.id.findDriver2)).
+        RxView.clicks(findDriver2).
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Unit>() {
@@ -712,37 +717,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude());
                         d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemand(d1);
-                        findViewById(R.id.findDriver).setVisibility(View.GONE);
+                        findDriver2.setVisibility(View.GONE);
+                        DeleteDemand.setVisibility(View.VISIBLE);
                         findViewById(R.id.progBar).setVisibility(View.VISIBLE);
-                        //findViewById(R.id.LyoutLoti).setVisibility(View.VISIBLE);
-
-                        RxView.clicks(findViewById(R.id.imageViewCancel)).
-                                throttleFirst(3, TimeUnit.SECONDS)
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Observer<Unit>() {
-                                    @Override
-                                    public void onSubscribe(Disposable d) {
-                                        compositeDisposable.add(d);
-                                    }
-
-                                    @Override
-                                    public void onNext(Unit unit) {
-                                        RemoveDemand(d1);
-                                        navigationMapRoute.removeRoute();
-                                        WhereToGo.getEditText().setText("");
-                                        findViewById(R.id.LyoutLoti).setVisibility(View.GONE);
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        Timber.e(e);
-                                    }
-
-                                    @Override
-                                    public void onComplete() {
-                                    }
-                                });
-
                     }
 
                     @Override
@@ -784,6 +761,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren())
                                 dataSnapshot1.getRef().removeValue();
+                            layout_location_display_info.setVisibility(View.GONE);
                             Snackbar.make(findViewById(android.R.id.content), R.string.you_canceled_your_demand, Snackbar.LENGTH_LONG).show();
                         }
                     }

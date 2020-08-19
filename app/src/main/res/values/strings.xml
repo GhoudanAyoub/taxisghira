@@ -281,6 +281,7 @@ limitations under the License.
     <string name="driver_not_Found">no Driver Found</string>
     <string name="not_found_key">"No driver key was found "</string>
     <string name="you_canceled_your_demand">لقد ألغيت طلبك ...</string>
+    <string name="delete_your_demand">حذف الطلب الخاص بك</string>
 
 
 </resources>
