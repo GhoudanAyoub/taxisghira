@@ -30,6 +30,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.PersonalInfo;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseDriverInfoListener;
 import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseFailedListener;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
@@ -40,7 +41,6 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
-import com.TaxiSghira.TreeProg.plashscreen.Authentication.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
@@ -65,8 +65,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -135,10 +133,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     @BindView(R.id.DeleteDemand) Button DeleteDemand;
     @BindView(R.id.layout_location_display_info) LinearLayout layout_location_display_info;
     @BindView(R.id.layout_driver_display_info) LinearLayout layout_driver_display_info;
-    @BindView(R.id.listAnim) Button listAnim;
-    @OnClick(R.id.DeleteDemand) void removedData(){
-        RemoveDemand(d1);
-    }
+    @BindView(R.id.listAnim) FloatingActionButton listAnim;
 
 
     MapView mapView;
@@ -150,20 +145,16 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private NavigationMapRoute navigationMapRoute;
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private String refreshedToken = FirebaseInstanceId.getInstance().getToken();
     private Client Current_Client;
     private Demande d1;
     FavorViewModel favorViewModel;
     MapViewModel mapViewModel;
 
     //online System
-    private DatabaseReference currentUserRef, ClientLocationRef, driver_location_ref;
+    private DatabaseReference  ClientLocationRef, driver_location_ref;
     private GeoFire geoFire;
 
-
-    private static final String TAG = "LocationService";
     private FusedLocationProviderClient mFusedLocationClient;
-    private LocationRequest locationRequest;
     private LocationCallback locationCallback;
     private double distances = 1.0;
     private double LIMIT_RANGE = 10.0;
@@ -225,7 +216,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         iFirebaseDriverInfoListener = this;
         iFirebaseFailedListener = this;
 
-        locationRequest = new LocationRequest();
+        LocationRequest locationRequest = new LocationRequest();
         locationRequest.setSmallestDisplacement(10f);
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(3000);
@@ -239,7 +230,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                     if (location != null) {
                         Common.SetWelcomeMessage(WelcomeText);
-                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
                         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
                         UploadLocation(location);
 
@@ -255,7 +245,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                     @Override
                                     public void onNext(Unit unit) {
-                                        Toast.makeText(getApplicationContext(), "المرجو الانتظار جاري البحت عن طريق مناسب", Toast.LENGTH_LONG).show();
+                                        Snackbar.make(findViewById(android.R.id.content),"المرجو الانتظار جاري البحت عن طريق مناسب",Snackbar.LENGTH_SHORT).show();
                                         Point destinationPoint = null;
                                         try {
                                             final Geocoder geocoder = new Geocoder(getApplicationContext());
@@ -316,9 +306,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                     if (previousLocation.distanceTo(CurrentLocation) / 1000 < LIMIT_RANGE)
                         loadAvailableDrivers();
-                    else {
-                        // do noting
-                    }
                 }
         };
 
@@ -393,6 +380,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             @Override
                             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                                 GeoQueryModel geoQueryModel = snapshot.getValue(GeoQueryModel.class);
+                                assert geoQueryModel != null;
                                 GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0),geoQueryModel.getL().get(1));
                                 DriverGeoModel driverGeoModel = new DriverGeoModel(snapshot.getKey(),geoLocation);
                                 Location newDriverLocation = new Location("");
@@ -436,7 +424,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(driverGeoModel -> FindDriversByID(driverGeoModel),
                             throwable -> Snackbar.make(findViewById(android.R.id.content),throwable.getMessage(), Snackbar.LENGTH_SHORT).show(),
-                                    () -> { });
+                                    () -> Timber.e("Got Some Driver Inside"));
         } else {
             Snackbar.make(findViewById(android.R.id.content),getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
         }
@@ -688,8 +676,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
 
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
-        assert location != null;
-
         layout_location_display_info.setVisibility(View.VISIBLE);
         findDriver2.setVisibility(View.VISIBLE);
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
@@ -702,6 +688,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         } catch (IOException e) {
             e.printStackTrace();
         }
+        UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude());
+        d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
 
         RxView.clicks(findDriver2).
                 throttleFirst(2, TimeUnit.SECONDS)
@@ -714,8 +702,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                     @Override
                     public void onNext(Unit unit) {
-                        UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude());
-                        d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
                         mapViewModel.AddDemand(d1);
                         findDriver2.setVisibility(View.GONE);
                         DeleteDemand.setVisibility(View.VISIBLE);
@@ -731,6 +717,24 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     public void onComplete() {
                     }
                 });
+        RxView.clicks(DeleteDemand)
+                .throttleFirst(2,TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Unit>() {
+                    @Override
+                    public void onSubscribe(Disposable d) { compositeDisposable.add(d);}
+
+                    @Override
+                    public void onNext(Unit unit) {
+                        RemoveDemand(d1);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) { Timber.e(e);}
+
+                    @Override
+                    public void onComplete() { }
+                });
     }
 
     private void UploadLocation(Location locationComponent) {
@@ -744,14 +748,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         if (error != null)
                             Timber.e(error.getMessage());
                         else
-                            Snackbar.make(Objects.requireNonNull(findViewById(android.R.id.content)), "يبحث .....", Snackbar.LENGTH_LONG);
+                            Snackbar.make(findViewById(android.R.id.content), "يبحث .....", Snackbar.LENGTH_LONG);
                     });
         }
     }
 
     public void RemoveDemand(Demande demande) {
-        geoFire.getDatabaseReference()
-                .child(Common.Demande_DataBase_Table)
+        findViewById(R.id.progBar).setVisibility(View.GONE);
+        FirebaseDatabase.getInstance().getReference(Common.Demande_DataBase_Table)
                 .child(demande.getCity())
                 .orderByChild("clientId")
                 .equalTo(Common.Current_Client_Id)
@@ -879,8 +883,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mFusedLocationClient.removeLocationUpdates(locationCallback);
         stopService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
         geoFire.removeLocation(Common.Current_Client_Id);
-        //remove  demand
-        // geoFire.getDatabaseReference().child(Common.Demande_DataBase_Table).child(d1.getCity()).removeValue();
         compositeDisposable.clear();
     }
 
