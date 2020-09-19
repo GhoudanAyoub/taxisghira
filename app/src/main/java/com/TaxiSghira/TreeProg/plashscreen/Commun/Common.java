@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Common {
@@ -32,7 +33,7 @@ public class Common {
     public static final String Drivers_LOCATION_REFERENCES = "DriversLocation";
     public static final String city = "city";
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
-    public static Set<DriverGeoModel> driversFound = new HashSet<>();
+    public static Map<String,DriverGeoModel> driversFound = new HashMap<>();
     public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();
 
     public static void SetWelcomeMessage(TextView textView){

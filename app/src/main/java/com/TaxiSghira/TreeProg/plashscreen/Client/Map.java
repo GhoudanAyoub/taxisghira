@@ -156,7 +156,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationCallback locationCallback;
-    private double distances = 1.0;
+    private double distances = 1000.0;
     private double LIMIT_RANGE = 10.0;
     private Location previousLocation, CurrentLocation;
     private Boolean firstTime = true;
@@ -345,7 +345,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                             @Override
                             public void onKeyEntered(String key, GeoLocation location) {
-                                Common.driversFound.add(new DriverGeoModel(key, location));
+                                //Common.driversFound.add(new DriverGeoModel(key, location));
+                                if (!Common.driversFound.containsKey(key))
+                                    Common.driversFound.put(key,new DriverGeoModel(key,location));
                             }
 
                             @Override
@@ -364,7 +366,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     distances++;
                                     loadAvailableDrivers();
                                 } else {
-                                    distances = 1.0;
+                                    distances = 1000.0;
                                     addDriverMarker();
                                 }
                             }
@@ -379,16 +381,20 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         driver_location_ref.addChildEventListener(new ChildEventListener() {
                             @Override
                             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                                GeoQueryModel geoQueryModel = snapshot.getValue(GeoQueryModel.class);
-                                assert geoQueryModel != null;
-                                GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0),geoQueryModel.getL().get(1));
-                                DriverGeoModel driverGeoModel = new DriverGeoModel(snapshot.getKey(),geoLocation);
-                                Location newDriverLocation = new Location("");
-                                newDriverLocation.setLatitude(geoLocation.latitude);
-                                newDriverLocation.setLongitude(geoLocation.longitude);
-                                float newDistance = location.distanceTo(newDriverLocation)/1000;
-                                if (newDistance <= LIMIT_RANGE)
-                                    FindDriversByID(driverGeoModel);
+                                if (snapshot.hasChildren()){
+                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                        GeoQueryModel geoQueryModel = dataSnapshot.getValue(GeoQueryModel.class);
+                                        assert geoQueryModel != null;
+                                        GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0),geoQueryModel.getL().get(1));
+                                        DriverGeoModel driverGeoModel = new DriverGeoModel(dataSnapshot.getKey(),geoLocation);
+                                        Location newDriverLocation = new Location("");
+                                        newDriverLocation.setLatitude(geoLocation.latitude);
+                                        newDriverLocation.setLongitude(geoLocation.longitude);
+                                        float newDistance = location.distanceTo(newDriverLocation)/1000;
+                                        if (newDistance <= LIMIT_RANGE)
+                                            FindDriversByID(driverGeoModel);
+                                    }
+                                }
                             }
 
                             @Override
@@ -419,12 +425,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     private void addDriverMarker() {
         if (Common.driversFound.size() > 0) {
-            Observable.fromIterable(Common.driversFound)
+            Observable.fromIterable(Common.driversFound.keySet())
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(driverGeoModel -> FindDriversByID(driverGeoModel),
-                            throwable -> Snackbar.make(findViewById(android.R.id.content),throwable.getMessage(), Snackbar.LENGTH_SHORT).show(),
-                                    () -> Timber.e("Got Some Driver Inside"));
+                    .subscribe(key -> FindDriversByID(Common.driversFound.get(key))
+                            , throwable -> Snackbar.make(findViewById(android.R.id.content),throwable.getMessage(), Snackbar.LENGTH_SHORT).show()
+                            , () -> Timber.e("Got Some Driver Inside"));
         } else {
             Snackbar.make(findViewById(android.R.id.content),getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
         }
@@ -433,13 +439,17 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void FindDriversByID(DriverGeoModel driverGeoModel) {
         FireBaseClient.getFireBaseClient().getFirebaseDatabase()
                 .getReference(Common.Chifor_DataBase_Table)
-                .child(driverGeoModel.getKey())
+                .orderByChild("id")
+                .equalTo(driverGeoModel.getKey())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.hasChildren()) {
-                            driverGeoModel.setChifor(snapshot.getValue(Chifor.class));
-                            iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel);
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                driverGeoModel.setChifor(dataSnapshot.getValue(Chifor.class));
+                                Common.driversFound.get(driverGeoModel.getKey()).setChifor(dataSnapshot.getValue(Chifor.class));
+                                iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel);
+                            }
                         } else
                             iFirebaseFailedListener.onFirebaseLoadFailed(getString(R.string.not_found_key));
                     }
@@ -930,7 +940,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     @Override
     public void onFirebaseLoadFailed(String message) {
-        Snackbar.make(findViewById(android.R.id.content),message, Snackbar.LENGTH_LONG).show();
         Timber.e(message);
     }
 }
