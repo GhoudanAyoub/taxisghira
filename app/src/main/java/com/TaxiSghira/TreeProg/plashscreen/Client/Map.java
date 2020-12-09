@@ -162,6 +162,7 @@ public class Map extends AppCompatActivity
     private Client Current_Client;
     private Demande d1;
     MapViewModel mapViewModel;
+    private  LocationRequest locationRequest;
 
     //online System
     private DatabaseReference ClientLocationRef, driver_location_ref;
@@ -230,90 +231,109 @@ public class Map extends AppCompatActivity
     }
 
     private void init() {
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
         iFirebaseDriverInfoListener = this;
         iFirebaseFailedListener = this;
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setSmallestDisplacement(10f);
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(3000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationCallback = new LocationCallback() {
-            @SuppressLint("CheckResult")
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                Location location = locationResult.getLastLocation();
 
-                if (location != null) {
-                    Common.SetWelcomeMessage(WelcomeText);
-                    startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
-                    UploadLocation(location);
-
-                    //Find Button For Lunch Search Request
-                    RxView.clicks(findViewById(R.id.FindButton))
-                            .throttleFirst(5, TimeUnit.SECONDS)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(unit -> {
-                                Snackbar.make(findViewById(android.R.id.content), getString(R.string.lookingForBestRoute), Snackbar.LENGTH_SHORT).show();
-                                Point destinationPoint = null;
-                                try {
-                                    final Geocoder geocoder = new Geocoder(getApplicationContext());
-                                    final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
-                                    final List<Address> list = geocoder.getFromLocationName(locName, 1);
-                                    if (!(list == null || list.isEmpty())) {
-                                        final Address address = list.get(0);
-                                        destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                Point originPoint = null;
-                                try {
-                                    assert locationComponent.getLastKnownLocation() != null;
-                                    originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                                            locationComponent.getLastKnownLocation().getLatitude());
-                                } catch (Exception e) {
-                                    Timber.e(e);
-                                    startActivity(new Intent(getApplicationContext(), Map.class));
-                                }
-                                //destination point
-                                GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
-                                if (dest != null) {
-                                    dest.setGeoJson(Feature.fromGeometry(destinationPoint));
-                                }
-                                //location point
-                                GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
-                                if (origin != null) {
-                                    origin.setGeoJson(Feature.fromGeometry(originPoint));
-                                }
-                                try {
-                                    getRoute(originPoint, destinationPoint, location);
-                                } catch (Exception e) {
-                                    Timber.e(e);
-                                }
-                            }, Throwable::printStackTrace);
-                }
-                //if user Has Change Location Cal and Load Driver Again
-                if (firstTime) {
-                    previousLocation = CurrentLocation = locationResult.getLastLocation();
-                    firstTime = false;
-                } else {
-                    previousLocation = CurrentLocation;
-                    CurrentLocation = locationResult.getLastLocation();
-                }
-                if (previousLocation.distanceTo(CurrentLocation) / 1000 < LIMIT_RANGE)
-                    loadAvailableDrivers();
-            }
-        };
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-        mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+        BuildLocationRequest();
+        BuildLocationCallBack();
+        UpdateLocation();
+        
         loadAvailableDrivers();
+    }
+
+    private void UpdateLocation() {
+        if (mFusedLocationClient == null){
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+        }
+    }
+
+    private void BuildLocationCallBack() {
+        if (locationCallback == null){
+            locationCallback = new LocationCallback() {
+                @SuppressLint("CheckResult")
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    Location location = locationResult.getLastLocation();
+
+                    if (location != null) {
+                        Common.SetWelcomeMessage(WelcomeText);
+                        startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
+                        UploadLocation(location);
+                        //Find Button For Lunch Search Request
+                        RxView.clicks(findViewById(R.id.FindButton))
+                                .throttleFirst(5, TimeUnit.SECONDS)
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(unit -> {
+                                    Snackbar.make(findViewById(android.R.id.content), getString(R.string.lookingForBestRoute), Snackbar.LENGTH_SHORT).show();
+                                    Point destinationPoint = null;
+                                    try {
+                                        final Geocoder geocoder = new Geocoder(getApplicationContext());
+                                        final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
+                                        final List<Address> list = geocoder.getFromLocationName(locName, 1);
+                                        if (!(list == null || list.isEmpty())) {
+                                            final Address address = list.get(0);
+                                            destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Point originPoint = null;
+                                    try {
+                                        assert locationComponent.getLastKnownLocation() != null;
+                                        originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                                                locationComponent.getLastKnownLocation().getLatitude());
+                                    } catch (Exception e) {
+                                        Timber.e(e);
+                                        startActivity(new Intent(getApplicationContext(), Map.class));
+                                    }
+                                    //destination point
+                                    GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
+                                    if (dest != null) {
+                                        dest.setGeoJson(Feature.fromGeometry(destinationPoint));
+                                    }
+                                    //location point
+                                    GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
+                                    if (origin != null) {
+                                        origin.setGeoJson(Feature.fromGeometry(originPoint));
+                                    }
+                                    try {
+                                        getRoute(originPoint, destinationPoint, location);
+                                    } catch (Exception e) {
+                                        Timber.e(e);
+                                    }
+                                }, Throwable::printStackTrace);
+                    }
+                    //if user Has Change Location Cal and Load Driver Again
+                    if (firstTime) {
+                        previousLocation = CurrentLocation = locationResult.getLastLocation();
+                        firstTime = false;
+                    } else {
+                        previousLocation = CurrentLocation;
+                        CurrentLocation = locationResult.getLastLocation();
+                    }
+                    if (previousLocation.distanceTo(CurrentLocation) / 1000 < LIMIT_RANGE)
+                        loadAvailableDrivers();
+                }
+            };
+        }
+    }
+
+    private void BuildLocationRequest() {
+        if (locationRequest == null) {
+            locationRequest = new LocationRequest();
+            locationRequest.setSmallestDisplacement(10f);
+            locationRequest.setInterval(5000);
+            locationRequest.setFastestInterval(3000);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        }
     }
 
     private void loadAvailableDrivers() {
@@ -329,8 +349,8 @@ public class Map extends AppCompatActivity
                     Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
                     List<Address> addressList;
                     try {
-                        addressList = geocoder.getFromLocation(manager.getLastKnownLocation(bestProvider).getLatitude()
-                                , manager.getLastKnownLocation(bestProvider).getLongitude(), 1);
+                        addressList = geocoder.getFromLocation(location.getLatitude()
+                                , location.getLongitude(), 1);
                         cityName = addressList.get(0).getLocality();
 
                         //query
@@ -535,25 +555,32 @@ public class Map extends AppCompatActivity
             addDestinationIconSymbolLayer(style);
             mapboxMap.addOnMapClickListener(Map.this);
 
-            //get current Location animation
-            findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
-                assert locationComponent.getLastKnownLocation() != null;
-                try {
-                    CameraPosition position = new CameraPosition
-                            .Builder()
-                            .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
-                                    locationComponent.getLastKnownLocation().getLongitude()))
-                            .zoom(17)
-                            .bearing(180).tilt(30)
-                            .build();
-                    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            //getAcceptData
-            mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
         });
+
+        //get current Location animation
+        findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
+            assert locationComponent.getLastKnownLocation() != null;
+            try {
+                CameraPosition position = new CameraPosition
+                        .Builder()
+                        .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
+                                locationComponent.getLastKnownLocation().getLongitude()))
+                        .zoom(17)
+                        .bearing(180).tilt(30)
+                        .build();
+                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        //Move Location
+        BuildLocationRequest();
+        BuildLocationCallBack();
+        UpdateLocation();
+
+        //getAcceptData
+        mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
     }
 
     @SuppressLint("CheckResult")
@@ -585,7 +612,7 @@ public class Map extends AppCompatActivity
     }
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
-        loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.maps_and_flags));
+        loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.map_marker_dark));
         loadedMapStyle.addSource(new GeoJsonSource("destination-source-id"));
         SymbolLayer destinationSymbolLayer = new SymbolLayer("destination-symbol-layer-id", "destination-source-id");
         destinationSymbolLayer.withProperties(iconImage("destination-icon-id"), iconIgnorePlacement(true));
