@@ -35,6 +35,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
+import timber.log.Timber;
+
 
 public class phoneTest extends Fragment {
 
@@ -72,7 +74,7 @@ public class phoneTest extends Fragment {
         public void onCodeSent(@NotNull String s, @NotNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
             super.onCodeSent(s, forceResendingToken);
             mResendToken = forceResendingToken;
-            Log.e( "onCodeSent: ",s );
+            Timber.e(s);
         }
     };
 
@@ -238,6 +240,10 @@ public class phoneTest extends Fragment {
             bundle.putString("phone", phone);
             Navigation.findNavController(root).navigate(R.id.infoTest, bundle);
         } else {
+            // TODO: 2020-12-09 Delete THis block later att the end
+            Bundle bundle = new Bundle();
+            bundle.putString("phone", phone);
+            Navigation.findNavController(root).navigate(R.id.infoTest, bundle);
             Toast.makeText(getActivity(),getString(R.string.PleaseEntreTheCorrectCode), Toast.LENGTH_SHORT).show();
         }
     }

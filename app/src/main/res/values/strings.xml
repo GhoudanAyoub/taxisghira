@@ -20,7 +20,7 @@
     <string name="menu_send">Send</string>
     <string name="nom">Nom</string>
     <string name="go">Go 👉</string>
-    <string name="welcome">Welcome</string>
+    <string name="welcome">أهلا بك</string>
     <string name="prenom">Prenom</string>
     <string name="cin">CIN</string>
     <string name="couleur_de_taxi">Couleur De Taxi</string>
@@ -284,9 +284,9 @@ limitations under the License.
     <string name="delete_your_demand">حذف الطلب الخاص بك</string>
     <string name="AddedToFavor">تم</string>
     <string name="Looking">يبحث .....</string>
-    <string name="ActivatGpsRequest">\"المرجو تشغيل GPS\"</string>
-    <string name="okey">\"حسنا\"</string>
-    <string name="persnalDataRequest">\"المرجو ملأ معلوماتكم الشخصية\"</string>
+    <string name="ActivatGpsRequest">المرجو تشغيل GPS</string>
+    <string name="okey">حسنا</string>
+    <string name="persnalDataRequest">المرجو ملأ معلوماتكم الشخصية</string>
     <string name="lookingForBestRoute">المرجو الانتظار جاري البحت عن طريق مناسب</string>
     <string name="NoRouteWasFound">لم يتم العثور على مسارات</string>
     <string name="gotSomeDriverInfor">Got Some Driver Inside</string>

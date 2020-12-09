@@ -9,8 +9,10 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
+import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -119,20 +121,32 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 @AndroidEntryPoint
 public class Map extends AppCompatActivity
         implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener,
-        IFirebaseDriverInfoListener, IFirebaseFailedListener {
+        IFirebaseDriverInfoListener, IFirebaseFailedListener, LocationListener {
 
-    @BindView(R.id.textView5) TextView WelcomeText;
-    @BindView(R.id.textView) TextView ComingFrom;
-    @BindView(R.id.textView2) TextView GoingTO;
-    @BindView(R.id.list_Taxi_num) TextView ListTaxiNum;
-    @BindView(R.id.list_Ch_Name) TextView ListChName;
-    @BindView(R.id.list_Ch_num) TextView ListChNum;
-    @BindView(R.id.editText2) TextInputLayout WhereToGo;
-    @BindView(R.id.findDriver2) Button findDriver2;
-    @BindView(R.id.DeleteDemand) Button DeleteDemand;
-    @BindView(R.id.layout_location_display_info) LinearLayout layout_location_display_info;
-    @BindView(R.id.layout_driver_display_info) LinearLayout layout_driver_display_info;
-    @BindView(R.id.listAnim) FloatingActionButton listAnim;
+    @BindView(R.id.textView5)
+    TextView WelcomeText;
+    @BindView(R.id.textView)
+    TextView ComingFrom;
+    @BindView(R.id.textView2)
+    TextView GoingTO;
+    @BindView(R.id.list_Taxi_num)
+    TextView ListTaxiNum;
+    @BindView(R.id.list_Ch_Name)
+    TextView ListChName;
+    @BindView(R.id.list_Ch_num)
+    TextView ListChNum;
+    @BindView(R.id.editText2)
+    TextInputLayout WhereToGo;
+    @BindView(R.id.findDriver2)
+    Button findDriver2;
+    @BindView(R.id.DeleteDemand)
+    Button DeleteDemand;
+    @BindView(R.id.layout_location_display_info)
+    LinearLayout layout_location_display_info;
+    @BindView(R.id.layout_driver_display_info)
+    LinearLayout layout_driver_display_info;
+    @BindView(R.id.listAnim)
+    FloatingActionButton listAnim;
 
 
     MapView mapView;
@@ -141,6 +155,7 @@ public class Map extends AppCompatActivity
     private PermissionsManager permissionsManager;
     private LocationComponent locationComponent;
     private DirectionsRoute currentRoute;
+    private LocationManager manager;
     private NavigationMapRoute navigationMapRoute;
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -149,7 +164,7 @@ public class Map extends AppCompatActivity
     MapViewModel mapViewModel;
 
     //online System
-    private DatabaseReference  ClientLocationRef, driver_location_ref;
+    private DatabaseReference ClientLocationRef, driver_location_ref;
     private GeoFire geoFire;
 
     private FusedLocationProviderClient mFusedLocationClient;
@@ -158,7 +173,8 @@ public class Map extends AppCompatActivity
     private double LIMIT_RANGE = 10.0;
     private Location previousLocation, CurrentLocation;
     private Boolean firstTime = true;
-    private String cityName;
+    private String cityName, bestProvider;
+    public Criteria criteria;
 
     //Listeners
     IFirebaseDriverInfoListener iFirebaseDriverInfoListener;
@@ -171,28 +187,34 @@ public class Map extends AppCompatActivity
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
         FirebaseApp.initializeApp(getApplicationContext());
-        mapViewModel =  new ViewModelProvider(this).get(MapViewModel.class);
+        mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
 
-        //Log.d("FIREBASE", refreshedToken);
-        checkMapServices();
         views();
-        init();
+        CheckMyData();
+        //Log.d("FIREBASE", refreshedToken);
+        if (isMapsEnabled()) {
+            init();
+        } else {
+            buildAlertMessageNoGps();
+        }
         mapViewModel.getClientInfo();
         mapViewModel.GetPickDemand();
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        mapViewModel.getClientMutableLiveData().observe(this, client -> {
+    }
+
+    private void CheckMyData() {
+        mapViewModel.getClientMutableLiveData().observe(this,client -> {
             if (client == null)
                 buildAlertMessageNoDataFound();
             else
                 Current_Client = client;
         });
-
     }
 
     private void views() {
-        ButterKnife.bind(this,findViewById(android.R.id.content));
+        ButterKnife.bind(this, findViewById(android.R.id.content));
         Common.SetWelcomeMessage(WelcomeText);
         mapView = findViewById(R.id.mapView);
         findViewById(R.id.progBar).setVisibility(View.GONE);
@@ -200,95 +222,96 @@ public class Map extends AppCompatActivity
         layout_driver_display_info.setVisibility(View.GONE);
         layout_location_display_info.setVisibility(View.GONE);
         DeleteDemand.setVisibility(View.GONE);
-        listAnim.setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Util_List.class)));
+        listAnim.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
+
+        manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        criteria = new Criteria();
+        bestProvider = String.valueOf(manager.getBestProvider(criteria, true));
     }
 
     private void init() {
-
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         iFirebaseDriverInfoListener = this;
         iFirebaseFailedListener = this;
-
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setSmallestDisplacement(10f);
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(3000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationCallback = new LocationCallback() {
+            @SuppressLint("CheckResult")
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                Location location = locationResult.getLastLocation();
 
-        locationCallback = new LocationCallback(){
-                @SuppressLint("CheckResult")
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    super.onLocationResult(locationResult);
-                    Location location = locationResult.getLastLocation();
+                if (location != null) {
+                    Common.SetWelcomeMessage(WelcomeText);
+                    startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
+                    UploadLocation(location);
 
-                    if (location != null) {
-                        Common.SetWelcomeMessage(WelcomeText);
-                        startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
-                        UploadLocation(location);
-
-                        //Find Button For Lunch Search Request
-                        RxView.clicks(findViewById(R.id.FindButton))
-                                .throttleFirst(5, TimeUnit.SECONDS)
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(unit -> {
-                                    Snackbar.make(findViewById(android.R.id.content),getString(R.string.lookingForBestRoute),Snackbar.LENGTH_SHORT).show();
-                                    Point destinationPoint = null;
-                                    try {
-                                        final Geocoder geocoder = new Geocoder(getApplicationContext());
-                                        final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
-                                        final List<Address> list = geocoder.getFromLocationName(locName, 1);
-                                        if (!(list == null || list.isEmpty())) {
-                                            final Address address = list.get(0);
-                                            destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
-                                        }
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                    //Find Button For Lunch Search Request
+                    RxView.clicks(findViewById(R.id.FindButton))
+                            .throttleFirst(5, TimeUnit.SECONDS)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(unit -> {
+                                Snackbar.make(findViewById(android.R.id.content), getString(R.string.lookingForBestRoute), Snackbar.LENGTH_SHORT).show();
+                                Point destinationPoint = null;
+                                try {
+                                    final Geocoder geocoder = new Geocoder(getApplicationContext());
+                                    final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
+                                    final List<Address> list = geocoder.getFromLocationName(locName, 1);
+                                    if (!(list == null || list.isEmpty())) {
+                                        final Address address = list.get(0);
+                                        destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
                                     }
-                                    Point originPoint = null;
-                                    try {
-                                        assert locationComponent.getLastKnownLocation() != null;
-                                        originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                                                locationComponent.getLastKnownLocation().getLatitude());
-                                    } catch (Exception e) {
-                                        Timber.e(e);
-                                        startActivity(new Intent(getApplicationContext(), Map.class));
-                                    }
-                                    //destination point
-                                    GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
-                                    if (dest != null) {
-                                        dest.setGeoJson(Feature.fromGeometry(destinationPoint));
-                                    }
-                                    //location point
-                                    GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
-                                    if (origin != null) {
-                                        origin.setGeoJson(Feature.fromGeometry(originPoint));
-                                    }
-                                    try {
-                                        getRoute(originPoint, destinationPoint,location);
-                                    } catch (Exception e) {
-                                        Timber.e(e);
-                                    }
-                                },Throwable::printStackTrace);
-                    }
-                    //if user Has Change Location Cal and Load Driver Again
-                    if (firstTime) {
-                        previousLocation = CurrentLocation = locationResult.getLastLocation();
-                        firstTime = false;
-                    } else {
-                        previousLocation = CurrentLocation;
-                        CurrentLocation = locationResult.getLastLocation();
-                    }
-
-                    if (previousLocation.distanceTo(CurrentLocation) / 1000 < LIMIT_RANGE)
-                        loadAvailableDrivers();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                Point originPoint = null;
+                                try {
+                                    assert locationComponent.getLastKnownLocation() != null;
+                                    originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                                            locationComponent.getLastKnownLocation().getLatitude());
+                                } catch (Exception e) {
+                                    Timber.e(e);
+                                    startActivity(new Intent(getApplicationContext(), Map.class));
+                                }
+                                //destination point
+                                GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
+                                if (dest != null) {
+                                    dest.setGeoJson(Feature.fromGeometry(destinationPoint));
+                                }
+                                //location point
+                                GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
+                                if (origin != null) {
+                                    origin.setGeoJson(Feature.fromGeometry(originPoint));
+                                }
+                                try {
+                                    getRoute(originPoint, destinationPoint, location);
+                                } catch (Exception e) {
+                                    Timber.e(e);
+                                }
+                            }, Throwable::printStackTrace);
                 }
+                //if user Has Change Location Cal and Load Driver Again
+                if (firstTime) {
+                    previousLocation = CurrentLocation = locationResult.getLastLocation();
+                    firstTime = false;
+                } else {
+                    previousLocation = CurrentLocation;
+                    CurrentLocation = locationResult.getLastLocation();
+                }
+                if (previousLocation.distanceTo(CurrentLocation) / 1000 < LIMIT_RANGE)
+                    loadAvailableDrivers();
+            }
         };
-
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
         mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         loadAvailableDrivers();
     }
@@ -306,7 +329,8 @@ public class Map extends AppCompatActivity
                     Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
                     List<Address> addressList;
                     try {
-                        addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                        addressList = geocoder.getFromLocation(manager.getLastKnownLocation(bestProvider).getLatitude()
+                                , manager.getLastKnownLocation(bestProvider).getLongitude(), 1);
                         cityName = addressList.get(0).getLocality();
 
                         //query
@@ -322,7 +346,7 @@ public class Map extends AppCompatActivity
                             public void onKeyEntered(String key, GeoLocation location) {
                                 //Common.driversFound.add(new DriverGeoModel(key, location));
                                 if (!Common.driversFound.containsKey(key))
-                                    Common.driversFound.put(key,new DriverGeoModel(key,location));
+                                    Common.driversFound.put(key, new DriverGeoModel(key, location));
                             }
 
                             @Override
@@ -356,16 +380,16 @@ public class Map extends AppCompatActivity
                         driver_location_ref.addChildEventListener(new ChildEventListener() {
                             @Override
                             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                                if (snapshot.hasChildren()){
-                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                if (snapshot.hasChildren()) {
+                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                         GeoQueryModel geoQueryModel = dataSnapshot.getValue(GeoQueryModel.class);
                                         assert geoQueryModel != null;
-                                        GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0),geoQueryModel.getL().get(1));
-                                        DriverGeoModel driverGeoModel = new DriverGeoModel(dataSnapshot.getKey(),geoLocation);
+                                        GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0), geoQueryModel.getL().get(1));
+                                        DriverGeoModel driverGeoModel = new DriverGeoModel(dataSnapshot.getKey(), geoLocation);
                                         Location newDriverLocation = new Location("");
                                         newDriverLocation.setLatitude(geoLocation.latitude);
                                         newDriverLocation.setLongitude(geoLocation.longitude);
-                                        float newDistance = location.distanceTo(newDriverLocation)/1000;
+                                        float newDistance = location.distanceTo(newDriverLocation) / 1000;
                                         if (newDistance <= LIMIT_RANGE)
                                             FindDriversByID(driverGeoModel);
                                     }
@@ -408,7 +432,7 @@ public class Map extends AppCompatActivity
                             , throwable -> Snackbar.make(findViewById(android.R.id.content), Objects.requireNonNull(throwable.getMessage()), Snackbar.LENGTH_SHORT).show()
                             , () -> Timber.e(getString(R.string.gotSomeDriverInfor)));
         } else {
-            Snackbar.make(findViewById(android.R.id.content),getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(android.R.id.content), getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -421,7 +445,7 @@ public class Map extends AppCompatActivity
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.hasChildren()) {
-                            for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 driverGeoModel.setChifor(dataSnapshot.getValue(Chifor.class));
                                 Common.driversFound.get(driverGeoModel.getKey()).setChifor(dataSnapshot.getValue(Chifor.class));
                                 iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel);
@@ -460,15 +484,12 @@ public class Map extends AppCompatActivity
         alert.show();
     }
 
-    private void checkMapServices() {
-        isMapsEnabled();
-    }
-
-    public void isMapsEnabled() {
-        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    public boolean isMapsEnabled() {
+        manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            buildAlertMessageNoGps();
+            return false;
         }
+        return true;
     }
 
     private void buildAlertMessageNoGps() {
@@ -502,7 +523,8 @@ public class Map extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed() { }
+    public void onBackPressed() {
+    }
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
@@ -547,14 +569,16 @@ public class Map extends AppCompatActivity
             RxView.clicks(findViewById(R.id.Favories))
                     .throttleFirst(5, TimeUnit.SECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(unit -> {mapViewModel.InsertData(pickup1.getChifor());
-                                Toast.makeText(getApplicationContext(),getString(R.string.AddedToFavor), Toast.LENGTH_SHORT).show();}
-                    , Throwable::printStackTrace);
+                    .subscribe(unit -> {
+                                mapViewModel.InsertData(pickup1.getChifor());
+                                Toast.makeText(getApplicationContext(), getString(R.string.AddedToFavor), Toast.LENGTH_SHORT).show();
+                            }
+                            , Throwable::printStackTrace);
             RxView.clicks(findViewById(R.id.calls))
                     .throttleFirst(5, TimeUnit.SECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(unit -> startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getChifor().getPhone())))
-                    ,Throwable::printStackTrace);
+                            , Throwable::printStackTrace);
         } catch (Throwable t) {
             Timber.e(t);
         }
@@ -649,15 +673,16 @@ public class Map extends AppCompatActivity
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
-                    mapViewModel.AddDemand(d1);
-                    findDriver2.setVisibility(View.GONE);
-                    DeleteDemand.setVisibility(View.VISIBLE);
-                    findViewById(R.id.progBar).setVisibility(View.VISIBLE);}
-                    ,Throwable::printStackTrace);
+                            mapViewModel.AddDemand(d1);
+                            findDriver2.setVisibility(View.GONE);
+                            DeleteDemand.setVisibility(View.VISIBLE);
+                            findViewById(R.id.progBar).setVisibility(View.VISIBLE);
+                        }
+                        , Throwable::printStackTrace);
         RxView.clicks(DeleteDemand)
-                .throttleFirst(2,TimeUnit.SECONDS)
+                .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(unit -> RemoveDemand(d1),Throwable::printStackTrace);
+                .subscribe(unit -> RemoveDemand(d1), Throwable::printStackTrace);
     }
 
     private void UploadLocation(Location locationComponent) {
@@ -792,6 +817,7 @@ public class Map extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         mapView.onStop();
+        stopService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
     }
 
     @Override
@@ -821,12 +847,12 @@ public class Map extends AppCompatActivity
         if (!Common.marerList.containsKey(driverGeoModel.getKey()))
             Common.marerList.put(driverGeoModel.getKey(),
                     mapboxMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(driverGeoModel.getGeoLocation().latitude,
-                            driverGeoModel.getGeoLocation().longitude))
-                    .title(driverGeoModel.getChifor().getFullname())
-                    .snippet(driverGeoModel.getChifor().getPhone())
-                    .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2))));
-        if (!TextUtils.isEmpty(cityName)){
+                            .position(new LatLng(driverGeoModel.getGeoLocation().latitude,
+                                    driverGeoModel.getGeoLocation().longitude))
+                            .title(driverGeoModel.getChifor().getFullname())
+                            .snippet(driverGeoModel.getChifor().getPhone())
+                            .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2))));
+        if (!TextUtils.isEmpty(cityName)) {
             DatabaseReference driverLocation = FireBaseClient.getFireBaseClient()
                     .getDatabaseReference()
                     .child(Common.Drivers_LOCATION_REFERENCES)
@@ -855,5 +881,11 @@ public class Map extends AppCompatActivity
     @Override
     public void onFirebaseLoadFailed(String message) {
         Timber.e(message);
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        //remove location callback:
+        manager.removeUpdates(this);
     }
 }

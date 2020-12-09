@@ -22,6 +22,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -39,48 +40,22 @@ public class SpachScreen extends AppCompatActivity {
         setContentView(R.layout.spachscreen);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-
         firebaseAuth = FirebaseAuth.getInstance();
-        if (checkMapServices()) {
-            Completable.timer(3, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                    .subscribe(() -> {
-                        if (firebaseAuth.getCurrentUser() != null)
-                            checkUserFromDataBase(firebaseAuth.getCurrentUser());
-                        else
-                            startActivity(new Intent(getApplication(), Auth.class));
-                    });
-        }
-        else
-            startActivity(new Intent(getApplication(), SpachScreen.class));
-
+        Completable.timer(3, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                    if (firebaseAuth.getCurrentUser() != null)
+                        checkUserFromDataBase(firebaseAuth.getCurrentUser());
+                    else
+                        startActivity(new Intent(getApplication(), Auth.class));
+                },Throwable::printStackTrace);
     }
 
-    private boolean checkMapServices() {
-        return isMapsEnabled();
-    }
-    public boolean isMapsEnabled() {
-        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            buildAlertMessageNoGps();
-            return false;
-        }
-        return true;
-    }
-    private void buildAlertMessageNoGps() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.ic_gps_off_black_24dp)
-                .setMessage(getString(R.string.ActivatGpsRequest))
-                .setCancelable(false)
-                .setPositiveButton(getString(R.string.okey), (dialog, id) -> startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 333));
-        final AlertDialog alert = builder.create();
-        alert.show();
-    }
     private void checkUserFromDataBase(FirebaseUser user) {
         FireBaseClient.getFireBaseClient()
                 .getFirebaseDatabase()
                 .getReference("Client")
                 .orderByChild("id")
-                .equalTo(firebaseAuth.getCurrentUser().getUid())
+                .equalTo(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

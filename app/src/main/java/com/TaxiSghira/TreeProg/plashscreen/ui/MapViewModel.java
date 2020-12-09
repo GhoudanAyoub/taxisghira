@@ -48,8 +48,8 @@ public class MapViewModel extends ViewModel {
         FirebaseDatabase.getInstance()
                 .getReference(Common.Client_DataBase_Table)
                 .orderByChild(Common.Gmail_String)
-                .equalTo(Common.Current_Client_Gmail)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+                .equalTo(Common.Current_Client_Gmail.toLowerCase())
+                .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
