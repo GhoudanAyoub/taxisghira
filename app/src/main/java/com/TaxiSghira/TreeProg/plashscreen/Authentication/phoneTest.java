@@ -4,10 +4,14 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,15 +21,18 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.TaxiSghira.TreeProg.plashscreen.R;
+import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.FirebaseTooManyRequestsException;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.hbb20.CountryCodePicker;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 
@@ -33,96 +40,93 @@ public class phoneTest extends Fragment {
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
     private EditText editText, N1, N2, N3, N4, N5, N6;
+    private Button sendCodeButton;
+    private Button phoneDone;
+    private Button ResendCode;
+    private TextView ChangePhoneNumber;
+    private LinearLayout FirstLayout,SecondLayout;
     private String phone;
     private CountryCodePicker countryCodePicker;
     private View root;
     private String Code;
+    private PhoneAuthProvider.ForceResendingToken mResendToken;
+
     PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
         @Override
         public void onVerificationCompleted(@NotNull PhoneAuthCredential phoneAuthCredential) {
-            disableLayout();
-            enableVerificationButton();
+            enableSecondLayout();
+            EnablePhoneDoneButton();
             Code = phoneAuthCredential.getSmsCode();
         }
 
         @Override
         public void onVerificationFailed(@NotNull FirebaseException e) {
-            Toast.makeText(getActivity(), "نواجه مشكل في التواصل مع هاتفكم\uD83D\uDE14", Toast.LENGTH_SHORT).show();
+            if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                Toast.makeText(getActivity(), getString(R.string.ProblemConnectionWithYourPhone), Toast.LENGTH_SHORT).show();
+            } else if (e instanceof FirebaseTooManyRequestsException) {
+                Toast.makeText(getActivity(), getString(R.string.TooManyRequest), Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
         public void onCodeSent(@NotNull String s, @NotNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
             super.onCodeSent(s, forceResendingToken);
+            mResendToken = forceResendingToken;
+            Log.e( "onCodeSent: ",s );
         }
     };
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.phone_test_fragment, container, false);
-
-        root.findViewById(R.id.sendButton).setVisibility(View.GONE);
-        root.findViewById(R.id.NumberNext).setVisibility(View.GONE);
-        editText = root.findViewById(R.id.phoneText);
-        countryCodePicker = root.findViewById(R.id.ccp);
+        view(root);
+        checkForSmsPermission();
+        enableFirstLayout();
+        
+        ChangePhoneNumber.setOnClickListener(v3 -> {
+            enableFirstLayout();
+            sendCodeButton.setVisibility(View.VISIBLE);
+            phoneDone.setVisibility(View.GONE);
+        });
+        sendCodeButton.setOnClickListener(v -> sendVerificationCode());
+        ResendCode.setOnClickListener(v -> resendVerificationCode(phone,mResendToken));
+        phoneDone.setOnClickListener(v4 -> verifySignInCode());
+        
+        return root;
+    }
+    
+    //**** UI Manipulation
+    public void view(View root){
         N1 = root.findViewById(R.id.N1);
         N2 = root.findViewById(R.id.N2);
         N3 = root.findViewById(R.id.N3);
         N4 = root.findViewById(R.id.N4);
         N5 = root.findViewById(R.id.N5);
         N6 = root.findViewById(R.id.N6);
-
-        root.findViewById(R.id.makeCall).setOnClickListener(v -> { });
-        root.findViewById(R.id.ChangePhoneNumber).setOnClickListener(v3 -> {
-            enableLayout();
-            root.findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
-            root.findViewById(R.id.NumberNext).setVisibility(View.GONE);
-        });
-        root.findViewById(R.id.sendButton).setOnClickListener(v -> sendVerificationCode());
-        root.findViewById(R.id.resendCode).setOnClickListener(v -> sendVerificationCode());
-        root.findViewById(R.id.NumberNext).setOnClickListener(v4 -> verifySignInCode());
-
-        checkForSmsPermission();
-        enableLayout();
-
-        return root;
+        ChangePhoneNumber = root.findViewById(R.id.ChangePhoneNumber);
+        sendCodeButton = root.findViewById(R.id.sendCodeButton);
+        SecondLayout = root.findViewById(R.id.Secondlayout);
+        Button makeCall = root.findViewById(R.id.makeCall);
+        FirstLayout = root.findViewById(R.id.firstLayout);
+        ResendCode = root.findViewById(R.id.resendCode);
+        countryCodePicker = root.findViewById(R.id.ccp);
+        phoneDone = root.findViewById(R.id.phonedone);
+        editText = root.findViewById(R.id.phoneText);
+        makeCall.setEnabled(false);
     }
-
-    //**** Permission
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_SEND_SMS) {
-            if (permissions[0].equalsIgnoreCase(Manifest.permission.SEND_SMS) && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                root.findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
-            } else {
-                Toast.makeText(getContext(), getString(R.string.failure_permission), Toast.LENGTH_LONG).show();
-                disableSmsButton();
-            }
-        }
-    }
-
-    private void checkForSmsPermission() {
-        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
-            root.findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
-        } else {
-            root.findViewById(R.id.sendButton).setVisibility(View.VISIBLE);
-            root.findViewById(R.id.NumberNext).setVisibility(View.GONE);
-        }
-    }
-
-    //**** UI Manipulation
+    
     private boolean validateForm() {
         boolean valid = true;
 
         String email1 = editText.getText().toString();
         if (TextUtils.isEmpty(email1)) {
-            editText.setError("املأ الفراغ من فضلك!!");
+            editText.setError(getString(R.string.FillEveryPlace));
             valid = false;
         } else {
             editText.setError(null);
         }
         if (email1.length() != 9) {
-            editText.setError("ضع رقم هاتف صحيح من فضلك!!");
+            editText.setError(getString(R.string.putYourPhoneNumber));
             valid = false;
         } else {
             editText.setError(null);
@@ -135,42 +139,42 @@ public class phoneTest extends Fragment {
 
         String email1 = N1.getText().toString();
         if (TextUtils.isEmpty(email1)) {
-            N1.setError("املأ الفراغ من فضلك!!");
+            N1.setError(getString(R.string.FillEveryPlace));
             valid = false;
         } else {
             N1.setError(null);
         }
         String email2 = N2.getText().toString();
         if (TextUtils.isEmpty(email2)) {
-            N2.setError("املأ الفراغ من فضلك!!");
+            N2.setError(getString(R.string.FillEveryPlace));
             valid = false;
         } else {
             N2.setError(null);
         }
         String email3 = N3.getText().toString();
         if (TextUtils.isEmpty(email3)) {
-            N3.setError("املأ الفراغ من فضلك!!");
+            N3.setError(getString(R.string.FillEveryPlace));
             valid = false;
         } else {
             N3.setError(null);
         }
         String email4 = N4.getText().toString();
         if (TextUtils.isEmpty(email4)) {
-            N4.setError("املأ الفراغ من فضلك!!");
+            N4.setError(getString(R.string.FillEveryPlace));
             valid = false;
         } else {
             N4.setError(null);
         }
         String email5 = N5.getText().toString();
         if (TextUtils.isEmpty(email5)) {
-            N5.setError("املأ الفراغ من فضلك!!");
+            N5.setError(getString(R.string.FillEveryPlace));
             valid = false;
         } else {
             N5.setError(null);
         }
         String email6 = N6.getText().toString();
         if (TextUtils.isEmpty(email6)) {
-            N6.setError("املأ الفراغ من فضلك!!");
+            N6.setError(getString(R.string.FillEveryPlace));
             valid = false;
         } else {
             N6.setError(null);
@@ -180,47 +184,84 @@ public class phoneTest extends Fragment {
 
     private void disableSmsButton() {
         Toast.makeText(getContext(), R.string.sms_disabled, Toast.LENGTH_LONG).show();
-        root.findViewById(R.id.sendButton).setVisibility(View.GONE);
-        root.findViewById(R.id.NumberNext).setVisibility(View.GONE);
+        sendCodeButton.setVisibility(View.GONE);
+        phoneDone.setVisibility(View.GONE);
     }
 
-    private void disableLayout() {
-        root.findViewById(R.id.linearLayout4).setVisibility(View.GONE);
-        root.findViewById(R.id.ln00).setVisibility(View.VISIBLE);
+    private void enableSecondLayout() {
+        FirstLayout.setVisibility(View.GONE);
+        SecondLayout.setVisibility(View.VISIBLE);
     }
 
-    private void enableLayout() {
-        root.findViewById(R.id.linearLayout4).setVisibility(View.VISIBLE);
-        root.findViewById(R.id.ln00).setVisibility(View.GONE);
+    private void enableFirstLayout() {
+        FirstLayout.setVisibility(View.VISIBLE);
+        SecondLayout.setVisibility(View.GONE);
     }
 
-    private void enableVerificationButton() {
-        root.findViewById(R.id.sendButton).setVisibility(View.GONE);
-        root.findViewById(R.id.NumberNext).setVisibility(View.VISIBLE);
+    private void EnablePhoneDoneButton() {
+        sendCodeButton.setVisibility(View.GONE);
+        phoneDone.setVisibility(View.VISIBLE);
     }
-//**********************************************************************
+    
+    //******core
     private void sendVerificationCode() {
         if (!validateForm()) return;
         phone = "+" + countryCodePicker.getSelectedCountryCode() + editText.getText().toString();
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phone,
-                30,
-                TimeUnit.SECONDS,
-                requireActivity(),
-                mCallbacks);
+        PhoneAuthProvider.verifyPhoneNumber(
+                PhoneAuthOptions.newBuilder(FireBaseClient.getFireBaseClient().getFirebaseAuth())
+                .setPhoneNumber(phone)
+                .setTimeout(30L, TimeUnit.SECONDS)
+                .setActivity(requireActivity())
+                .setCallbacks(mCallbacks)
+                .build());
+        enableSecondLayout();
+        EnablePhoneDoneButton();
+    }
+    
+    private void resendVerificationCode(String phoneNumber, PhoneAuthProvider.ForceResendingToken token) {
+        PhoneAuthProvider.verifyPhoneNumber(
+                PhoneAuthOptions.newBuilder(FireBaseClient.getFireBaseClient().getFirebaseAuth())
+                .setPhoneNumber(phoneNumber)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(requireActivity())
+                .setCallbacks(mCallbacks)
+                .setForceResendingToken(token)
+                .build());
     }
 
     private void verifySignInCode() {
         if (!validateForm2()) return;
         String txt = "" + N1.getText().toString() + "" + N2.getText().toString() + "" + N3.getText().toString() + "" + N4.getText().toString() + "" + N5.getText().toString() + "" + N6.getText().toString();
         if (txt.equals(Code)) {
-            Toast.makeText(getActivity(), "تم التحقح من رقمك بنجاح\uD83D\uDE04", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), getString(R.string.VerificationPhoneSucced), Toast.LENGTH_SHORT).show();
             Bundle bundle = new Bundle();
             bundle.putString("phone", phone);
             Navigation.findNavController(root).navigate(R.id.infoTest, bundle);
         } else {
-            //will be Removed after
-            Snackbar.make(root.findViewById(android.R.id.content),"المرجو ادخال الارقام الاربعة الصحيحة!", Snackbar.LENGTH_LONG).show();
+            Toast.makeText(getActivity(),getString(R.string.PleaseEntreTheCorrectCode), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    //**** Permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NotNull String @NotNull [] permissions, @NotNull int @NotNull [] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_SEND_SMS) {
+            if (permissions[0].equalsIgnoreCase(Manifest.permission.SEND_SMS)
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                sendCodeButton.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(getContext(), getString(R.string.failure_permission), Toast.LENGTH_LONG).show();
+                disableSmsButton();
+            }
+        }
+    }
+
+    private void checkForSmsPermission() {
+        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.SEND_SMS}, MY_PERMISSIONS_REQUEST_SEND_SMS);
+            sendCodeButton.setVisibility(View.VISIBLE);
+        } else {
+            phoneDone.setVisibility(View.GONE);
         }
     }
 }

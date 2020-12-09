@@ -1,10 +1,10 @@
 package com.TaxiSghira.TreeProg.plashscreen.Authentication;
 
+import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-
-import android.os.Bundle;
 
 import com.TaxiSghira.TreeProg.plashscreen.R;
 

@@ -4,16 +4,15 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.R;
+import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
@@ -53,10 +52,10 @@ public class Auth extends AppCompatActivity {
 
         progressDialog = new ProgressDialog(this);
         firebaseAuth = FirebaseAuth.getInstance();
+        compositeDisposable = new CompositeDisposable();
         // Choose authentication
         providers = Collections.singletonList(
                 new AuthUI.IdpConfig.GoogleBuilder().build());
-        compositeDisposable = new CompositeDisposable();
         RxView.clicks(findViewById(R.id.buttonphone))
                 .throttleFirst(5, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -131,14 +130,12 @@ public class Auth extends AppCompatActivity {
                 try {
                     FireBaseClient.getFireBaseClient().setFirebaseUser(user);
                     progressDialog.dismiss();
-                    startActivity(new Intent(getApplicationContext(),Create_Account.class));
+                    startActivity(new
+                            Intent(getApplicationContext(),Create_Account.class));
                 } catch (Exception e) {
                     Timber.e(e);
                 }
-            }
-
-            else{
-
+            } else{
                 if(response == null){
                     finish();
                 }
@@ -147,7 +144,6 @@ public class Auth extends AppCompatActivity {
                     //Show No Internet Notification
                     return;
                 }
-
                 if(response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                     Toast.makeText(this, response.getError().getErrorCode(), Toast.LENGTH_LONG).show();
                     Timber.d(String.valueOf(response.getError().getErrorCode()));

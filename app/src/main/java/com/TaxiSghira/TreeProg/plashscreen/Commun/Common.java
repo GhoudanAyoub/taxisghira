@@ -2,18 +2,16 @@ package com.TaxiSghira.TreeProg.plashscreen.Commun;
 
 import android.widget.TextView;
 
-import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
+import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
 import com.mapbox.mapboxsdk.annotations.Marker;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class Common {
 

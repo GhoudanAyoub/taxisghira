@@ -2,36 +2,69 @@ package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.hilt.lifecycle.ViewModelInject;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
+import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.di.Repository;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
 
 public class MapViewModel extends ViewModel {
+
+    private Repository repository;
+
+    private LiveData<List<Chifor>> listLiveDataFavorChifor = null;
+
     private MutableLiveData<Pickup> acceptMutableLiveData;
+    private MutableLiveData<Client> clientMutableLiveData;
+
+    public LiveData<List<Chifor>> getListLiveDataFavorChifor() { return listLiveDataFavorChifor; }
+    public LiveData<Pickup> getAcceptMutableLiveData() { acceptMutableLiveData = new MutableLiveData<>();return acceptMutableLiveData; }
+    public LiveData<Client> getClientMutableLiveData() { clientMutableLiveData = new MutableLiveData<>();return clientMutableLiveData; }
 
 
-    public LiveData<Pickup> getAcceptMutableLiveData() {
-        acceptMutableLiveData = new MutableLiveData<>();
-        return acceptMutableLiveData;
+    @ViewModelInject
+    public MapViewModel(Repository repository) {
+        this.repository = repository;
     }
 
+    //Client Data
+    public void getClientInfo() {
+        FirebaseDatabase.getInstance()
+                .getReference(Common.Client_DataBase_Table)
+                .orderByChild(Common.Gmail_String)
+                .equalTo(Common.Current_Client_Gmail)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            clientMutableLiveData.setValue(dataSnapshot.getValue(Client.class));
+                        }
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Timber.e(error.getMessage());
+                    }
+                });
+    }
+
+    //Demand Data
     public void GetPickDemand() {
         FireBaseClient.getFireBaseClient()
                 .getFirebaseDatabase()
@@ -91,7 +124,6 @@ public class MapViewModel extends ViewModel {
                     }
                 });
     }
-
     public void AddDemand(Demande demande) {
         FireBaseClient.getFireBaseClient().getDatabaseReference()
                 .child(Common.Demande_DataBase_Table)
@@ -101,4 +133,9 @@ public class MapViewModel extends ViewModel {
                 .addOnFailureListener(Throwable::printStackTrace)
                 .addOnSuccessListener(v -> Timber.i("DemandAdded"));
     }
+
+    //Favor Chifor Data
+    public void InsertData(Chifor chifor){repository.InsertData(chifor);}
+    public void DeleteData(int id){repository.DeleteData(id);}
+    public void GetData(){listLiveDataFavorChifor = repository.GetData();}
 }

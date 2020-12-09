@@ -7,7 +7,7 @@
     tools:context=".Authentication.phoneTest">
 
     <LinearLayout
-        android:id="@+id/linearLayout4"
+        android:id="@+id/firstLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -74,13 +74,13 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/ln00"
+        android:id="@+id/Secondlayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
+        app:layout_constraintTop_toBottomOf="@+id/firstLayout">
 
         <TextView
             android:id="@+id/textView12"
@@ -272,7 +272,7 @@
                 android:text="@string/resend"
                 android:textColor="@color/frutorial_title"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toTopOf="@+id/NumberNext"
+                app:layout_constraintBottom_toTopOf="@+id/phonedone"
                 app:layout_constraintEnd_toStartOf="@+id/textView15"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tableRow"
@@ -287,7 +287,7 @@
                 android:text="@string/or"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                app:layout_constraintBottom_toTopOf="@+id/NumberNext"
+                app:layout_constraintBottom_toTopOf="@+id/phonedone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tableRow"
@@ -304,7 +304,7 @@
                 android:text="@string/make_a_call"
                 android:textColor="@color/frutorial_title"
                 android:textSize="12sp"
-                app:layout_constraintBottom_toTopOf="@+id/NumberNext"
+                app:layout_constraintBottom_toTopOf="@+id/phonedone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView15"
                 app:layout_constraintTop_toBottomOf="@+id/tableRow"
@@ -315,7 +315,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/sendButton"
+        android:id="@+id/sendCodeButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -325,18 +325,19 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/cerclebackgroundpurple"
         android:fontFamily="@font/roboto"
+        android:rotationX="2"
+        android:rotationY="4"
         android:text="@string/next"
         android:textColor="@color/backgroundcolor"
         android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="gone" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
     <Button
-        android:id="@+id/NumberNext"
+        android:id="@+id/phonedone"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="28dp"
@@ -351,7 +352,7 @@
         android:textColor="@color/backgroundcolor"
         android:textSize="15sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/sendButton"
+        app:layout_constraintBottom_toTopOf="@+id/sendCodeButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toStartOf="parent"

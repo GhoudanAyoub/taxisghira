@@ -282,6 +282,21 @@ limitations under the License.
     <string name="not_found_key">"No driver key was found "</string>
     <string name="you_canceled_your_demand">لقد ألغيت طلبك ...</string>
     <string name="delete_your_demand">حذف الطلب الخاص بك</string>
+    <string name="AddedToFavor">تم</string>
+    <string name="Looking">يبحث .....</string>
+    <string name="ActivatGpsRequest">\"المرجو تشغيل GPS\"</string>
+    <string name="okey">\"حسنا\"</string>
+    <string name="persnalDataRequest">\"المرجو ملأ معلوماتكم الشخصية\"</string>
+    <string name="lookingForBestRoute">المرجو الانتظار جاري البحت عن طريق مناسب</string>
+    <string name="NoRouteWasFound">لم يتم العثور على مسارات</string>
+    <string name="gotSomeDriverInfor">Got Some Driver Inside</string>
+    <string name="YourDataUpdated">تم تحديث معلوماتك</string>
+    <string name="PleaseWait">المرجو الانتظار قليلا ⌛️</string>
+    <string name="ProblemConnectionWithYourPhone">نواجه مشكل في التواصل مع هاتفكم😔</string>
+    <string name="TooManyRequest">العديد من الطلبات حاول مرة أخرى في وقت لاحق</string>
+    <string name="FillEveryPlace">املأ الفراغ من فضلك!!</string>
+    <string name="VerificationPhoneSucced">تم التحقح من رقمك بنجاح😄</string>
+    <string name="PleaseEntreTheCorrectCode">المرجو ادخال الارقام الاربعة الصحيحة!</string>
 
 
 </resources>

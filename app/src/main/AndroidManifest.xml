@@ -14,11 +14,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <permission android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService" />
 
     <application
+        android:name=".BaseApp"
         android:allowBackup="true"
         android:appComponentFactory="whateverString"
         android:icon="@mipmap/ll"
@@ -28,7 +29,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:appComponentFactory">
-        <activity android:name=".Authentication.Create_Account"></activity>
+        <activity android:name=".Authentication.Create_Account" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -41,7 +42,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".Authentication.Util_List" />
+        <activity android:name=".ui.Util_List" />
         <activity android:name=".Client.FavorDrivers" />
         <activity
             android:name=".Client.Map"
@@ -63,7 +64,7 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <activity android:name=".Authentication.SpachScreen">
+        <activity android:name=".ui.SpachScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

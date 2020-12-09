@@ -1,30 +1,33 @@
 package com.TaxiSghira.TreeProg.plashscreen.Client;
 
+import android.content.Intent;
+import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.os.Bundle;
-
 import com.TaxiSghira.TreeProg.plashscreen.Adapters.FavorAdapter;
-import com.TaxiSghira.TreeProg.plashscreen.Authentication.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
+import com.TaxiSghira.TreeProg.plashscreen.ui.MapViewModel;
+import com.TaxiSghira.TreeProg.plashscreen.ui.Util_List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class FavorDrivers extends AppCompatActivity {
 
     private RecyclerView Favor_Recycle;
-    FavorViewModel favorViewModel;
+    MapViewModel mapViewModel;
     FavorAdapter favorAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favor_driver);
 
-        favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
-        favorViewModel.getFavor();
+        mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
+        mapViewModel.GetData();
 
         findViewById(R.id.listAnim22).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Util_List.class)));
         favorAdapter = new FavorAdapter(getApplicationContext());
@@ -33,6 +36,6 @@ public class FavorDrivers extends AppCompatActivity {
         Favor_Recycle.setHasFixedSize(true);
         Favor_Recycle.setAdapter(favorAdapter);
 
-        favorViewModel.getMutableLiveData().observe(this, favors -> favorAdapter.setList(favors));
+        mapViewModel.getListLiveDataFavorChifor().observe(this, chifors ->favorAdapter.setList(chifors));
     }
 }

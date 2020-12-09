@@ -12,14 +12,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.TaxiSghira.TreeProg.plashscreen.Module.Favor;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FavorAdapter extends RecyclerView.Adapter<FavorAdapter.FavorAdapterHolder> {
-    private List<Favor> favorList = new ArrayList<>();
+    private List<Chifor> favorList = new ArrayList<>();
     private Context context;
     public FavorAdapter(Context context) {
         this.context = context;
@@ -33,10 +33,10 @@ public class FavorAdapter extends RecyclerView.Adapter<FavorAdapter.FavorAdapter
 
     @Override
     public void onBindViewHolder(@NonNull FavorAdapterHolder holder, int position) {
-        holder.TaxiNum.setText(favorList.get(position).getTaxi_num());
-        holder.Ch_Num.setText(favorList.get(position).getCh_num());
-        holder.Ch_Name.setText(favorList.get(position).getCh_Name());
-        holder.ImageView.setOnClickListener(v ->context.startActivity(new Intent(Intent.ACTION_DIAL).setData(Uri.parse("tel:"+favorList.get(position).getCh_num()))));
+        holder.TaxiNum.setText(favorList.get(position).getTaxi_NUM());
+        holder.Ch_Num.setText(favorList.get(position).getPhone());
+        holder.Ch_Name.setText(favorList.get(position).getFullname());
+        holder.ImageView.setOnClickListener(v ->context.startActivity(new Intent(Intent.ACTION_DIAL).setData(Uri.parse("tel:"+favorList.get(position).getPhone()))));
     }
 
     @Override
@@ -44,7 +44,7 @@ public class FavorAdapter extends RecyclerView.Adapter<FavorAdapter.FavorAdapter
         return favorList.size();
     }
 
-    public void setList(List<Favor> moviesList) {
+    public void setList(List<Chifor> moviesList) {
         this.favorList = moviesList;
         notifyDataSetChanged();
     }

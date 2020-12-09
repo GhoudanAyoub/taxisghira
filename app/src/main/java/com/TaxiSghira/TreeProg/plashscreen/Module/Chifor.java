@@ -1,9 +1,13 @@
 package com.TaxiSghira.TreeProg.plashscreen.Module;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "chifor")
 public class Chifor {
 
-
-    private String id;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private String fullname;
     private String phone;
     private String cin;
@@ -14,8 +18,7 @@ public class Chifor {
 
     public Chifor() { }
 
-    public Chifor(String id, String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng, String status) {
-        this.id = id;
+    public Chifor( String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng, String status) {
         this.fullname = fullname;
         this.phone = phone;
         this.cin = cin;
@@ -33,11 +36,11 @@ public class Chifor {
         Status = status;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

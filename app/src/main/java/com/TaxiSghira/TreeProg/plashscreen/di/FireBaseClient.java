@@ -1,7 +1,5 @@
-package com.TaxiSghira.TreeProg.plashscreen.API;
+package com.TaxiSghira.TreeProg.plashscreen.di;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;

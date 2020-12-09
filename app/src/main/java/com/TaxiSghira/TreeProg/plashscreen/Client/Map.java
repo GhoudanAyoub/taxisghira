@@ -1,6 +1,7 @@
 package com.TaxiSghira.TreeProg.plashscreen.Client;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -26,11 +27,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.TaxiSghira.TreeProg.plashscreen.API.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.PersonalInfo;
-import com.TaxiSghira.TreeProg.plashscreen.Authentication.Util_List;
 import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseDriverInfoListener;
 import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseFailedListener;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
@@ -43,9 +42,9 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
-import com.TaxiSghira.TreeProg.plashscreen.ui.FavorViewModel;
+import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.ui.MapViewModel;
-import com.TaxiSghira.TreeProg.plashscreen.ui.PersonalInfoModelViewClass;
+import com.TaxiSghira.TreeProg.plashscreen.ui.Util_List;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -103,15 +102,12 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -120,7 +116,10 @@ import timber.log.Timber;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
-public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener, IFirebaseDriverInfoListener, IFirebaseFailedListener {
+@AndroidEntryPoint
+public class Map extends AppCompatActivity
+        implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener,
+        IFirebaseDriverInfoListener, IFirebaseFailedListener {
 
     @BindView(R.id.textView5) TextView WelcomeText;
     @BindView(R.id.textView) TextView ComingFrom;
@@ -147,7 +146,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private Client Current_Client;
     private Demande d1;
-    FavorViewModel favorViewModel;
     MapViewModel mapViewModel;
 
     //online System
@@ -173,24 +171,18 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
         FirebaseApp.initializeApp(getApplicationContext());
+        mapViewModel =  new ViewModelProvider(this).get(MapViewModel.class);
 
+        //Log.d("FIREBASE", refreshedToken);
         checkMapServices();
         views();
         init();
-
-        //Log.d("FIREBASETOKEN", refreshedToken);
-        PersonalInfoModelViewClass personalInfoModelViewClass = ViewModelProviders.of(this).get(PersonalInfoModelViewClass.class);
-        mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
-        favorViewModel = ViewModelProviders.of(this).get(FavorViewModel.class);
-
-        personalInfoModelViewClass.getClientInfo();
+        mapViewModel.getClientInfo();
         mapViewModel.GetPickDemand();
-
-
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        personalInfoModelViewClass.getClientMutableLiveData().observe(this, client -> {
+        mapViewModel.getClientMutableLiveData().observe(this, client -> {
             if (client == null)
                 buildAlertMessageNoDataFound();
             else
@@ -223,6 +215,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         locationCallback = new LocationCallback(){
+                @SuppressLint("CheckResult")
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
@@ -237,63 +230,45 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         RxView.clicks(findViewById(R.id.FindButton))
                                 .throttleFirst(5, TimeUnit.SECONDS)
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Observer<Unit>() {
-                                    @Override
-                                    public void onSubscribe(Disposable d) {
-                                        compositeDisposable.add(d);
+                                .subscribe(unit -> {
+                                    Snackbar.make(findViewById(android.R.id.content),getString(R.string.lookingForBestRoute),Snackbar.LENGTH_SHORT).show();
+                                    Point destinationPoint = null;
+                                    try {
+                                        final Geocoder geocoder = new Geocoder(getApplicationContext());
+                                        final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
+                                        final List<Address> list = geocoder.getFromLocationName(locName, 1);
+                                        if (!(list == null || list.isEmpty())) {
+                                            final Address address = list.get(0);
+                                            destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
                                     }
-
-                                    @Override
-                                    public void onNext(Unit unit) {
-                                        Snackbar.make(findViewById(android.R.id.content),"المرجو الانتظار جاري البحت عن طريق مناسب",Snackbar.LENGTH_SHORT).show();
-                                        Point destinationPoint = null;
-                                        try {
-                                            final Geocoder geocoder = new Geocoder(getApplicationContext());
-                                            final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
-                                            final List<Address> list = geocoder.getFromLocationName(locName, 1);
-                                            if (!(list == null || list.isEmpty())) {
-                                                final Address address = list.get(0);
-                                                destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
-                                            }
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        Point originPoint = null;
-                                        try {
-                                            assert locationComponent.getLastKnownLocation() != null;
-                                            originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                                                    locationComponent.getLastKnownLocation().getLatitude());
-                                        } catch (Exception e) {
-                                            Timber.e(e);
-                                            startActivity(new Intent(getApplicationContext(), Map.class));
-                                        }
-                                        //destination point
-                                        GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
-                                        if (dest != null) {
-                                            dest.setGeoJson(Feature.fromGeometry(destinationPoint));
-                                        }
-                                        //location point
-                                        GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
-                                        if (origin != null) {
-                                            origin.setGeoJson(Feature.fromGeometry(originPoint));
-                                        }
-                                        try {
-                                            getRoute(originPoint, destinationPoint,location);
-                                        } catch (Exception e) {
-                                            Timber.e(e);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
+                                    Point originPoint = null;
+                                    try {
+                                        assert locationComponent.getLastKnownLocation() != null;
+                                        originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                                                locationComponent.getLastKnownLocation().getLatitude());
+                                    } catch (Exception e) {
                                         Timber.e(e);
-                                        compositeDisposable.clear();
+                                        startActivity(new Intent(getApplicationContext(), Map.class));
                                     }
-
-                                    @Override
-                                    public void onComplete() {
+                                    //destination point
+                                    GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
+                                    if (dest != null) {
+                                        dest.setGeoJson(Feature.fromGeometry(destinationPoint));
                                     }
-                                });
+                                    //location point
+                                    GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
+                                    if (origin != null) {
+                                        origin.setGeoJson(Feature.fromGeometry(originPoint));
+                                    }
+                                    try {
+                                        getRoute(originPoint, destinationPoint,location);
+                                    } catch (Exception e) {
+                                        Timber.e(e);
+                                    }
+                                },Throwable::printStackTrace);
                     }
                     //if user Has Change Location Cal and Load Driver Again
                     if (firstTime) {
@@ -423,14 +398,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 });
     }
 
+    @SuppressLint("CheckResult")
     private void addDriverMarker() {
         if (Common.driversFound.size() > 0) {
             Observable.fromIterable(Common.driversFound.keySet())
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(key -> FindDriversByID(Common.driversFound.get(key))
-                            , throwable -> Snackbar.make(findViewById(android.R.id.content),throwable.getMessage(), Snackbar.LENGTH_SHORT).show()
-                            , () -> Timber.e("Got Some Driver Inside"));
+                    .subscribe(key -> FindDriversByID(Objects.requireNonNull(Common.driversFound.get(key)))
+                            , throwable -> Snackbar.make(findViewById(android.R.id.content), Objects.requireNonNull(throwable.getMessage()), Snackbar.LENGTH_SHORT).show()
+                            , () -> Timber.e(getString(R.string.gotSomeDriverInfor)));
         } else {
             Snackbar.make(findViewById(android.R.id.content),getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
         }
@@ -476,10 +452,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     private void buildAlertMessageNoDataFound() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("المرجو ملأ معلوماتكم الشخصية")
+        builder.setMessage(getString(R.string.persnalDataRequest))
                 .setIcon(R.drawable.ic_account_circle_black)
                 .setCancelable(false)
-                .setPositiveButton("حسنا", (dialog, which) -> startActivity(new Intent(getApplicationContext(), PersonalInfo.class)));
+                .setPositiveButton(getString(R.string.okey), (dialog, which) -> startActivity(new Intent(getApplicationContext(), PersonalInfo.class)));
         final AlertDialog alert = builder.create();
         alert.show();
     }
@@ -498,9 +474,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.drawable.ic_gps_off_black_24dp)
-                .setMessage("المرجو تشغيل GPS")
+                .setMessage(getString(R.string.ActivatGpsRequest))
                 .setCancelable(false)
-                .setPositiveButton("حسنا", (dialog, id) -> startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 333));
+                .setPositiveButton(getString(R.string.okey), (dialog, id) -> startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 333));
         final AlertDialog alert = builder.create();
         alert.show();
     }
@@ -526,8 +502,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
 
     @Override
-    public void onBackPressed() {
-    }
+    public void onBackPressed() { }
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
@@ -554,69 +529,32 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     e.printStackTrace();
                 }
             });
-
             //getAcceptData
             mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
-
         });
     }
 
+    @SuppressLint("CheckResult")
     private void ShowDriverDashboard(Pickup pickup1) {
         try {
             Timber.tag("wtf").e("Inside");
             findViewById(R.id.progBar).setVisibility(View.GONE);
             layout_location_display_info.setVisibility(View.GONE);
             layout_driver_display_info.setVisibility(View.VISIBLE);
-            ListTaxiNum.setText(pickup1.getTaxi_num());
-            ListChName.setText(pickup1.getCh_Name());
-            ListChNum.setText(pickup1.getCh_num());
+            ListTaxiNum.setText(pickup1.getChifor().getTaxi_NUM());
+            ListChName.setText(pickup1.getChifor().getFullname());
+            ListChNum.setText(pickup1.getChifor().getPhone());
             RxView.clicks(findViewById(R.id.Favories))
                     .throttleFirst(5, TimeUnit.SECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Unit>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-                            compositeDisposable.add(d);
-                        }
-
-                        @Override
-                        public void onNext(Unit unit) {
-                            favorViewModel.AddFAvor(Objects.requireNonNull(Common.Current_Client_Id)
-                                    , pickup1.getCh_Name(), pickup1.getCh_num(), pickup1.getTaxi_num(), Common.Current_Client_DispalyName);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Timber.e(e);
-                        }
-
-                        @Override
-                        public void onComplete() {
-                        }
-                    });
+                    .subscribe(unit -> {mapViewModel.InsertData(pickup1.getChifor());
+                                Toast.makeText(getApplicationContext(),getString(R.string.AddedToFavor), Toast.LENGTH_SHORT).show();}
+                    , Throwable::printStackTrace);
             RxView.clicks(findViewById(R.id.calls))
                     .throttleFirst(5, TimeUnit.SECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Unit>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-                            compositeDisposable.add(d);
-                        }
-
-                        @Override
-                        public void onNext(Unit unit) {
-                            startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getCh_num())));
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Timber.e(e);
-                        }
-
-                        @Override
-                        public void onComplete() {
-                        }
-                    });
+                    .subscribe(unit -> startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getChifor().getPhone())))
+                    ,Throwable::printStackTrace);
         } catch (Throwable t) {
             Timber.e(t);
         }
@@ -654,15 +592,18 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     .destination(destination)
                     .build()
                     .getRoute(new Callback<DirectionsResponse>() {
+                        @SuppressLint("CheckResult")
                         @Override
                         public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
-                            Completable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                            Completable.timer(500,
+                                    TimeUnit.MILLISECONDS,
+                                    AndroidSchedulers.mainThread())
                                     .subscribe(() -> buildAlertMessageSearchOperation(location));
                             if (response.body() == null) {
-                                Toast.makeText(getApplicationContext(), "لم يتم العثور على مسارات", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), getString(R.string.NoRouteWasFound), Toast.LENGTH_SHORT).show();
                                 return;
                             } else if (response.body().routes().size() < 1) {
-                                Toast.makeText(getApplicationContext(), "لم يتم العثور على مسارات", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), getString(R.string.NoRouteWasFound), Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             currentRoute = response.body().routes().get(0);
@@ -685,6 +626,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         }
     }
 
+    @SuppressLint("CheckResult")
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
         layout_location_display_info.setVisibility(View.VISIBLE);
         findDriver2.setVisibility(View.VISIBLE);
@@ -698,53 +640,24 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude());
-        d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(), Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
+        d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(),
+                Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
 
         RxView.clicks(findDriver2).
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Unit>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        compositeDisposable.add(d);
-                    }
-
-                    @Override
-                    public void onNext(Unit unit) {
-                        mapViewModel.AddDemand(d1);
-                        findDriver2.setVisibility(View.GONE);
-                        DeleteDemand.setVisibility(View.VISIBLE);
-                        findViewById(R.id.progBar).setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Timber.e(e);
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+                .subscribe(unit -> {
+                    mapViewModel.AddDemand(d1);
+                    findDriver2.setVisibility(View.GONE);
+                    DeleteDemand.setVisibility(View.VISIBLE);
+                    findViewById(R.id.progBar).setVisibility(View.VISIBLE);}
+                    ,Throwable::printStackTrace);
         RxView.clicks(DeleteDemand)
                 .throttleFirst(2,TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Unit>() {
-                    @Override
-                    public void onSubscribe(Disposable d) { compositeDisposable.add(d);}
-
-                    @Override
-                    public void onNext(Unit unit) {
-                        RemoveDemand(d1);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) { Timber.e(e);}
-
-                    @Override
-                    public void onComplete() { }
-                });
+                .subscribe(unit -> RemoveDemand(d1),Throwable::printStackTrace);
     }
 
     private void UploadLocation(Location locationComponent) {
@@ -758,7 +671,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         if (error != null)
                             Timber.e(error.getMessage());
                         else
-                            Snackbar.make(findViewById(android.R.id.content), "يبحث .....", Snackbar.LENGTH_LONG);
+                            Snackbar.make(findViewById(android.R.id.content), getString(R.string.Looking), Snackbar.LENGTH_LONG);
                     });
         }
     }
@@ -832,7 +745,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mLocationPermissionGranted = false;
-        if (requestCode == 334) {// If request is cancelled, the result arrays are empty.
+        if (requestCode == 334) {
+            // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermissionGranted = true;

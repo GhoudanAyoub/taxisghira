@@ -8,6 +8,7 @@ public class Pickup {
     private String Ch_num;
     private String Taxi_num;
     private Boolean Status;
+    private Chifor chifor;
 
     public Pickup() {
     }
@@ -21,6 +22,14 @@ public class Pickup {
         Status = s;
     }
 
+
+    public Chifor getChifor() {
+        return chifor;
+    }
+
+    public void setChifor(Chifor chifor) {
+        this.chifor = chifor;
+    }
 
     public Boolean getStatus() {
         return Status;
