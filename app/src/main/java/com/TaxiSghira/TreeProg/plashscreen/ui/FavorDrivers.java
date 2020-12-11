@@ -1,4 +1,4 @@
-package com.TaxiSghira.TreeProg.plashscreen.Client;
+package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.TaxiSghira.TreeProg.plashscreen.Adapters.FavorAdapter;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.TaxiSghira.TreeProg.plashscreen.ui.MapViewModel;
-import com.TaxiSghira.TreeProg.plashscreen.ui.Util_List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 

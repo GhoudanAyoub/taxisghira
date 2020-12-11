@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Client.Map">
+    tools:context=".ui.Map">
 
     <include
         android:id="@+id/include"
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginLeft="32dp"
-        android:layout_marginTop="84dp"
+        android:layout_marginTop="60dp"
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
         android:background="@drawable/cerclebackgroundwhite"
@@ -54,6 +54,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1 "
             android:background="@drawable/ccp_selectable_bg"
+            android:contentDescription="TODO"
             app:srcCompat="@drawable/ll" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -93,7 +94,7 @@
     </TableRow>
 
     <LinearLayout
-        android:id="@+id/findDriver"
+        android:id="@+id/BottomContainerHolder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"

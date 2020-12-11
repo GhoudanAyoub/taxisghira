@@ -31,9 +31,9 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".ui.Util_List" />
-        <activity android:name=".Client.FavorDrivers" />
+        <activity android:name=".ui.FavorDrivers" />
         <activity
-            android:name=".Client.Map"
+            android:name=".ui.Map"
             android:label="@string/title_activity_map"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Authentication.Auth" />

@@ -15,7 +15,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
-import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;

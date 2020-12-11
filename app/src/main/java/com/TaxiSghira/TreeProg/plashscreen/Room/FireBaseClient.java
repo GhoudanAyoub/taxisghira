@@ -1,4 +1,4 @@
-package com.TaxiSghira.TreeProg.plashscreen.di;
+package com.TaxiSghira.TreeProg.plashscreen.Room;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

@@ -12,8 +12,8 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
-import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.di.Repository;
+import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Room.Repository;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,10 +32,13 @@ public class MapViewModel extends ViewModel {
 
     private MutableLiveData<Pickup> acceptMutableLiveData;
     private MutableLiveData<Client> clientMutableLiveData;
+    private MutableLiveData<Demande> DemandMutableLiveData;
 
     public LiveData<List<Chifor>> getListLiveDataFavorChifor() { return listLiveDataFavorChifor; }
     public LiveData<Pickup> getAcceptMutableLiveData() { acceptMutableLiveData = new MutableLiveData<>();return acceptMutableLiveData; }
     public LiveData<Client> getClientMutableLiveData() { clientMutableLiveData = new MutableLiveData<>();return clientMutableLiveData; }
+    public LiveData<Demande> getDemandMutableLiveData() { DemandMutableLiveData = new MutableLiveData<>();return DemandMutableLiveData; }
+
 
 
     @ViewModelInject
@@ -47,13 +50,17 @@ public class MapViewModel extends ViewModel {
     public void getClientInfo() {
         FirebaseDatabase.getInstance()
                 .getReference(Common.Client_DataBase_Table)
-                .orderByChild(Common.Gmail_String)
-                .equalTo(Common.Current_Client_Gmail.toLowerCase())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            clientMutableLiveData.setValue(dataSnapshot.getValue(Client.class));
+                            Client client = null;
+                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                                client  = dataSnapshot1.getValue(Client.class);
+                            }
+                            assert client != null;
+                            if (client.getGmail().equals(Common.Current_Client_Gmail))
+                                clientMutableLiveData.setValue(client);
                         }
                     }
 
@@ -64,7 +71,7 @@ public class MapViewModel extends ViewModel {
                 });
     }
 
-    //Demand Data
+    //Pick Data
     public void GetPickDemand() {
         FireBaseClient.getFireBaseClient()
                 .getFirebaseDatabase()
@@ -124,6 +131,8 @@ public class MapViewModel extends ViewModel {
                     }
                 });
     }
+
+    //Demand Data
     public void AddDemand(Demande demande) {
         FireBaseClient.getFireBaseClient().getDatabaseReference()
                 .child(Common.Demande_DataBase_Table)
@@ -133,7 +142,51 @@ public class MapViewModel extends ViewModel {
                 .addOnFailureListener(Throwable::printStackTrace)
                 .addOnSuccessListener(v -> Timber.i("DemandAdded"));
     }
+    public void GetDemand(){
+        FireBaseClient.getFireBaseClient().getDatabaseReference()
+                .child(Common.Demande_DataBase_Table)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Demande demande1 = null;
+                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                                demande1 = dataSnapshot1.getValue(Demande.class);
+                                if (demande1!=null && demande1.getClientId().equals(Common.Current_Client_Id))
+                                    DemandMutableLiveData.setValue(demande1);
+                            }
+                        }
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+    public void RemoveDemand(Demande demande) {
+        FireBaseClient.getFireBaseClient().getDatabaseReference()
+                .child(Common.Demande_DataBase_Table)
+                .child(demande.getCity())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Demande demande1 = null;
+                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                                demande1 = dataSnapshot1.getValue(Demande.class);
+                                if (demande1!=null && demande1.getClientId().equals(Common.Current_Client_Id))
+                                    dataSnapshot1.getRef().removeValue();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
     //Favor Chifor Data
     public void InsertData(Chifor chifor){repository.InsertData(chifor);}
     public void DeleteData(int id){repository.DeleteData(id);}

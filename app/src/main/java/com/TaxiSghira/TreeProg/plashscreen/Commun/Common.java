@@ -4,7 +4,7 @@ import android.widget.TextView;
 
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
-import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.mapbox.mapboxsdk.annotations.Marker;
 
 import java.util.ArrayList;

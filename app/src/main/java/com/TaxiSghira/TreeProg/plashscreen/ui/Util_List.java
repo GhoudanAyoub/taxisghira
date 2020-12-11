@@ -11,10 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.ActivitySetting;
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.Auth;
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.PersonalInfo;
-import com.TaxiSghira.TreeProg.plashscreen.Client.FavorDrivers;
-import com.TaxiSghira.TreeProg.plashscreen.Client.Map;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.bumptech.glide.Glide;
 
 public class Util_List extends AppCompatActivity {

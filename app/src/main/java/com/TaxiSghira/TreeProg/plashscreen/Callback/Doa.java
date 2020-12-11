@@ -1,4 +1,4 @@
-package com.TaxiSghira.TreeProg.plashscreen.di;
+package com.TaxiSghira.TreeProg.plashscreen.Callback;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;

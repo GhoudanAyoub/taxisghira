@@ -1,4 +1,4 @@
-package com.TaxiSghira.TreeProg.plashscreen.Client;
+package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -44,9 +44,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
-import com.TaxiSghira.TreeProg.plashscreen.di.FireBaseClient;
-import com.TaxiSghira.TreeProg.plashscreen.ui.MapViewModel;
-import com.TaxiSghira.TreeProg.plashscreen.ui.Util_List;
+import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -139,6 +137,8 @@ public class Map extends AppCompatActivity
     TextInputLayout WhereToGo;
     @BindView(R.id.findDriver2)
     Button findDriver2;
+    @BindView(R.id.BottomContainerHolder)
+    LinearLayout BottomContainerHolder;
     @BindView(R.id.DeleteDemand)
     Button DeleteDemand;
     @BindView(R.id.layout_location_display_info)
@@ -191,6 +191,8 @@ public class Map extends AppCompatActivity
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
 
         views();
+        mapViewModel.getClientInfo();
+        mapViewModel.GetPickDemand();
         CheckMyData();
         //Log.d("FIREBASE", refreshedToken);
         if (isMapsEnabled()) {
@@ -198,11 +200,20 @@ public class Map extends AppCompatActivity
         } else {
             buildAlertMessageNoGps();
         }
-        mapViewModel.getClientInfo();
-        mapViewModel.GetPickDemand();
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
+    }
+
+    private void CheckMyDemand() {
+        mapViewModel.getDemandMutableLiveData().observe(this,demande -> {
+            findViewById(R.id.progBar).setVisibility(View.VISIBLE);
+            layout_location_display_info.setVisibility(View.VISIBLE);
+            findDriver2.setVisibility(View.GONE);
+            DeleteDemand.setVisibility(View.VISIBLE);
+            BottomContainerHolder.setVisibility(View.VISIBLE);
+            Snackbar.make(findViewById(android.R.id.content), R.string.You_Still_Have_Demand_OnProgress, Snackbar.LENGTH_LONG).show();
+        });
     }
 
     private void CheckMyData() {
@@ -220,6 +231,7 @@ public class Map extends AppCompatActivity
         mapView = findViewById(R.id.mapView);
         findViewById(R.id.progBar).setVisibility(View.GONE);
         findDriver2.setVisibility(View.GONE);
+        BottomContainerHolder.setVisibility(View.GONE);
         layout_driver_display_info.setVisibility(View.GONE);
         layout_location_display_info.setVisibility(View.GONE);
         DeleteDemand.setVisibility(View.GONE);
@@ -269,7 +281,7 @@ public class Map extends AppCompatActivity
                         UploadLocation(location);
                         //Find Button For Lunch Search Request
                         RxView.clicks(findViewById(R.id.FindButton))
-                                .throttleFirst(5, TimeUnit.SECONDS)
+                                .throttleFirst(3, TimeUnit.SECONDS)
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(unit -> {
                                     Snackbar.make(findViewById(android.R.id.content), getString(R.string.lookingForBestRoute), Snackbar.LENGTH_SHORT).show();
@@ -349,93 +361,95 @@ public class Map extends AppCompatActivity
                     Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
                     List<Address> addressList;
                     try {
-                        addressList = geocoder.getFromLocation(location.getLatitude()
-                                , location.getLongitude(), 1);
-                        cityName = addressList.get(0).getLocality();
+                        if (location !=null) {
+                            addressList = geocoder.getFromLocation(location.getLatitude()
+                                    , location.getLongitude(), 1);
+                            cityName = addressList.get(0).getLocality();
 
-                        //query
-                        driver_location_ref = FirebaseDatabase.getInstance()
-                                .getReference(Common.Drivers_LOCATION_REFERENCES)
-                                .child(cityName);
-                        GeoFire geoFire = new GeoFire(driver_location_ref);
-                        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), distances);
-                        geoQuery.removeAllListeners();
+                            //query
+                            driver_location_ref = FirebaseDatabase.getInstance()
+                                    .getReference(Common.Drivers_LOCATION_REFERENCES)
+                                    .child(cityName);
+                            GeoFire geoFire = new GeoFire(driver_location_ref);
+                            GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), distances);
+                            geoQuery.removeAllListeners();
 
-                        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                            @Override
-                            public void onKeyEntered(String key, GeoLocation location) {
-                                //Common.driversFound.add(new DriverGeoModel(key, location));
-                                if (!Common.driversFound.containsKey(key))
-                                    Common.driversFound.put(key, new DriverGeoModel(key, location));
-                            }
-
-                            @Override
-                            public void onKeyExited(String key) {
-
-                            }
-
-                            @Override
-                            public void onKeyMoved(String key, GeoLocation location) {
-
-                            }
-
-                            @Override
-                            public void onGeoQueryReady() {
-                                if (distances <= LIMIT_RANGE) {
-                                    distances++;
-                                    loadAvailableDrivers();
-                                } else {
-                                    distances = 1000.0;
-                                    addDriverMarker();
+                            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                                @Override
+                                public void onKeyEntered(String key, GeoLocation location) {
+                                    //Common.driversFound.add(new DriverGeoModel(key, location));
+                                    if (!Common.driversFound.containsKey(key))
+                                        Common.driversFound.put(key, new DriverGeoModel(key, location));
                                 }
-                            }
 
-                            @Override
-                            public void onGeoQueryError(DatabaseError error) {
-                                Timber.e(error.getMessage());
-                            }
-                        });
+                                @Override
+                                public void onKeyExited(String key) {
 
-                        //listen to new Driver In Range
-                        driver_location_ref.addChildEventListener(new ChildEventListener() {
-                            @Override
-                            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                                if (snapshot.hasChildren()) {
-                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                        GeoQueryModel geoQueryModel = dataSnapshot.getValue(GeoQueryModel.class);
-                                        assert geoQueryModel != null;
-                                        GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0), geoQueryModel.getL().get(1));
-                                        DriverGeoModel driverGeoModel = new DriverGeoModel(dataSnapshot.getKey(), geoLocation);
-                                        Location newDriverLocation = new Location("");
-                                        newDriverLocation.setLatitude(geoLocation.latitude);
-                                        newDriverLocation.setLongitude(geoLocation.longitude);
-                                        float newDistance = location.distanceTo(newDriverLocation) / 1000;
-                                        if (newDistance <= LIMIT_RANGE)
-                                            FindDriversByID(driverGeoModel);
+                                }
+
+                                @Override
+                                public void onKeyMoved(String key, GeoLocation location) {
+
+                                }
+
+                                @Override
+                                public void onGeoQueryReady() {
+                                    if (distances <= LIMIT_RANGE) {
+                                        distances++;
+                                        loadAvailableDrivers();
+                                    } else {
+                                        distances = 1000.0;
+                                        addDriverMarker();
                                     }
                                 }
-                            }
 
-                            @Override
-                            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                                @Override
+                                public void onGeoQueryError(DatabaseError error) {
+                                    Timber.e(error.getMessage());
+                                }
+                            });
 
-                            }
+                            //listen to new Driver In Range
+                            driver_location_ref.addChildEventListener(new ChildEventListener() {
+                                @Override
+                                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                                    if (snapshot.hasChildren()) {
+                                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                            GeoQueryModel geoQueryModel = dataSnapshot.getValue(GeoQueryModel.class);
+                                            assert geoQueryModel != null;
+                                            GeoLocation geoLocation = new GeoLocation(geoQueryModel.getL().get(0), geoQueryModel.getL().get(1));
+                                            DriverGeoModel driverGeoModel = new DriverGeoModel(dataSnapshot.getKey(), geoLocation);
+                                            Location newDriverLocation = new Location("");
+                                            newDriverLocation.setLatitude(geoLocation.latitude);
+                                            newDriverLocation.setLongitude(geoLocation.longitude);
+                                            float newDistance = location.distanceTo(newDriverLocation) / 1000;
+                                            if (newDistance <= LIMIT_RANGE)
+                                                FindDriversByID(driverGeoModel);
+                                        }
+                                    }
+                                }
 
-                            @Override
-                            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                                @Override
+                                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
-                            }
+                                }
 
-                            @Override
-                            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                                @Override
+                                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
 
-                            }
+                                }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                                @Override
+                                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
-                            }
-                        });
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -559,18 +573,20 @@ public class Map extends AppCompatActivity
 
         //get current Location animation
         findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
-            assert locationComponent.getLastKnownLocation() != null;
             try {
-                CameraPosition position = new CameraPosition
-                        .Builder()
-                        .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
-                                locationComponent.getLastKnownLocation().getLongitude()))
-                        .zoom(17)
-                        .bearing(180).tilt(30)
-                        .build();
-                mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
+                if (locationComponent.getLastKnownLocation() != null) {
+                    CameraPosition position = new CameraPosition
+                            .Builder()
+                            .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
+                                    locationComponent.getLastKnownLocation().getLongitude()))
+                            .zoom(17)
+                            .bearing(180).tilt(30)
+                            .build();
+                    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(getApplicationContext(), getString(R.string.LocationNotFound), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -579,6 +595,10 @@ public class Map extends AppCompatActivity
         BuildLocationCallBack();
         UpdateLocation();
 
+        /*
+        mapViewModel.GetDemand();
+        CheckMyDemand();
+         */
         //getAcceptData
         mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
     }
@@ -595,6 +615,7 @@ public class Map extends AppCompatActivity
             ListChNum.setText(pickup1.getChifor().getPhone());
             RxView.clicks(findViewById(R.id.Favories))
                     .throttleFirst(5, TimeUnit.SECONDS)
+                    .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(unit -> {
                                 mapViewModel.InsertData(pickup1.getChifor());
@@ -603,6 +624,7 @@ public class Map extends AppCompatActivity
                             , Throwable::printStackTrace);
             RxView.clicks(findViewById(R.id.calls))
                     .throttleFirst(5, TimeUnit.SECONDS)
+                    .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(unit -> startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getChifor().getPhone())))
                             , Throwable::printStackTrace);
@@ -681,6 +703,7 @@ public class Map extends AppCompatActivity
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
         layout_location_display_info.setVisibility(View.VISIBLE);
         findDriver2.setVisibility(View.VISIBLE);
+        BottomContainerHolder.setVisibility(View.VISIBLE);
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
             List<Address> currentAddress = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
@@ -709,7 +732,14 @@ public class Map extends AppCompatActivity
         RxView.clicks(DeleteDemand)
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(unit -> RemoveDemand(d1), Throwable::printStackTrace);
+                .subscribe(unit -> {
+                    findViewById(R.id.progBar).setVisibility(View.GONE);
+                    mapViewModel.RemoveDemand(d1);
+                    layout_location_display_info.setVisibility(View.GONE);
+                    BottomContainerHolder.setVisibility(View.GONE);
+                    Snackbar.make(findViewById(android.R.id.content), R.string.you_canceled_your_demand, Snackbar.LENGTH_LONG).show();
+
+                }, Throwable::printStackTrace);
     }
 
     private void UploadLocation(Location locationComponent) {
@@ -728,29 +758,6 @@ public class Map extends AppCompatActivity
         }
     }
 
-    public void RemoveDemand(Demande demande) {
-        findViewById(R.id.progBar).setVisibility(View.GONE);
-        FirebaseDatabase.getInstance().getReference(Common.Demande_DataBase_Table)
-                .child(demande.getCity())
-                .orderByChild("clientId")
-                .equalTo(Common.Current_Client_Id)
-                .removeEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren())
-                                dataSnapshot1.getRef().removeValue();
-                            layout_location_display_info.setVisibility(View.GONE);
-                            Snackbar.make(findViewById(android.R.id.content), R.string.you_canceled_your_demand, Snackbar.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Timber.e(databaseError.getMessage());
-                    }
-                });
-    }
 
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -844,7 +851,6 @@ public class Map extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         mapView.onStop();
-        stopService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
     }
 
     @Override

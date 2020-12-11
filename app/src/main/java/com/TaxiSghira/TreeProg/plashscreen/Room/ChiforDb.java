@@ -1,9 +1,9 @@
-package com.TaxiSghira.TreeProg.plashscreen.di;
+package com.TaxiSghira.TreeProg.plashscreen.Room;
 
-import androidx.room.Dao;
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
+import com.TaxiSghira.TreeProg.plashscreen.Callback.Doa;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 
 @Database(entities = {Chifor.class},version = 1)

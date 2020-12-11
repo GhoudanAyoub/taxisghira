@@ -1,8 +1,10 @@
-package com.TaxiSghira.TreeProg.plashscreen.di;
+package com.TaxiSghira.TreeProg.plashscreen.Room;
 
 import android.app.Application;
 
 import androidx.room.Room;
+
+import com.TaxiSghira.TreeProg.plashscreen.Callback.Doa;
 
 import javax.inject.Singleton;
 

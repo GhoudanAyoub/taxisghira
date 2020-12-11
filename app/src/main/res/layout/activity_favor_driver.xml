@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".Client.FavorDrivers">
+    tools:context=".ui.FavorDrivers">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/listAnim22"

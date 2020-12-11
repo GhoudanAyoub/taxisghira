@@ -1,7 +1,8 @@
-package com.TaxiSghira.TreeProg.plashscreen.di;
+package com.TaxiSghira.TreeProg.plashscreen.Room;
 
 import androidx.lifecycle.LiveData;
 
+import com.TaxiSghira.TreeProg.plashscreen.Callback.Doa;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 
 import java.util.List;

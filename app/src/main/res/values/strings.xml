@@ -297,6 +297,8 @@ limitations under the License.
     <string name="FillEveryPlace">املأ الفراغ من فضلك!!</string>
     <string name="VerificationPhoneSucced">تم التحقح من رقمك بنجاح😄</string>
     <string name="PleaseEntreTheCorrectCode">المرجو ادخال الارقام الاربعة الصحيحة!</string>
+    <string name="LocationNotFound">لم نتمكن من الحصول على موقعك في الوقت الحالي ، يرجى المحاولة مرة أخرى لاحقًا</string>
+    <string name="You_Still_Have_Demand_OnProgress">طلبك لا يزال قيد المعالجة !!</string>
 
 
 </resources>
