@@ -2,17 +2,23 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "08cfe147295c93f34143105021bdf53f",
+    "identityHash": "35832d45dd1c649ec72f1203a9b3baac",
     "entities": [
       {
         "tableName": "chifor",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fullname` TEXT, `phone` TEXT, `cin` TEXT, `taxi_NUM` TEXT, `lnt` REAL NOT NULL, `lng` REAL NOT NULL, `Status` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id2` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT, `fullname` TEXT, `phone` TEXT, `cin` TEXT, `taxi_NUM` TEXT, `lnt` REAL NOT NULL, `lng` REAL NOT NULL, `Status` TEXT)",
         "fields": [
+          {
+            "fieldPath": "id2",
+            "columnName": "id2",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "fullname",
@@ -59,7 +65,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "id"
+            "id2"
           ],
           "autoGenerate": true
         },
@@ -70,7 +76,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '08cfe147295c93f34143105021bdf53f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35832d45dd1c649ec72f1203a9b3baac')"
     ]
   }
 }

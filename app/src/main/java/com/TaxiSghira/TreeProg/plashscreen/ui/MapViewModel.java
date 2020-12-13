@@ -58,8 +58,7 @@ public class MapViewModel extends ViewModel {
                             for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
                                 client  = dataSnapshot1.getValue(Client.class);
                             }
-                            assert client != null;
-                            if (client.getGmail().equals(Common.Current_Client_Gmail))
+                            if (client != null && client.getGmail().equals(Common.Current_Client_Gmail))
                                 clientMutableLiveData.setValue(client);
                         }
                     }

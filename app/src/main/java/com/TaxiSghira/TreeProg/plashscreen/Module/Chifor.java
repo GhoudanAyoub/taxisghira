@@ -7,7 +7,8 @@ import androidx.room.PrimaryKey;
 public class Chifor {
 
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private int id2;
+    private String id;
     private String fullname;
     private String phone;
     private String cin;
@@ -18,7 +19,8 @@ public class Chifor {
 
     public Chifor() { }
 
-    public Chifor( String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng, String status) {
+    public Chifor(String id, String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng, String status) {
+        this.id = id;
         this.fullname = fullname;
         this.phone = phone;
         this.cin = cin;
@@ -36,11 +38,19 @@ public class Chifor {
         Status = status;
     }
 
-    public int getId() {
+    public int getId2() {
+        return id2;
+    }
+
+    public void setId2(int id2) {
+        this.id2 = id2;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

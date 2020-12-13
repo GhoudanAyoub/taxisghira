@@ -74,7 +74,7 @@ public class InfoTest extends Fragment {
                 .push()
                 .setValue(client)
                 .addOnFailureListener(Timber::e);
-            startActivity(new Intent(getApplicationContext(), Map.class));
+            startActivity(new Intent(requireActivity(), Map.class));
             Toast.makeText(getApplicationContext(),getString(R.string.welcome),Toast.LENGTH_SHORT).show();
         }catch (Throwable throwable){Timber.e(throwable);}
     }
