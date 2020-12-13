@@ -390,8 +390,9 @@ public class Map extends AppCompatActivity
                             geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                                 @Override
                                 public void onKeyEntered(String key, GeoLocation location) {
-                                    Common.driversFound.add(new DriverGeoModel(key, location));
-                                 //   if (!Common.driversFound.containsKey(key)) Common.driversFound.put(key, new DriverGeoModel(key, location));
+                                    //Common.driversFound.add(new DriverGeoModel(key, location));
+                                    if (!Common.driversFound.containsKey(key))
+                                        Common.driversFound.put(key, new DriverGeoModel(key, location));
                                 }
 
                                 @Override
@@ -468,10 +469,10 @@ public class Map extends AppCompatActivity
     @SuppressLint("CheckResult")
     private void addDriverMarker() {
         if (Common.driversFound.size() > 0) {
-            Observable.fromIterable(Common.driversFound)
+            Observable.fromIterable(Common.driversFound.keySet())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::FindDriversByID, Throwable::printStackTrace);
+                    .subscribe(key ->FindDriversByID(Common.driversFound.get(key)), Throwable::printStackTrace);
         } else {
             Snackbar.make(findViewById(android.R.id.content), getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
         }
@@ -488,6 +489,7 @@ public class Map extends AppCompatActivity
                                 Chifor chifor = dataSnapshot.getValue(Chifor.class);
                                 if (chifor!=null && chifor.getId().equals(driverGeoModel.getKey())){
                                     driverGeoModel.setChifor(chifor);
+                                    Common.driversFound.get(driverGeoModel.getKey()).setChifor(chifor);
                                     iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel);
                                 }
                             }
@@ -737,6 +739,7 @@ public class Map extends AppCompatActivity
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
+                    FindNearByDrivers(location);
                             mapViewModel.AddDemand(d1);
                             findDriver2.setVisibility(View.GONE);
                             DeleteDemand.setVisibility(View.VISIBLE);
@@ -755,6 +758,33 @@ public class Map extends AppCompatActivity
                     Snackbar.make(findViewById(android.R.id.content), R.string.you_canceled_your_demand, Snackbar.LENGTH_LONG).show();
 
                 }, Throwable::printStackTrace);
+    }
+
+    private void FindNearByDrivers(Location location) {
+        if (Common.driversFound.size()>0){
+            float min_distance = 0;
+            DriverGeoModel foundDriver = Common.driversFound.get(Common.driversFound.keySet().iterator().next());
+            Location currentRiderLocation = new Location("");
+            currentRiderLocation.setLatitude(location.getLatitude());
+            currentRiderLocation.setLongitude(location.getLongitude());
+            for (String key : Common.driversFound.keySet()){
+                Location DriverLocation = new Location("");
+                DriverLocation.setLatitude(Common.driversFound.get(key).getGeoLocation().latitude);
+                DriverLocation.setLongitude(Common.driversFound.get(key).getGeoLocation().longitude);
+
+                if (min_distance == 0){
+                    min_distance = DriverLocation.distanceTo(currentRiderLocation);
+                    foundDriver = Common.driversFound.get(key);
+                }else if (DriverLocation.distanceTo(currentRiderLocation) < min_distance){
+                    min_distance = DriverLocation.distanceTo(currentRiderLocation);
+                    foundDriver = Common.driversFound.get(key);
+                }
+//                Snackbar.make(findViewById(android.R.id.content),
+//                        new StringBuilder("Found Driver : ").append(foundDriver.getChifor().getFullname()),
+//                        Snackbar.LENGTH_LONG).show();
+                UserUtils.sendRequestToDriver(mapViewModel,getApplicationContext(),foundDriver,location);
+            }
+        }
     }
 
 

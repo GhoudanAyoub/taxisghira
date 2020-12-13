@@ -25,15 +25,19 @@ public class Common {
     public static final String Demande_DataBase_Table = "Demande";
     public static final String Pickup_DataBase_Table = "Pickup";
     public static final String Client_DataBase_Table = "Client";
-
+    public static final String TOKEN_REFERENCE = "Token";
     public static final String Client_Id_String = "id";
     public static final String Gmail_String = "gmail";
     public static final String ClientName_String = "ClientName";
     public static final String CLIENT_LOCATION_REFERENCES = "ClientLocation";
     public static final String Drivers_LOCATION_REFERENCES = "DriversLocation";
     public static final String city = "city";
+    public static final String NOTI_TITLE = "title";
+    public static final String NOTI_BODY= "body";
+    public static final String REQUEST_DRIVER_TITLE = "RequestDriver";
+    public static final String RIDER_PICK_UP_LOCATION = "RequestLocation";
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
-    public static Set<DriverGeoModel> driversFound = new HashSet<>();
+    public static Map<String,DriverGeoModel> driversFound = new HashMap<>();
     public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();
 
     public static void SetWelcomeMessage(TextView textView){

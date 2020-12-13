@@ -11,6 +11,8 @@ import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
+import com.TaxiSghira.TreeProg.plashscreen.Module.FCMResponse;
+import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Room.Repository;
@@ -22,6 +24,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+import retrofit2.http.Body;
 import timber.log.Timber;
 
 public class MapViewModel extends ViewModel {
@@ -45,6 +49,9 @@ public class MapViewModel extends ViewModel {
     public MapViewModel(Repository repository) {
         this.repository = repository;
     }
+
+    //Send Notification
+    public Observable<FCMResponse> sendNotification( FCMSendData body){return repository.sendNotification(body);}
 
     //Client Data
     public void getClientInfo() {
