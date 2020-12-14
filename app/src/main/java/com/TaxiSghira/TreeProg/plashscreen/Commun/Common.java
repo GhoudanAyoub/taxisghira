@@ -5,6 +5,7 @@ import android.widget.TextView;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
+import com.google.firebase.auth.FirebaseAuth;
 import com.mapbox.mapboxsdk.annotations.Marker;
 
 import java.util.ArrayList;
@@ -13,11 +14,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class Common {
 
-    public static final String Current_Client_Id = FireBaseClient.getFireBaseClient().getFirebaseUser().getUid();
+    public static final String Current_Client_Id = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     public static final String Current_Client_DispalyName = FireBaseClient.getFireBaseClient().getFirebaseUser().getDisplayName();
     public static final String Current_Client_Gmail = FireBaseClient.getFireBaseClient().getFirebaseUser().getEmail();
     public static final String Favor_DataBase_Table = "Favor";

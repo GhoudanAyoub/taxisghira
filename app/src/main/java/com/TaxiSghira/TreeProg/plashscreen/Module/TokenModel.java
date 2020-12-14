@@ -6,6 +6,10 @@ public class TokenModel {
     public TokenModel() {
     }
 
+    public TokenModel(String token) {
+        Token = token;
+    }
+
     public String getToken() {
         return Token;
     }

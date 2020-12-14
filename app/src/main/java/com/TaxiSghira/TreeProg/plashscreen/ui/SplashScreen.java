@@ -10,13 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.Auth;
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.installations.FirebaseInstallations;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +29,7 @@ import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 
-public class SpachScreen extends AppCompatActivity {
+public class SplashScreen extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
     @SuppressLint("CheckResult")
@@ -38,18 +42,25 @@ public class SpachScreen extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         Completable.timer(3, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                    if (firebaseAuth.getCurrentUser() != null)
+                    if (firebaseAuth.getCurrentUser() != null) {
+                        FirebaseInstallations.getInstance()
+                                .getId()
+                                .addOnFailureListener(Throwable::printStackTrace)
+                                .addOnSuccessListener(instanceIdResult -> {
+                                    if (instanceIdResult != null)
+                                        UserUtils.UpdateToken(this,instanceIdResult);
+                                });
                         checkUserFromDataBase(firebaseAuth.getCurrentUser());
+                    }
                     else
                         startActivity(new Intent(getApplication(), Auth.class));
-                },Throwable::printStackTrace);
+                });
     }
 
     private void checkUserFromDataBase(FirebaseUser user) {
-        FireBaseClient.getFireBaseClient()
-                .getFirebaseDatabase()
-                .getReference("Client")
-                .orderByChild("id")
+        FirebaseDatabase.getInstance()
+                .getReference(Common.Client_DataBase_Table)
+                .orderByChild(Common.Client_Id_String)
                 .equalTo(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override

@@ -1,10 +1,12 @@
 package com.TaxiSghira.TreeProg.plashscreen.Service;
-
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -13,54 +15,75 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.TaxiSghira.TreeProg.plashscreen.ui.SpachScreen;
+import com.TaxiSghira.TreeProg.plashscreen.ui.SplashScreen;
+import com.TaxiSghira.TreeProg.plashscreen.ui.UserUtils;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
+import timber.log.Timber;
+
 public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
+        if (Common.Current_Client_Id != null)
+            UserUtils.UpdateToken(this,s);
     }
 
     @Override
     public void onMessageReceived(@NotNull RemoteMessage remoteMessage) {
         try {
-            if (remoteMessage.getData().size() > 0 || remoteMessage.getNotification() != null) {
-                messagingstyle_Notification();
+            Map<String,String> dataRec = remoteMessage.getData();
+            if (dataRec!=null){
+                messagingstyle_Notification(new Random().nextInt());
             }
         } catch (Throwable e) {
-            Log.e("feald", "onMessageReceivedNotification: " + e.getMessage());
+            Timber.e("onMessageReceivedNotification: %s", e.getMessage());
         }
 
     }
 
-    private void messagingstyle_Notification() {
-        Intent intent = new Intent(getApplicationContext(), SpachScreen.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        int notificationId = 4;
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                .setSmallIcon(R.drawable.no)
-                .setContentTitle("TaxiSghira")
-                .setContentText("لقد اتى سائقك")
-                .setAutoCancel(true);
-        builder.setContentIntent(pendingIntent);
-
+    private void messagingstyle_Notification(int notificationId) {
         Uri path = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        builder.setSound(path);
+        PendingIntent pendingIntent = null;
+        Intent intent = new Intent(getApplicationContext(), SplashScreen.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (intent != null)
+            pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        String channelId = "TreeProg_TaxiSghira";
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "YOUR_CHANNEL_ID";
             NotificationChannel channel = new NotificationChannel(channelId,
-                    "Channel human readable title",
-                    NotificationManager.IMPORTANCE_DEFAULT);
+                    "TaxiSghira", NotificationManager.IMPORTANCE_HIGH);
+
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+            channel.setVibrationPattern(new long[]{0,1000,500,1000});
+            channel.enableVibration(true);
+            channel.setDescription("TaxiSghira");
             notificationManager.createNotificationChannel(channel);
-            builder.setChannelId(channelId);
         }
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
+                .setSmallIcon(R.drawable.taxisymb)
+                .setContentTitle("TaxiSghira")
+                .setContentText("لقد اتى سائقك")
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.no))
+                .setSound(path);
+
+        if (pendingIntent != null)
+            builder.setContentIntent(pendingIntent);
         notificationManager.notify(notificationId, builder.build());
     }
 }

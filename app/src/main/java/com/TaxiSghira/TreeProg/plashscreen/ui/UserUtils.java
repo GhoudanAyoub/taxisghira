@@ -9,6 +9,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
 import com.TaxiSghira.TreeProg.plashscreen.Module.TokenModel;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -17,6 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -25,6 +27,15 @@ import io.reactivex.schedulers.Schedulers;
 
 public class UserUtils {
 
+    public static void UpdateToken(Context context , String  token){
+        TokenModel token1 = new TokenModel(token);
+        FirebaseDatabase.getInstance()
+                .getReference(Common.TOKEN_REFERENCE)
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .setValue(token1)
+                .addOnFailureListener(Throwable::printStackTrace)
+                .addOnSuccessListener(aVoid -> {});
+    }
     public static void sendRequestToDriver( MapViewModel mapViewModel,Context application , DriverGeoModel foundDriver, Location location) {
 
         CompositeDisposable disposable = new CompositeDisposable();
