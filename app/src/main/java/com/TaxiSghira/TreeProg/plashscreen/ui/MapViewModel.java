@@ -51,7 +51,7 @@ public class MapViewModel extends ViewModel {
     }
 
     //Send Notification
-    public Observable<FCMResponse> sendNotification( FCMSendData body){return repository.sendNotification(body);}
+    public Observable<FCMResponse> sendNotification(FCMSendData body){return repository.sendNotification(body);}
 
     //Client Data
     public void getClientInfo() {
@@ -193,8 +193,15 @@ public class MapViewModel extends ViewModel {
                     }
                 });
     }
+
     //Favor Chifor Data
     public void InsertData(Chifor chifor){repository.InsertData(chifor);}
     public void DeleteData(int id){repository.DeleteData(id);}
     public void GetData(){listLiveDataFavorChifor = repository.GetData();}
+
+
+    //Get Direction For Notification
+    public Observable<String> getDirections(String mode, String transit_routing, String from, String to, String key){
+        return repository.getDirections(mode,transit_routing,from,to,key);
+    }
 }

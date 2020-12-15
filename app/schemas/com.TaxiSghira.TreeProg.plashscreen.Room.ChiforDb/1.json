@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "35832d45dd1c649ec72f1203a9b3baac",
+    "identityHash": "8348d0e5945b56ff1beda7a8897d3892",
     "entities": [
       {
         "tableName": "chifor",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id2` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT, `fullname` TEXT, `phone` TEXT, `cin` TEXT, `taxi_NUM` TEXT, `lnt` REAL NOT NULL, `lng` REAL NOT NULL, `Status` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id2` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT, `fullname` TEXT, `phone` TEXT, `cin` TEXT, `taxi_NUM` TEXT, `lnt` REAL NOT NULL, `lng` REAL NOT NULL, `Status` TEXT, `city` TEXT)",
         "fields": [
           {
             "fieldPath": "id2",
@@ -61,6 +61,12 @@
             "columnName": "Status",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "city",
+            "columnName": "city",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -76,7 +82,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35832d45dd1c649ec72f1203a9b3baac')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8348d0e5945b56ff1beda7a8897d3892')"
     ]
   }
 }

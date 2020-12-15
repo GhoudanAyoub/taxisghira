@@ -30,7 +30,7 @@ public class UserUtils {
     public static void UpdateToken(Context context , String  token){
         TokenModel token1 = new TokenModel(token);
         FirebaseDatabase.getInstance()
-                .getReference(Common.TOKEN_REFERENCE)
+                .getReference(Common.CLIENT_TOKEN_REFERENCE)
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .setValue(token1)
                 .addOnFailureListener(Throwable::printStackTrace)
@@ -40,10 +40,9 @@ public class UserUtils {
 
         CompositeDisposable disposable = new CompositeDisposable();
 
-
         FirebaseDatabase
                 .getInstance()
-                .getReference(Common.TOKEN_REFERENCE)
+                .getReference(Common.DRIVER_TOKEN_REFERENCE)
                 .child(foundDriver.getKey())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -54,11 +53,12 @@ public class UserUtils {
                             Map<String,String> notification = new HashMap<String,String>();
                             notification.put(Common.NOTI_TITLE,Common.REQUEST_DRIVER_TITLE );
                             notification.put(Common.NOTI_BODY,"Message For Driver Action" );
-                            notification.put(Common.RIDER_PICK_UP_LOCATION,new StringBuilder("")
-                                    .append(location.getLatitude())
-                            .append(",")
-                            .append(location.getLongitude())
-                            .toString());
+                            notification.put(Common.RIDER_KEY,Common.Current_Client_Id);
+
+                            notification.put(Common.RIDER_PICK_UP_LOCATION,
+                                    location.getLatitude() +
+                                    "," +
+                                    location.getLongitude());
 
                             FCMSendData fcmSendData = new FCMSendData(token.getToken(),notification);
                             disposable.add(mapViewModel.sendNotification(fcmSendData)

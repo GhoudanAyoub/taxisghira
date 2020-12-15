@@ -174,7 +174,7 @@ public class Map extends AppCompatActivity
     private LocationCallback locationCallback;
     private double distances = 1000.0;
     private double LIMIT_RANGE = 10.0;
-    private Location previousLocation, CurrentLocation;
+    private Location previousLocation, CurrentLocation,MyLocation;
     private Boolean firstTime = true;
     private String cityName, bestProvider;
     public Criteria criteria;
@@ -186,11 +186,15 @@ public class Map extends AppCompatActivity
 
 
 
+    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
+
+        if (FirebaseInstanceId.getInstance().getToken() != null)
+            UserUtils.UpdateToken(this,FirebaseInstanceId.getInstance().getToken());
         FirebaseApp.initializeApp(getApplicationContext());
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
 
@@ -198,7 +202,7 @@ public class Map extends AppCompatActivity
         mapViewModel.getClientInfo();
         mapViewModel.GetPickDemand();
         CheckMyData();
-        Log.d("FIREBASE", FirebaseInstanceId.getInstance().getToken());
+
         if (isMapsEnabled()) {
             init();
         } else {
@@ -207,6 +211,31 @@ public class Map extends AppCompatActivity
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
+
+
+        RxView.clicks(findDriver2).
+                throttleFirst(2, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(unit -> {
+                            FindNearByDrivers(MyLocation);
+                            mapViewModel.AddDemand(d1);
+                            findDriver2.setVisibility(View.GONE);
+                            DeleteDemand.setVisibility(View.VISIBLE);
+                            findViewById(R.id.progBar).setVisibility(View.VISIBLE);
+                        }
+                        , Throwable::printStackTrace);
+        RxView.clicks(DeleteDemand)
+                .throttleFirst(2, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(unit -> {
+                    findViewById(R.id.progBar).setVisibility(View.GONE);
+                    mapViewModel.RemoveDemand(d1);
+                    navigationMapRoute.removeRoute();
+                    layout_location_display_info.setVisibility(View.GONE);
+                    BottomContainerHolder.setVisibility(View.GONE);
+                    Snackbar.make(findViewById(android.R.id.content), R.string.you_canceled_your_demand, Snackbar.LENGTH_LONG).show();
+
+                }, Throwable::printStackTrace);
     }
 
     private void CheckMyDemand() {
@@ -489,7 +518,7 @@ public class Map extends AppCompatActivity
                         if (snapshot.hasChildren()) {
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 Chifor chifor = dataSnapshot.getValue(Chifor.class);
-                                if (chifor!=null && chifor.getId().equals(driverGeoModel.getKey())){
+                                if ( chifor!=null && chifor.getId().equals(driverGeoModel.getKey())){
                                     driverGeoModel.setChifor(chifor);
                                     Common.driversFound.get(driverGeoModel.getKey()).setChifor(chifor);
                                     iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel);
@@ -715,12 +744,14 @@ public class Map extends AppCompatActivity
 
     @SuppressLint("CheckResult")
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
+        MyLocation = location;
         layout_location_display_info.setVisibility(View.VISIBLE);
         findDriver2.setVisibility(View.VISIBLE);
         BottomContainerHolder.setVisibility(View.VISIBLE);
+        DeleteDemand.setVisibility(View.GONE);
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
-            List<Address> currentAddress = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            List<Address> currentAddress = geocoder.getFromLocation(MyLocation.getLatitude(), MyLocation.getLongitude(), 1);
             if (currentAddress.size() > 0) {
                 ComingFrom.setText(currentAddress.get(0).getAddressLine(0));
                 GoingTO.setText(Objects.requireNonNull(WhereToGo.getEditText()).getText());
@@ -729,37 +760,12 @@ public class Map extends AppCompatActivity
             e.printStackTrace();
         }
 
-        UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude());
+        UserLocation userLocation = new UserLocation(MyLocation.getLatitude(), MyLocation.getLongitude());
         if (Current_Client != null)
             d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(),
                     Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
         else
             Snackbar.make(findViewById(android.R.id.content), getString(R.string.CantGetYrLocation), Snackbar.LENGTH_LONG).show();
-
-
-        RxView.clicks(findDriver2).
-                throttleFirst(2, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(unit -> {
-                    FindNearByDrivers(location);
-                            mapViewModel.AddDemand(d1);
-                            findDriver2.setVisibility(View.GONE);
-                            DeleteDemand.setVisibility(View.VISIBLE);
-                            findViewById(R.id.progBar).setVisibility(View.VISIBLE);
-                        }
-                        , Throwable::printStackTrace);
-        RxView.clicks(DeleteDemand)
-                .throttleFirst(2, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(unit -> {
-                    findViewById(R.id.progBar).setVisibility(View.GONE);
-                    mapViewModel.RemoveDemand(d1);
-                    layout_location_display_info.setVisibility(View.GONE);
-                    BottomContainerHolder.setVisibility(View.GONE);
-                    mapboxMap.clear();
-                    Snackbar.make(findViewById(android.R.id.content), R.string.you_canceled_your_demand, Snackbar.LENGTH_LONG).show();
-
-                }, Throwable::printStackTrace);
     }
 
     private void FindNearByDrivers(Location location) {
@@ -771,8 +777,8 @@ public class Map extends AppCompatActivity
             currentRiderLocation.setLongitude(location.getLongitude());
             for (String key : Common.driversFound.keySet()){
                 Location DriverLocation = new Location("");
-                DriverLocation.setLatitude(Common.driversFound.get(key).getGeoLocation().latitude);
-                DriverLocation.setLongitude(Common.driversFound.get(key).getGeoLocation().longitude);
+                DriverLocation.setLatitude(Objects.requireNonNull(Common.driversFound.get(key)).getGeoLocation().latitude);
+                DriverLocation.setLongitude(Objects.requireNonNull(Common.driversFound.get(key)).getGeoLocation().longitude);
 
                 if (min_distance == 0){
                     min_distance = DriverLocation.distanceTo(currentRiderLocation);
@@ -784,7 +790,8 @@ public class Map extends AppCompatActivity
 //                Snackbar.make(findViewById(android.R.id.content),
 //                        new StringBuilder("Found Driver : ").append(foundDriver.getChifor().getFullname()),
 //                        Snackbar.LENGTH_LONG).show();
-                UserUtils.sendRequestToDriver(mapViewModel,getApplicationContext(),foundDriver,location);
+                if (foundDriver != null)
+                    UserUtils.sendRequestToDriver(mapViewModel,getApplicationContext(),foundDriver,currentRiderLocation);
             }
         }
     }
@@ -950,7 +957,6 @@ public class Map extends AppCompatActivity
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        //remove location callback:
         manager.removeUpdates(this);
     }
 

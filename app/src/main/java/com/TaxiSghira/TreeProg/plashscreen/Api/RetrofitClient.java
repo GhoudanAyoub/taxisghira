@@ -1,8 +1,6 @@
 package com.TaxiSghira.TreeProg.plashscreen.Api;
 
-import com.TaxiSghira.TreeProg.plashscreen.Callback.IFCMService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.TaxiSghira.TreeProg.plashscreen.Callback.IGoogleAPI;
 
 import javax.inject.Singleton;
 
@@ -16,19 +14,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 @Module
 @InstallIn(ApplicationComponent.class)
-public class RetrofitFCMClient {
-    private static final String BaseURL = "https://fcm.googleapis.com/";
+public class RetrofitClient {
+    private static final String BaseURL = "http://maps.googleapis.com/";
+
     @Singleton
     @Provides
-    public static IFCMService RetrofitFCMClient() {
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
+    public static IGoogleAPI FCMClient() {
         return new Retrofit.Builder()
                 .baseUrl(BaseURL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
-                .create(IFCMService.class);
+                .create(IGoogleAPI.class);
     }
 }

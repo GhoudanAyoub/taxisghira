@@ -16,6 +16,7 @@ public class Chifor {
     private double lnt;
     private double lng;
     private String Status;
+    private String city;
 
     public Chifor() { }
 
@@ -28,6 +29,14 @@ public class Chifor {
         this.lnt = lnt;
         this.lng = lng;
         Status = status;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getStatus() {
