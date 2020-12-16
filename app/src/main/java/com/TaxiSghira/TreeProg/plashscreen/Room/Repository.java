@@ -8,6 +8,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Callback.IGoogleAPI;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMResponse;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
+import com.TaxiSghira.TreeProg.plashscreen.Module.routes;
 
 import java.util.List;
 
@@ -30,5 +31,5 @@ public class Repository {
     public void InsertData(Chifor chifor){doa.InsertData(chifor);}
     public void DeleteData(int id){doa.DeleteData(id);}
     public LiveData<List<Chifor>> GetData(){return doa.GetData();}
-    public Observable<String> getDirections(String mode, String transit_routing, String from, String to, String key){return iGoogleAPI.getDirections(mode,transit_routing,from,to,key);}
+    public Observable<routes> getDirections(String profile, String to, String access_token){return iGoogleAPI.getDirection(profile,to,access_token);}
 }

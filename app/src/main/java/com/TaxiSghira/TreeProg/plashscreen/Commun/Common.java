@@ -38,6 +38,7 @@ public class Common {
     public static final String CLIENT_TOKEN_REFERENCE = "ClientToken";
     public static final String Drivers_LOCATION_REFERENCES = "DriversLocation";
     public static final String CLIENT_LOCATION_REFERENCES = "ClientLocation";
+    public static final String CLIENT_DATA = "ClientData" ;
     public static final String REQUEST_DRIVER_TITLE = "RequestDriver";
     public static final String RIDER_KEY = "RiderKey" ;
     public static final String RIDER_PICK_UP_LOCATION = "RequestLocation";

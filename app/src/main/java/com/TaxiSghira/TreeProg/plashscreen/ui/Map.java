@@ -791,7 +791,7 @@ public class Map extends AppCompatActivity
 //                        new StringBuilder("Found Driver : ").append(foundDriver.getChifor().getFullname()),
 //                        Snackbar.LENGTH_LONG).show();
                 if (foundDriver != null)
-                    UserUtils.sendRequestToDriver(mapViewModel,getApplicationContext(),foundDriver,currentRiderLocation);
+                    UserUtils.sendRequestToDriver(mapViewModel,getApplicationContext(),foundDriver,currentRiderLocation,Current_Client);
             }
         }
     }

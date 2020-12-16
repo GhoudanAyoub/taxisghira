@@ -6,6 +6,7 @@ import android.location.Location;
 import androidx.annotation.NonNull;
 
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
 import com.TaxiSghira.TreeProg.plashscreen.Module.TokenModel;
@@ -36,7 +37,7 @@ public class UserUtils {
                 .addOnFailureListener(Throwable::printStackTrace)
                 .addOnSuccessListener(aVoid -> {});
     }
-    public static void sendRequestToDriver( MapViewModel mapViewModel,Context application , DriverGeoModel foundDriver, Location location) {
+    public static void sendRequestToDriver(MapViewModel mapViewModel, Context application , DriverGeoModel foundDriver, Location location, Client client) {
 
         CompositeDisposable disposable = new CompositeDisposable();
 
@@ -54,6 +55,7 @@ public class UserUtils {
                             notification.put(Common.NOTI_TITLE,Common.REQUEST_DRIVER_TITLE );
                             notification.put(Common.NOTI_BODY,"Message For Driver Action" );
                             notification.put(Common.RIDER_KEY,Common.Current_Client_Id);
+                            notification.put(Common.CLIENT_DATA,client.getFullname()+","+client.getTell());
 
                             notification.put(Common.RIDER_PICK_UP_LOCATION,
                                     location.getLatitude() +

@@ -1,5 +1,7 @@
 package com.TaxiSghira.TreeProg.plashscreen.ui;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.hilt.lifecycle.ViewModelInject;
@@ -14,6 +16,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMResponse;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
+import com.TaxiSghira.TreeProg.plashscreen.Module.route;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Room.Repository;
 import com.google.firebase.database.ChildEventListener;
@@ -25,6 +28,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.http.Body;
 import timber.log.Timber;
 
@@ -37,11 +43,13 @@ public class MapViewModel extends ViewModel {
     private MutableLiveData<Pickup> acceptMutableLiveData;
     private MutableLiveData<Client> clientMutableLiveData;
     private MutableLiveData<Demande> DemandMutableLiveData;
+    private MutableLiveData<List<route>> RouteLiveData= new MutableLiveData<>() ;
 
     public LiveData<List<Chifor>> getListLiveDataFavorChifor() { return listLiveDataFavorChifor; }
     public LiveData<Pickup> getAcceptMutableLiveData() { acceptMutableLiveData = new MutableLiveData<>();return acceptMutableLiveData; }
     public LiveData<Client> getClientMutableLiveData() { clientMutableLiveData = new MutableLiveData<>();return clientMutableLiveData; }
     public LiveData<Demande> getDemandMutableLiveData() { DemandMutableLiveData = new MutableLiveData<>();return DemandMutableLiveData; }
+    public LiveData<List<route>> getRouteLiveData() { if (RouteLiveData == null ) RouteLiveData = new MutableLiveData<>();return RouteLiveData; }
 
 
 
@@ -49,6 +57,7 @@ public class MapViewModel extends ViewModel {
     public MapViewModel(Repository repository) {
         this.repository = repository;
     }
+
 
     //Send Notification
     public Observable<FCMResponse> sendNotification(FCMSendData body){return repository.sendNotification(body);}
@@ -201,7 +210,11 @@ public class MapViewModel extends ViewModel {
 
 
     //Get Direction For Notification
-    public Observable<String> getDirections(String mode, String transit_routing, String from, String to, String key){
-        return repository.getDirections(mode,transit_routing,from,to,key);
+    @SuppressLint("CheckResult")
+    public Disposable getDirections(String profile, String to, String access_token){
+        return repository.getDirections(profile,to,access_token)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(routes -> RouteLiveData.setValue(routes.getRouteList()),Throwable::printStackTrace);
     }
 }
