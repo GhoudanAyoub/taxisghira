@@ -42,6 +42,7 @@ public class Common {
     public static final String REQUEST_DRIVER_TITLE = "RequestDriver";
     public static final String RIDER_KEY = "RiderKey" ;
     public static final String RIDER_PICK_UP_LOCATION = "RequestLocation";
+    public static final String REQUEST_DRIVER_DECLINE = "Decline";
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
     public static Map<String,DriverGeoModel> driversFound = new HashMap<>();
     public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();

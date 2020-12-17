@@ -6,6 +6,7 @@ public class DriverGeoModel {
     private String key;
     private GeoLocation geoLocation;
     private Chifor chifor;
+    private boolean isDecline;
 
     public DriverGeoModel() {
     }
@@ -13,6 +14,14 @@ public class DriverGeoModel {
     public DriverGeoModel(String key, GeoLocation geoLocation) {
         this.key = key;
         this.geoLocation = geoLocation;
+    }
+
+    public boolean isDecline() {
+        return isDecline;
+    }
+
+    public void setDecline(boolean decline) {
+        isDecline = decline;
     }
 
     public String getKey() {

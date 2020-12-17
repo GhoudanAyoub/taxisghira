@@ -1,6 +1,7 @@
 package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -20,6 +21,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -40,6 +42,8 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestFromDriver;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.SelectedPlaceEvent;
 import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
@@ -77,9 +81,11 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
@@ -94,6 +100,9 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -182,8 +191,8 @@ public class Map extends AppCompatActivity
     //Listeners
     IFirebaseDriverInfoListener iFirebaseDriverInfoListener;
     IFirebaseFailedListener iFirebaseFailedListener;
-
-
+    private DriverGeoModel LastDriverCall;
+    private SelectedPlaceEvent selectedplaceevent;
 
 
     @SuppressLint("CheckResult")
@@ -771,7 +780,7 @@ public class Map extends AppCompatActivity
     private void FindNearByDrivers(Location location) {
         if (Common.driversFound.size()>0){
             float min_distance = 0;
-            DriverGeoModel foundDriver = Common.driversFound.get(Common.driversFound.keySet().iterator().next());
+            DriverGeoModel foundDriver = null;
             Location currentRiderLocation = new Location("");
             currentRiderLocation.setLatitude(location.getLatitude());
             currentRiderLocation.setLongitude(location.getLongitude());
@@ -782,17 +791,37 @@ public class Map extends AppCompatActivity
 
                 if (min_distance == 0){
                     min_distance = DriverLocation.distanceTo(currentRiderLocation);
-                    foundDriver = Common.driversFound.get(key);
+                    if (!Objects.requireNonNull(Common.driversFound.get(key)).isDecline()){
+                        foundDriver = Common.driversFound.get(key);
+                        break;
+                    }else
+                        continue;
+
                 }else if (DriverLocation.distanceTo(currentRiderLocation) < min_distance){
                     min_distance = DriverLocation.distanceTo(currentRiderLocation);
-                    foundDriver = Common.driversFound.get(key);
+                    if (!Objects.requireNonNull(Common.driversFound.get(key)).isDecline()){
+                        foundDriver = Common.driversFound.get(key);
+                        break;
+                    }else
+                        continue;
                 }
 //                Snackbar.make(findViewById(android.R.id.content),
 //                        new StringBuilder("Found Driver : ").append(foundDriver.getChifor().getFullname()),
 //                        Snackbar.LENGTH_LONG).show();
-                if (foundDriver != null)
-                    UserUtils.sendRequestToDriver(mapViewModel,getApplicationContext(),foundDriver,currentRiderLocation,Current_Client);
+              }
+            if (foundDriver != null) {
+                UserUtils.sendRequestToDriver(mapViewModel, getApplicationContext(), foundDriver, currentRiderLocation, Current_Client);
+                LastDriverCall = foundDriver;
+            }else {
+                Snackbar.make(findViewById(android.R.id.content), getString(R.string.No_Driver_Accept_Request), Snackbar.LENGTH_LONG).show();
+                LastDriverCall = null;
+                finish();
             }
+
+        }else {
+            Snackbar.make(findViewById(android.R.id.content), getString(R.string.driver_not_Found), Snackbar.LENGTH_LONG).show();
+            LastDriverCall = null;
+            finish();
         }
     }
 
@@ -870,6 +899,8 @@ public class Map extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         mapView.onStart();
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
     }
 
     @Override
@@ -904,6 +935,11 @@ public class Map extends AppCompatActivity
         mFusedLocationClient.removeLocationUpdates(locationCallback);
         stopService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
         geoFire.removeLocation(Common.Current_Client_Id);
+
+        if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestFromDriver.class))
+            EventBus.getDefault().removeStickyEvent(DeclineRequestFromDriver.class);
+        EventBus.getDefault().unregister(this);
+
         compositeDisposable.clear();
     }
 
@@ -938,6 +974,9 @@ public class Map extends AppCompatActivity
                             Common.marerList.get(driverGeoModel.getKey()).remove();
                         Common.marerList.remove(driverGeoModel.getKey());
                         driverLocation.removeEventListener(this);
+                        if (Common.driversFound!=null && Common.driversFound.size() > 0)
+                            Common.driversFound.remove(driverGeoModel.getKey());
+                        driverLocation.removeEventListener(this);
                     }
                 }
 
@@ -960,6 +999,16 @@ public class Map extends AppCompatActivity
         manager.removeUpdates(this);
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void OnSelectedPlaceEvent(SelectedPlaceEvent event) { selectedplaceevent = event; }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void OnDeclineDriverRequest(DeclineRequestFromDriver event) {
+
+        if (LastDriverCall != null){
+            Common.driversFound.get(LastDriverCall.getKey()).setDecline(true);
+            FindNearByDrivers(selectedplaceevent.getOrigin());
+        }
+    }
     /*
 
     //GET BEARING

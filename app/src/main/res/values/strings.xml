@@ -300,6 +300,7 @@ limitations under the License.
     <string name="LocationNotFound">لم نتمكن من الحصول على موقعك في الوقت الحالي ، يرجى المحاولة مرة أخرى لاحقًا</string>
     <string name="You_Still_Have_Demand_OnProgress">طلبك لا يزال قيد المعالجة !!</string>
     <string name="CantGetYrLocation">لا يمكننا الحصول على موقعك الحالي حاول مرة أخرى لاحقًا</string>
+    <string name="No_Driver_Accept_Request">لا يوجد سائق يقبل الطلب</string>
 
 
 </resources>

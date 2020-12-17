@@ -16,16 +16,19 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestFromDriver;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.ui.SplashScreen;
 import com.TaxiSghira.TreeProg.plashscreen.ui.UserUtils;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 import timber.log.Timber;
@@ -43,7 +46,13 @@ public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
         try {
             Map<String,String> dataRec = remoteMessage.getData();
             if (dataRec!=null){
-                messagingstyle_Notification(new Random().nextInt());
+                if (dataRec.get(Common.NOTI_TITLE) != null){
+                    if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_DECLINE)){
+                        EventBus.getDefault().postSticky(new DeclineRequestFromDriver());
+                    }else {
+                        messagingstyle_Notification(new Random().nextInt());
+                    }
+                }
             }
         } catch (Throwable e) {
             Timber.e("onMessageReceivedNotification: %s", e.getMessage());
