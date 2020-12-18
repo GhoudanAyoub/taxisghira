@@ -15,7 +15,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMResponse;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Trip;
 import com.TaxiSghira.TreeProg.plashscreen.Module.route;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Room.Repository;
@@ -31,7 +31,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.http.Body;
 import timber.log.Timber;
 
 public class MapViewModel extends ViewModel {
@@ -40,13 +39,13 @@ public class MapViewModel extends ViewModel {
 
     private LiveData<List<Chifor>> listLiveDataFavorChifor = null;
 
-    private MutableLiveData<Pickup> acceptMutableLiveData;
+    private MutableLiveData<Trip> acceptMutableLiveData;
     private MutableLiveData<Client> clientMutableLiveData;
     private MutableLiveData<Demande> DemandMutableLiveData;
     private MutableLiveData<List<route>> RouteLiveData= new MutableLiveData<>() ;
 
     public LiveData<List<Chifor>> getListLiveDataFavorChifor() { return listLiveDataFavorChifor; }
-    public LiveData<Pickup> getAcceptMutableLiveData() { acceptMutableLiveData = new MutableLiveData<>();return acceptMutableLiveData; }
+    public LiveData<Trip> getAcceptMutableLiveData() { acceptMutableLiveData = new MutableLiveData<>();return acceptMutableLiveData; }
     public LiveData<Client> getClientMutableLiveData() { clientMutableLiveData = new MutableLiveData<>();return clientMutableLiveData; }
     public LiveData<Demande> getDemandMutableLiveData() { DemandMutableLiveData = new MutableLiveData<>();return DemandMutableLiveData; }
     public LiveData<List<route>> getRouteLiveData() { if (RouteLiveData == null ) RouteLiveData = new MutableLiveData<>();return RouteLiveData; }
@@ -127,7 +126,7 @@ public class MapViewModel extends ViewModel {
                             try {
                                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                                     if (dataSnapshot1.exists()) {
-                                        Pickup p = dataSnapshot1.getValue(Pickup.class);
+                                        Trip p = dataSnapshot1.getValue(Trip.class);
                                         assert p != null;
                                         if (p.getDemande().getClientId().equals(Common.Current_Client_Id)) {
                                             acceptMutableLiveData.setValue(p);

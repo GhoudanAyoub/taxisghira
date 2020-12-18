@@ -7,6 +7,7 @@ import com.google.android.gms.maps.model.LatLng;
 public class SelectedPlaceEvent {
     private Location origin;
     private Location destination;
+    private String OriginString,DestinationString;
 
     public SelectedPlaceEvent() { }
 
@@ -26,6 +27,19 @@ public class SelectedPlaceEvent {
         this.destination = destination;
     }
 
-    public String getOriginString(){return this.origin.getLatitude()+","+this.origin.getLongitude();}
-    public String getDestinationString(){return this.destination.getLatitude()+","+this.destination.getLongitude();}
+    public String getOriginString() {
+        return OriginString;
+    }
+
+    public void setOriginString(String originString) {
+        OriginString = originString;
+    }
+
+    public String getDestinationString() {
+        return DestinationString;
+    }
+
+    public void setDestinationString(String destinationString) {
+        DestinationString = destinationString;
+    }
 }

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.SelectedPlaceEvent;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
 import com.TaxiSghira.TreeProg.plashscreen.Module.TokenModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +38,7 @@ public class UserUtils {
                 .addOnFailureListener(Throwable::printStackTrace)
                 .addOnSuccessListener(aVoid -> {});
     }
-    public static void sendRequestToDriver(MapViewModel mapViewModel, Context application , DriverGeoModel foundDriver, Location location, Client client) {
+    public static void sendRequestToDriver(MapViewModel mapViewModel, SelectedPlaceEvent selectedPlaceEvent, DriverGeoModel foundDriver, Location location, Client client) {
 
         CompositeDisposable disposable = new CompositeDisposable();
 
@@ -57,10 +58,19 @@ public class UserUtils {
                             notification.put(Common.RIDER_KEY,Common.Current_Client_Id);
                             notification.put(Common.CLIENT_DATA,client.getFullname()+","+client.getTell());
 
+                            notification.put(Common.RIDER_PICKUP_LOCATION_STRING,selectedPlaceEvent.getOriginString());
+
+                            //To Change After With selectedPlaceEvent.getOrigin
                             notification.put(Common.RIDER_PICK_UP_LOCATION,
                                     location.getLatitude() +
                                     "," +
                                     location.getLongitude());
+
+                            notification.put(Common.RIDER_DESTINATION_STRING,selectedPlaceEvent.getDestinationString());
+                            notification.put(Common.RIDER_DESTINATION,
+                                    selectedPlaceEvent.getDestination().getLatitude() +
+                                            "," +
+                                            selectedPlaceEvent.getDestination().getLongitude());
 
                             FCMSendData fcmSendData = new FCMSendData(token.getToken(),notification);
                             disposable.add(mapViewModel.sendNotification(fcmSendData)

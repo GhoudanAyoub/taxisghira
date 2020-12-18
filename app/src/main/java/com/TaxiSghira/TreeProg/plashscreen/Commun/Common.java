@@ -26,7 +26,7 @@ public class Common {
     public static final String Favor_DataBase_Table = "Favor";
     public static final String Chifor_DataBase_Table = "Chifor";
     public static final String Demande_DataBase_Table = "Demande";
-    public static final String Pickup_DataBase_Table = "Pickup";
+    public static final String Pickup_DataBase_Table = "Trip";
     public static final String Client_DataBase_Table = "Client";
     public static final String city = "city";
     public static final String Client_Id_String = "id";
@@ -41,8 +41,11 @@ public class Common {
     public static final String CLIENT_DATA = "ClientData" ;
     public static final String REQUEST_DRIVER_TITLE = "RequestDriver";
     public static final String RIDER_KEY = "RiderKey" ;
-    public static final String RIDER_PICK_UP_LOCATION = "RequestLocation";
     public static final String REQUEST_DRIVER_DECLINE = "Decline";
+    public static final String RIDER_PICK_UP_LOCATION = "RequestLocation";
+    public static final String RIDER_PICKUP_LOCATION_STRING = "PickupLocationString";
+    public static final String RIDER_DESTINATION_STRING = "destinationLocationString";
+    public static final String RIDER_DESTINATION = "destinationLocation";
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
     public static Map<String,DriverGeoModel> driversFound = new HashMap<>();
     public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();

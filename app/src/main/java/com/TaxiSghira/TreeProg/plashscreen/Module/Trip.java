@@ -1,6 +1,6 @@
 package com.TaxiSghira.TreeProg.plashscreen.Module;
 
-public class Pickup {
+public class Trip {
 
 
     private Demande demande;
@@ -10,11 +10,11 @@ public class Pickup {
     private Boolean Status;
     private Chifor chifor;
 
-    public Pickup() {
+    public Trip() {
     }
 
 
-    public Pickup(Demande demande, String ch_Name, String ch_num, String taxi_num, Boolean s) {
+    public Trip(Demande demande, String ch_Name, String ch_num, String taxi_num, Boolean s) {
         this.demande = demande;
         Ch_Name = ch_Name;
         Ch_num = ch_num;

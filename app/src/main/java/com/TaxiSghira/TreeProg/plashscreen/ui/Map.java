@@ -1,7 +1,6 @@
 package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import android.Manifest;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -19,9 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,7 +42,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestFromDriver;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.SelectedPlaceEvent;
 import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Pickup;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Trip;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
@@ -81,11 +78,9 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
@@ -227,7 +222,6 @@ public class Map extends AppCompatActivity
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
                             FindNearByDrivers(MyLocation);
-                            mapViewModel.AddDemand(d1);
                             findDriver2.setVisibility(View.GONE);
                             DeleteDemand.setVisibility(View.VISIBLE);
                             findViewById(R.id.progBar).setVisibility(View.VISIBLE);
@@ -656,7 +650,7 @@ public class Map extends AppCompatActivity
     }
 
     @SuppressLint("CheckResult")
-    private void ShowDriverDashboard(Pickup pickup1) {
+    private void ShowDriverDashboard(Trip pickup1) {
         try {
             Timber.tag("wtf").e("Inside");
             findViewById(R.id.progBar).setVisibility(View.GONE);
