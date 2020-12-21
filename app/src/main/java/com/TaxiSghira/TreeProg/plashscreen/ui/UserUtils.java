@@ -16,6 +16,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
 
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class UserUtils {
                 .addOnFailureListener(Throwable::printStackTrace)
                 .addOnSuccessListener(aVoid -> {});
     }
-    public static void sendRequestToDriver(MapViewModel mapViewModel, SelectedPlaceEvent selectedPlaceEvent, DriverGeoModel foundDriver, Location location, Client client) {
+    public static void sendRequestToDriver(MapViewModel mapViewModel, LatLng Destination_point, String Destination_String, DriverGeoModel foundDriver, Location location, Client client) {
 
         CompositeDisposable disposable = new CompositeDisposable();
 
@@ -57,21 +58,10 @@ public class UserUtils {
                             notification.put(Common.NOTI_BODY,"Message For Driver Action" );
                             notification.put(Common.RIDER_KEY,Common.Current_Client_Id);
                             notification.put(Common.CLIENT_DATA,client.getFullname()+","+client.getTell());
-
-                            notification.put(Common.RIDER_PICKUP_LOCATION_STRING,selectedPlaceEvent.getOriginString());
-
-                            //To Change After With selectedPlaceEvent.getOrigin
-                            notification.put(Common.RIDER_PICK_UP_LOCATION,
-                                    location.getLatitude() +
-                                    "," +
-                                    location.getLongitude());
-
-                            notification.put(Common.RIDER_DESTINATION_STRING,selectedPlaceEvent.getDestinationString());
-                            notification.put(Common.RIDER_DESTINATION,
-                                    selectedPlaceEvent.getDestination().getLatitude() +
-                                            "," +
-                                            selectedPlaceEvent.getDestination().getLongitude());
-
+                            notification.put(Common.RIDER_PICKUP_LOCATION_STRING,location.toString());
+                            notification.put(Common.RIDER_PICK_UP_LOCATION, location.getLongitude() + "," + location.getLatitude());
+                            notification.put(Common.RIDER_DESTINATION_STRING,Destination_String);
+                            notification.put(Common.RIDER_DESTINATION, Destination_point.getLatitude() + "," + Destination_point.getLongitude());
                             FCMSendData fcmSendData = new FCMSendData(token.getToken(),notification);
                             disposable.add(mapViewModel.sendNotification(fcmSendData)
                             .subscribeOn(Schedulers.io())

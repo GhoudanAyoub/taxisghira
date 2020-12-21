@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestFromDriver;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverAcceptTripEvent;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.ui.SplashScreen;
 import com.TaxiSghira.TreeProg.plashscreen.ui.UserUtils;
@@ -48,8 +49,17 @@ public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
             if (dataRec!=null){
                 if (dataRec.get(Common.NOTI_TITLE) != null){
                     if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_DECLINE)){
-                        EventBus.getDefault().postSticky(new DeclineRequestFromDriver());
-                    }else {
+                        DeclineRequestFromDriver declineRequestFromDriver = new DeclineRequestFromDriver();
+                        declineRequestFromDriver.setKey(dataRec.get(Common.DRIVER_KEY));
+                        EventBus.getDefault().postSticky(declineRequestFromDriver);
+                    }
+
+                    else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_ACCEPT)){
+                        String TripKey = dataRec.get(Common.TRIP_KEY);
+                        EventBus.getDefault().postSticky(new DriverAcceptTripEvent(TripKey));
+                    }
+
+                    else {
                         messagingstyle_Notification(new Random().nextInt());
                     }
                 }

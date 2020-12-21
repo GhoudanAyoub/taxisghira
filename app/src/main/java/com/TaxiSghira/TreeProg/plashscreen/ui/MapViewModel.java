@@ -39,15 +39,11 @@ public class MapViewModel extends ViewModel {
 
     private LiveData<List<Chifor>> listLiveDataFavorChifor = null;
 
-    private MutableLiveData<Trip> acceptMutableLiveData;
     private MutableLiveData<Client> clientMutableLiveData;
-    private MutableLiveData<Demande> DemandMutableLiveData;
     private MutableLiveData<List<route>> RouteLiveData= new MutableLiveData<>() ;
 
     public LiveData<List<Chifor>> getListLiveDataFavorChifor() { return listLiveDataFavorChifor; }
-    public LiveData<Trip> getAcceptMutableLiveData() { acceptMutableLiveData = new MutableLiveData<>();return acceptMutableLiveData; }
     public LiveData<Client> getClientMutableLiveData() { clientMutableLiveData = new MutableLiveData<>();return clientMutableLiveData; }
-    public LiveData<Demande> getDemandMutableLiveData() { DemandMutableLiveData = new MutableLiveData<>();return DemandMutableLiveData; }
     public LiveData<List<route>> getRouteLiveData() { if (RouteLiveData == null ) RouteLiveData = new MutableLiveData<>();return RouteLiveData; }
 
 
@@ -85,122 +81,6 @@ public class MapViewModel extends ViewModel {
                 });
     }
 
-    //Pick Data
-    public void GetPickDemand() {
-        FireBaseClient.getFireBaseClient()
-                .getFirebaseDatabase()
-                .getReference(Common.Pickup_DataBase_Table)
-                .addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                    }
-
-                    @Override
-                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-        FireBaseClient.getFireBaseClient()
-                .getFirebaseDatabase()
-                .getReference(Common.Pickup_DataBase_Table)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            try {
-                                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                                    if (dataSnapshot1.exists()) {
-                                        Trip p = dataSnapshot1.getValue(Trip.class);
-                                        assert p != null;
-                                        if (p.getDemande().getClientId().equals(Common.Current_Client_Id)) {
-                                            acceptMutableLiveData.setValue(p);
-                                        }
-                                    }
-                                }
-                            } catch (Exception e) {
-                                Timber.e(e);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Timber.e(databaseError.getMessage());
-                    }
-                });
-    }
-
-    //Demand Data
-    public void AddDemand(Demande demande) {
-        FireBaseClient.getFireBaseClient().getDatabaseReference()
-                .child(Common.Demande_DataBase_Table)
-                .child(demande.getCity())
-                .push()
-                .setValue(demande)
-                .addOnFailureListener(Throwable::printStackTrace)
-                .addOnSuccessListener(v -> Timber.i("DemandAdded"));
-    }
-    public void GetDemand(){
-        FireBaseClient.getFireBaseClient().getDatabaseReference()
-                .child(Common.Demande_DataBase_Table)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Demande demande1 = null;
-                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                                demande1 = dataSnapshot1.getValue(Demande.class);
-                                if (demande1!=null && demande1.getClientId().equals(Common.Current_Client_Id))
-                                    DemandMutableLiveData.setValue(demande1);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-    }
-    public void RemoveDemand(Demande demande) {
-        FireBaseClient.getFireBaseClient().getDatabaseReference()
-                .child(Common.Demande_DataBase_Table)
-                .child(demande.getCity())
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Demande demande1 = null;
-                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                                demande1 = dataSnapshot1.getValue(Demande.class);
-                                if (demande1!=null && demande1.getClientId().equals(Common.Current_Client_Id))
-                                    dataSnapshot1.getRef().removeValue();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-    }
 
     //Favor Chifor Data
     public void InsertData(Chifor chifor){repository.InsertData(chifor);}

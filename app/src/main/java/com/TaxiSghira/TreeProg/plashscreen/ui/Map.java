@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -22,7 +21,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,16 +35,14 @@ import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseFailedListener;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
-import com.TaxiSghira.TreeProg.plashscreen.Module.Demande;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestFromDriver;
-import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.SelectedPlaceEvent;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverAcceptTripEvent;
 import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Trip;
-import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.R;
-import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -57,7 +53,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.ChildEventListener;
@@ -94,6 +89,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.shasin.notificationbanner.Banner;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -109,6 +105,7 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import dagger.hilt.android.AndroidEntryPoint;
+import es.dmoral.toasty.Toasty;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -123,6 +120,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacem
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
 @AndroidEntryPoint
+@SuppressLint("NonConstantResourceId")
 public class Map extends AppCompatActivity
         implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener,
         IFirebaseDriverInfoListener, IFirebaseFailedListener, LocationListener {
@@ -166,7 +164,6 @@ public class Map extends AppCompatActivity
     private boolean mLocationPermissionGranted = false;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private Client Current_Client;
-    private Demande d1;
     MapViewModel mapViewModel;
     private  LocationRequest locationRequest;
 
@@ -180,14 +177,14 @@ public class Map extends AppCompatActivity
     private double LIMIT_RANGE = 10.0;
     private Location previousLocation, CurrentLocation,MyLocation;
     private Boolean firstTime = true;
-    private String cityName, bestProvider;
-    public Criteria criteria;
+    private String cityName;
 
     //Listeners
     IFirebaseDriverInfoListener iFirebaseDriverInfoListener;
     IFirebaseFailedListener iFirebaseFailedListener;
     private DriverGeoModel LastDriverCall;
-    private SelectedPlaceEvent selectedplaceevent;
+    private LatLng Destination_point;
+    private Trip pickup12;
 
 
     @SuppressLint("CheckResult")
@@ -204,7 +201,6 @@ public class Map extends AppCompatActivity
 
         views();
         mapViewModel.getClientInfo();
-        mapViewModel.GetPickDemand();
         CheckMyData();
 
         if (isMapsEnabled()) {
@@ -224,32 +220,27 @@ public class Map extends AppCompatActivity
                             FindNearByDrivers(MyLocation);
                             findDriver2.setVisibility(View.GONE);
                             DeleteDemand.setVisibility(View.VISIBLE);
-                            findViewById(R.id.progBar).setVisibility(View.VISIBLE);
-                        }
-                        , Throwable::printStackTrace);
+                            findViewById(R.id.progBar).setVisibility(View.VISIBLE); }, Throwable::printStackTrace);
         RxView.clicks(DeleteDemand)
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
                     findViewById(R.id.progBar).setVisibility(View.GONE);
-                    mapViewModel.RemoveDemand(d1);
                     navigationMapRoute.removeRoute();
                     layout_location_display_info.setVisibility(View.GONE);
                     BottomContainerHolder.setVisibility(View.GONE);
-                    Snackbar.make(findViewById(android.R.id.content), R.string.you_canceled_your_demand, Snackbar.LENGTH_LONG).show();
-
-                }, Throwable::printStackTrace);
-    }
-
-    private void CheckMyDemand() {
-        mapViewModel.getDemandMutableLiveData().observe(this,demande -> {
-            findViewById(R.id.progBar).setVisibility(View.VISIBLE);
-            layout_location_display_info.setVisibility(View.VISIBLE);
-            findDriver2.setVisibility(View.GONE);
-            DeleteDemand.setVisibility(View.VISIBLE);
-            BottomContainerHolder.setVisibility(View.VISIBLE);
-            Snackbar.make(findViewById(android.R.id.content), R.string.You_Still_Have_Demand_OnProgress, Snackbar.LENGTH_LONG).show();
-        });
+                    Toasty.success(getApplicationContext(), getString(R.string.you_canceled_your_demand), Toasty.LENGTH_SHORT).show(); }, Throwable::printStackTrace);
+        RxView.clicks(findViewById(R.id.Favories))
+                .throttleFirst(2, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(unit -> {
+                            mapViewModel.InsertData(pickup12.getChifor());
+                            Toasty.success(getApplicationContext(), getString(R.string.AddedToFavor), Toasty.LENGTH_SHORT).show();
+                        }, Throwable::printStackTrace);
+        RxView.clicks(findViewById(R.id.calls))
+                .throttleFirst(2, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(unit -> startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup12.getChifor().getPhone()))), Throwable::printStackTrace);
     }
 
     private void CheckMyData() {
@@ -284,8 +275,6 @@ public class Map extends AppCompatActivity
         listAnim.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
 
         manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        criteria = new Criteria();
-        bestProvider = String.valueOf(manager.getBestProvider(criteria, true));
     }
 
     private void init() {
@@ -332,7 +321,7 @@ public class Map extends AppCompatActivity
                                 .throttleFirst(3, TimeUnit.SECONDS)
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(unit -> {
-                                    Snackbar.make(findViewById(android.R.id.content), getString(R.string.lookingForBestRoute), Snackbar.LENGTH_SHORT).show();
+                                    Toasty.info(getApplicationContext(),getString(R.string.lookingForBestRoute),Toasty.LENGTH_SHORT).show();
                                     Point destinationPoint = null;
                                     try {
                                         final Geocoder geocoder = new Geocoder(getApplicationContext());
@@ -508,7 +497,7 @@ public class Map extends AppCompatActivity
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(key ->FindDriversByID(Common.driversFound.get(key)), Throwable::printStackTrace);
         } else {
-            Snackbar.make(findViewById(android.R.id.content), getString(R.string.driver_not_Found), Snackbar.LENGTH_SHORT).show();
+            Banner.make(findViewById(android.R.id.content),this,Banner.INFO, getString(R.string.driver_not_Found), Banner.BOTTOM).show();
         }
     }
 
@@ -562,11 +551,10 @@ public class Map extends AppCompatActivity
                         if (error != null)
                             Timber.e(error.getMessage());
                         else
-                            Snackbar.make(findViewById(android.R.id.content), getString(R.string.Looking), Snackbar.LENGTH_LONG);
+                            Toasty.info(getApplicationContext(),getString(R.string.Looking),Toasty.LENGTH_SHORT);
                     });
         }
     }
-
 
     public boolean isMapsEnabled() {
         manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -632,7 +620,7 @@ public class Map extends AppCompatActivity
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(getApplicationContext(), getString(R.string.LocationNotFound), Toast.LENGTH_SHORT).show();
+                Toasty.warning(getApplicationContext(), getString(R.string.LocationNotFound), Toasty.LENGTH_SHORT).show();
             }
         });
 
@@ -640,18 +628,12 @@ public class Map extends AppCompatActivity
         BuildLocationRequest();
         BuildLocationCallBack();
         UpdateLocation();
-
-        /*
-        mapViewModel.GetDemand();
-        CheckMyDemand();
-         */
-        //getAcceptData
-        mapViewModel.getAcceptMutableLiveData().observe(Map.this, this::ShowDriverDashboard);
     }
 
     @SuppressLint("CheckResult")
     private void ShowDriverDashboard(Trip pickup1) {
         try {
+            pickup12 = pickup1;
             Timber.tag("wtf").e("Inside");
             findViewById(R.id.progBar).setVisibility(View.GONE);
             layout_location_display_info.setVisibility(View.GONE);
@@ -659,21 +641,6 @@ public class Map extends AppCompatActivity
             ListTaxiNum.setText(pickup1.getChifor().getTaxi_NUM());
             ListChName.setText(pickup1.getChifor().getFullname());
             ListChNum.setText(pickup1.getChifor().getPhone());
-            RxView.clicks(findViewById(R.id.Favories))
-                    .throttleFirst(5, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(unit -> {
-                                mapViewModel.InsertData(pickup1.getChifor());
-                                Toast.makeText(getApplicationContext(), getString(R.string.AddedToFavor), Toast.LENGTH_SHORT).show();
-                            }
-                            , Throwable::printStackTrace);
-            RxView.clicks(findViewById(R.id.calls))
-                    .throttleFirst(5, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(unit -> startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup1.getChifor().getPhone())))
-                            , Throwable::printStackTrace);
         } catch (Throwable t) {
             Timber.e(t);
         }
@@ -693,6 +660,7 @@ public class Map extends AppCompatActivity
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
             List<Address> addressList = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+            Destination_point = point;
             if (addressList.size() > 0) {
                 Objects.requireNonNull(WhereToGo.getEditText()).setText(addressList.get(0).getAddressLine(0));
             }
@@ -719,10 +687,10 @@ public class Map extends AppCompatActivity
                                     AndroidSchedulers.mainThread())
                                     .subscribe(() -> buildAlertMessageSearchOperation(location));
                             if (response.body() == null) {
-                                Toast.makeText(getApplicationContext(), getString(R.string.NoRouteWasFound), Toast.LENGTH_SHORT).show();
+                                Toasty.warning(getApplicationContext(), getString(R.string.NoRouteWasFound), Toasty.LENGTH_SHORT).show();
                                 return;
                             } else if (response.body().routes().size() < 1) {
-                                Toast.makeText(getApplicationContext(), getString(R.string.NoRouteWasFound), Toast.LENGTH_SHORT).show();
+                                Toasty.warning(getApplicationContext(), getString(R.string.NoRouteWasFound), Toasty.LENGTH_SHORT).show();
                                 return;
                             }
                             currentRoute = response.body().routes().get(0);
@@ -761,15 +729,7 @@ public class Map extends AppCompatActivity
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        UserLocation userLocation = new UserLocation(MyLocation.getLatitude(), MyLocation.getLongitude());
-        if (Current_Client != null)
-            d1 = new Demande(Common.Current_Client_Id, Common.Current_Client_DispalyName, Objects.requireNonNull(WhereToGo.getEditText()).getText().toString(),
-                    Current_Client.getCity(), userLocation.getLnt(), userLocation.getLong());
-        else
-            Snackbar.make(findViewById(android.R.id.content), getString(R.string.CantGetYrLocation), Snackbar.LENGTH_LONG).show();
-    }
+        }}
 
     private void FindNearByDrivers(Location location) {
         if (Common.driversFound.size()>0){
@@ -799,26 +759,22 @@ public class Map extends AppCompatActivity
                     }else
                         continue;
                 }
-//                Snackbar.make(findViewById(android.R.id.content),
-//                        new StringBuilder("Found Driver : ").append(foundDriver.getChifor().getFullname()),
-//                        Snackbar.LENGTH_LONG).show();
               }
             if (foundDriver != null) {
-                UserUtils.sendRequestToDriver(mapViewModel, getApplicationContext(), foundDriver, currentRiderLocation, Current_Client);
+                UserUtils.sendRequestToDriver(mapViewModel, Destination_point,WhereToGo.getEditText().getText().toString(), foundDriver, currentRiderLocation, Current_Client);
                 LastDriverCall = foundDriver;
             }else {
-                Snackbar.make(findViewById(android.R.id.content), getString(R.string.No_Driver_Accept_Request), Snackbar.LENGTH_LONG).show();
+                Toasty.info(getApplicationContext(),getString(R.string.No_Driver_Accept_Request),Toasty.LENGTH_SHORT).show();
                 LastDriverCall = null;
                 finish();
             }
 
         }else {
-            Snackbar.make(findViewById(android.R.id.content), getString(R.string.driver_not_Found), Snackbar.LENGTH_LONG).show();
+            Toasty.info(getApplicationContext(),getString(R.string.driver_not_Found),Toasty.LENGTH_SHORT).show();
             LastDriverCall = null;
             finish();
         }
     }
-
 
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -836,7 +792,7 @@ public class Map extends AppCompatActivity
                     != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
+                Toasty.warning(this, R.string.user_location_permission_explanation, Toasty.LENGTH_LONG).show();
                 return;
             }
             locationComponent.setLocationComponentEnabled(true);
@@ -876,7 +832,7 @@ public class Map extends AppCompatActivity
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
-        Toast.makeText(getApplicationContext(), R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
+        Toasty.warning(getApplicationContext(), R.string.user_location_permission_explanation, Toasty.LENGTH_LONG).show();
     }
 
     @Override
@@ -884,7 +840,7 @@ public class Map extends AppCompatActivity
         if (granted) {
             enableLocationComponent(Objects.requireNonNull(mapboxMap.getStyle()));
         } else {
-            Toast.makeText(getApplicationContext(), R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
+            Toasty.warning(getApplicationContext(), R.string.user_location_permission_not_granted, Toasty.LENGTH_LONG).show();
             finish();
         }
     }
@@ -932,6 +888,8 @@ public class Map extends AppCompatActivity
 
         if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestFromDriver.class))
             EventBus.getDefault().removeStickyEvent(DeclineRequestFromDriver.class);
+        if (EventBus.getDefault().hasSubscriberForEvent(DriverAcceptTripEvent.class))
+            EventBus.getDefault().removeStickyEvent(DriverAcceptTripEvent.class);
         EventBus.getDefault().unregister(this);
 
         compositeDisposable.clear();
@@ -994,68 +952,33 @@ public class Map extends AppCompatActivity
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void OnSelectedPlaceEvent(SelectedPlaceEvent event) { selectedplaceevent = event; }
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void OnDeclineDriverRequest(DeclineRequestFromDriver event) {
-
         if (LastDriverCall != null){
-            Common.driversFound.get(LastDriverCall.getKey()).setDecline(true);
-            FindNearByDrivers(selectedplaceevent.getOrigin());
+                Common.driversFound.get(LastDriverCall.getKey()).setDecline(true);
+                FindNearByDrivers(CurrentLocation);
         }
     }
-    /*
 
-    //GET BEARING
-    public static float getBearing(LatLng begin, LatLng end) {
-        //You can copy this function by link at description
-        double lat = Math.abs(begin.latitude - end.latitude);
-        double lng = Math.abs(begin.longitude - end.longitude);
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void OnAcceptDriverEvent(DriverAcceptTripEvent event) {
+        FirebaseDatabase.getInstance()
+                .getReference(Common.Pickup_DataBase_Table)
+                .child(event.getTripKey())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()){
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                Trip trip = dataSnapshot.getValue(Trip.class);
+                                ShowDriverDashboard(trip);
+                            }
+                        }
+                    }
 
-        if (begin.latitude < end.latitude && begin.longitude < end.longitude)
-            return (float) (Math.toDegrees(Math.atan(lng / lat)));
-        else if (begin.latitude >= end.latitude && begin.longitude < end.longitude)
-            return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 90);
-        else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude)
-            return (float) (Math.toDegrees(Math.atan(lng / lat)) + 180);
-        else if (begin.latitude < end.latitude && begin.longitude >= end.longitude)
-            return (float) ((90 - Math.toDegrees(Math.atan(lng / lat))) + 270);
-        return -1;
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
-
-    //DECODE POLY
-    public static List<LatLng> decodePoly(String encoded) {
-        List poly = new ArrayList();
-        int index=0,len=encoded.length();
-        int lat=0,lng=0;
-        while(index < len)
-        {
-            int b,shift=0,result=0;
-            do{
-                b=encoded.charAt(index++)-63;
-                result |= (b & 0x1f) << shift;
-                shift+=5;
-
-            }while(b >= 0x20);
-            int dlat = ((result & 1) != 0 ? ~(result >> 1):(result >> 1));
-            lat += dlat;
-
-            shift = 0;
-            result = 0;
-            do{
-                b = encoded.charAt(index++)-63;
-                result |= (b & 0x1f) << shift;
-                shift +=5;
-            }while(b >= 0x20);
-            int dlng = ((result & 1)!=0 ? ~(result >> 1): (result >> 1));
-            lng +=dlng;
-
-            LatLng p = new LatLng((((double)lat / 1E5)),
-                    (((double)lng/1E5)));
-            poly.add(p);
-        }
-        return poly;
-    }
-
-     */
-
 }

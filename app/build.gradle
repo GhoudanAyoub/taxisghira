@@ -136,5 +136,7 @@ dependencies {
 
     //Toasty
     implementation "com.github.GrenderG:Toasty:1.5.0"
+    //Notification Banner
+    implementation "com.github.shasin89:NotificationBanner:1.1.5"
 }
 apply plugin: 'com.google.gms.google-services'

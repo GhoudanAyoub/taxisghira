@@ -2,26 +2,42 @@ package com.TaxiSghira.TreeProg.plashscreen.Module;
 
 public class Trip {
 
-
-    private Demande demande;
-    private String Ch_Name;
-    private String Ch_num;
-    private String Taxi_num;
-    private Boolean Status;
+    private String id;
+    private String rider,driver;
     private Chifor chifor;
+    private Client client;
+    private String origin,originString,destination,destinationString;
+    private String distancePickup,distanceDestination;
+    private String durationPickup,durationDestination;
+    private double currentLat,currentLng;
+    private boolean isDone,isCancel;
 
     public Trip() {
     }
 
-
-    public Trip(Demande demande, String ch_Name, String ch_num, String taxi_num, Boolean s) {
-        this.demande = demande;
-        Ch_Name = ch_Name;
-        Ch_num = ch_num;
-        Taxi_num = taxi_num;
-        Status = s;
+    public String getId() {
+        return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRider() {
+        return rider;
+    }
+
+    public void setRider(String rider) {
+        this.rider = rider;
+    }
+
+    public String getDriver() {
+        return driver;
+    }
+
+    public void setDriver(String driver) {
+        this.driver = driver;
+    }
 
     public Chifor getChifor() {
         return chifor;
@@ -31,44 +47,108 @@ public class Trip {
         this.chifor = chifor;
     }
 
-    public Boolean getStatus() {
-        return Status;
+    public Client getClient() {
+        return client;
     }
 
-    public void setStatus(Boolean status) {
-        Status = status;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
-    public Demande getDemande() {
-        if (demande == null) {
-            demande = new Demande();
-        }
-        return demande;
+    public String getOrigin() {
+        return origin;
     }
 
-
-    public String getCh_Name() {
-        return Ch_Name;
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
-    public void setCh_Name(String ch_Name) {
-        Ch_Name = ch_Name;
+    public String getOriginString() {
+        return originString;
     }
 
-    public String getCh_num() {
-        return Ch_num;
+    public void setOriginString(String originString) {
+        this.originString = originString;
     }
 
-    public void setCh_num(String ch_num) {
-        Ch_num = ch_num;
+    public String getDestination() {
+        return destination;
     }
 
-    public String getTaxi_num() {
-        return Taxi_num;
+    public void setDestination(String destination) {
+        this.destination = destination;
     }
 
-    public void setTaxi_num(String taxi_num) {
-        Taxi_num = taxi_num;
+    public String getDestinationString() {
+        return destinationString;
+    }
+
+    public void setDestinationString(String destinationString) {
+        this.destinationString = destinationString;
+    }
+
+    public String getDistancePickup() {
+        return distancePickup;
+    }
+
+    public void setDistancePickup(String distancePickup) {
+        this.distancePickup = distancePickup;
+    }
+
+    public String getDistanceDestination() {
+        return distanceDestination;
+    }
+
+    public void setDistanceDestination(String distanceDestination) {
+        this.distanceDestination = distanceDestination;
+    }
+
+    public String getDurationPickup() {
+        return durationPickup;
+    }
+
+    public void setDurationPickup(String durationPickup) {
+        this.durationPickup = durationPickup;
+    }
+
+    public String getDurationDestination() {
+        return durationDestination;
+    }
+
+    public void setDurationDestination(String durationDestination) {
+        this.durationDestination = durationDestination;
+    }
+
+    public double getCurrentLat() {
+        return currentLat;
+    }
+
+    public void setCurrentLat(double currentLat) {
+        this.currentLat = currentLat;
+    }
+
+    public double getCurrentLng() {
+        return currentLng;
+    }
+
+    public void setCurrentLng(double currentLng) {
+        this.currentLng = currentLng;
+    }
+
+    public boolean isDone() {
+        return isDone;
+    }
+
+    public void setDone(boolean done) {
+        isDone = done;
+    }
+
+    public boolean isCancel() {
+        return isCancel;
+    }
+
+    public void setCancel(boolean cancel) {
+        isCancel = cancel;
     }
 
 }

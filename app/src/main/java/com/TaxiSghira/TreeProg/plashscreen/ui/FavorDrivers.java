@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.TaxiSghira.TreeProg.plashscreen.Adapters.FavorAdapter;
@@ -24,16 +26,15 @@ public class FavorDrivers extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favor_driver);
 
-        mapViewModel = ViewModelProviders.of(this).get(MapViewModel.class);
+        mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         mapViewModel.GetData();
 
         findViewById(R.id.listAnim22).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Util_List.class)));
         favorAdapter = new FavorAdapter(getApplicationContext());
         Favor_Recycle = findViewById(R.id.Favor_Recycle);
-        Favor_Recycle.setLayoutManager(new GridLayoutManager(getApplicationContext(), 1));
+        Favor_Recycle.setLayoutManager(new LinearLayoutManager(this));
         Favor_Recycle.setHasFixedSize(true);
         Favor_Recycle.setAdapter(favorAdapter);
-
         mapViewModel.getListLiveDataFavorChifor().observe(this, chifors ->favorAdapter.setList(chifors));
     }
 }
