@@ -1,0 +1,18 @@
+
+V	java:S110*"<This class has 9 parents which is greater than 5 authorized.(±‚¾ðÿÿÿÿÿ
+t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(û³É£úÿÿÿÿ
+R
+java:S1128"7Remove this unused import 'android.widget.ProgressBar'.(³ñÿŸùÿÿÿÿ
+Q
+java:S18740"6Remove this use of "ProgressDialog"; it is deprecated.(·á…Çùÿÿÿÿ
+Q
+java:S18746"6Remove this use of "ProgressDialog"; it is deprecated.(¿Ú•ðúÿÿÿÿ
+h	java:S100i"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ˆáÜýÿÿÿÿÿ
+g
+java:S3776}"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(¹Î¾
+>
+java:S1185§"(Remove this method to simply inherit it.(ºŠñ=
+D
+java:S1185¬"(Remove this method to simply inherit it.(èüù±ùÿÿÿÿ
+P
+java:S1144N":Remove this unused private "checkUserFromDataBase" method.(é¾É°

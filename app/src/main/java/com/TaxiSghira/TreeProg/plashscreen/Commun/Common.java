@@ -1,9 +1,23 @@
 package com.TaxiSghira.TreeProg.plashscreen.Commun;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.widget.TextView;
+
+import androidx.core.app.NotificationCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
+import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -48,7 +62,14 @@ public class Common {
     public static final String RIDER_DESTINATION_STRING = "destinationLocationString";
     public static final String RIDER_DESTINATION = "destinationLocation";
     public static final String REQUEST_DRIVER_ACCEPT = "Accept";
-    public static final String TRIP_KEY = "TripKey" ;
+    public static final String TRIP_KEY = "TripKey" ;;
+    public static final String TRIP_PICKUP_LOCATION =  "TripPickupLocation";
+    public static final double MINE_RANGE_PICK_UP_IN_KM = 0.05;
+    public static final String DRIVER_ARRIVED = "TaxiSghira";
+    public static final int WAIT_TIME_IN_MIN = 1;
+    public static final String TRIP_DESTINATION_LOCATION = "TripDestinationLocation" ;
+    public static final String REQUEST_DRIVER_DECLINE_AND_REMOVE_TRIP = "DeclineAndRemove";
+    public static final String RIDER_COMPLETE_TRIP =  "DriverCompleteTrip";
 
 
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
@@ -62,7 +83,6 @@ public class Common {
         else
             textView.setText(new StringBuilder(" مساء الخير "+Current_Client_DispalyName));
     }
-
 
     //DECODE POLY
     public static List<LatLng> decodePoly(String encoded) {
@@ -96,6 +116,43 @@ public class Common {
             poly.add(p);
         }
         return poly;
+    }
+
+
+    public static void messagingstyle_Notification(Context context,int notificationId,String title,String Body) {
+        Uri path = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        PendingIntent pendingIntent = null;
+        Intent intent = new Intent(context, com.TaxiSghira.TreeProg.plashscreen.ui.Map.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (intent != null)
+            pendingIntent = PendingIntent.getActivity(context, 0,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        String channelId = "TreeProg_TaxiSghira";
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId,
+                    "TaxiSghira", NotificationManager.IMPORTANCE_HIGH);
+
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+            channel.setVibrationPattern(new long[]{0,1000,500,1000});
+            channel.enableVibration(true);
+            channel.setDescription("TaxiSghira");
+            notificationManager.createNotificationChannel(channel);
+        }
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.taxisymb)
+                .setContentTitle(title)
+                .setContentText(Body)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.no))
+                .setSound(path);
+
+        if (pendingIntent != null)
+            builder.setContentIntent(pendingIntent);
+        notificationManager.notify(notificationId, builder.build());
     }
 }
 

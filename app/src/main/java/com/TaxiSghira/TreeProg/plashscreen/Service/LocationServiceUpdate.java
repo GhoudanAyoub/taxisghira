@@ -16,6 +16,7 @@ import androidx.core.app.ActivityCompat;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.UserLocation;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.ui.LocationUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -79,7 +80,7 @@ public class LocationServiceUpdate extends Service {
                 if (location != null) {
                     GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
                     UserLocation userLocation = new UserLocation( geoPoint.getLatitude(),geoPoint.getLongitude());
-                    updateUser(userLocation);
+                    updateUser(userLocation,location);
                 }
 
             }
@@ -88,21 +89,20 @@ public class LocationServiceUpdate extends Service {
     }
 
 
-    private void updateUser(final UserLocation userLocation){
-        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+    private void updateUser(final UserLocation userLocation, Location location){
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("/l/0" , userLocation.getLnt());
         childUpdates.put("/l/1" , userLocation.getLong());
         try {
-            List<Address> addressList = geocoder.getFromLocation(userLocation.getLnt(), userLocation.getLong(), 1);
-            String city = addressList.get(0).getLocality();
+
+            String city = LocationUtils.getAddressFromLocation(getApplicationContext(),location);
             FireBaseClient.getFireBaseClient()
                     .getDatabaseReference()
                     .child(Common.CLIENT_LOCATION_REFERENCES)
                     .child(city)
                     .child(Common.Current_Client_Id)
                     .updateChildren(childUpdates);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

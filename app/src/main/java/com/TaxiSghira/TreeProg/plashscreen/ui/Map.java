@@ -40,8 +40,10 @@ import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestAndRemoveTripFromDriver;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestFromDriver;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverAcceptTripEvent;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverCompleteTrip;
 import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Trip;
 import com.TaxiSghira.TreeProg.plashscreen.R;
@@ -51,13 +53,11 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
@@ -108,6 +108,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -200,6 +201,7 @@ public class Map extends AppCompatActivity
     private int index,next;
     private LatLng start,end;
     private String DriverOldLocation;
+    private boolean isNextLaunch = false;
 
 
     @SuppressLint("CheckResult")
@@ -411,13 +413,9 @@ public class Map extends AppCompatActivity
                 .addOnFailureListener(Throwable::printStackTrace)
                 .addOnSuccessListener(location -> {
                     //load All Drivers in City
-                    Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-                    List<Address> addressList;
                     try {
                         if (location !=null) {
-                            addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                            cityName = addressList.get(0).getLocality();
-
+                            cityName =  LocationUtils.getAddressFromLocation(getApplicationContext(),location);
                             //query
                             driver_location_ref = FirebaseDatabase.getInstance()
                                     .getReference(Common.Drivers_LOCATION_REFERENCES)
@@ -499,7 +497,7 @@ public class Map extends AppCompatActivity
                                 }
                             });
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 });
@@ -544,13 +542,11 @@ public class Map extends AppCompatActivity
     }
 
     private void init(Location locationComponent) {
-        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
-            List<Address> addressList = geocoder.getFromLocation(locationComponent.getLatitude(), locationComponent.getLongitude(), 1);
-            String city = addressList.get(0).getLocality();
+            String city = LocationUtils.getAddressFromLocation(getApplicationContext(),locationComponent);
             ClientLocationRef = FireBaseClient.getFireBaseClient().getDatabaseReference().child(Common.CLIENT_LOCATION_REFERENCES)
                     .child(city);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         geoFire = new GeoFire(ClientLocationRef);
@@ -782,7 +778,9 @@ public class Map extends AppCompatActivity
             }else {
                 Toasty.info(getApplicationContext(),getString(R.string.No_Driver_Accept_Request),Toasty.LENGTH_SHORT).show();
                 LastDriverCall = null;
-                finish();
+                navigationMapRoute.removeRoute();
+                layout_location_display_info.setVisibility(View.GONE);
+                BottomContainerHolder.setVisibility(View.GONE);
             }
 
         }else {
@@ -873,6 +871,10 @@ public class Map extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+        if (isNextLaunch){
+            loadAvailableDrivers();
+        }else
+            isNextLaunch = true;
     }
 
 
@@ -884,8 +886,17 @@ public class Map extends AppCompatActivity
 
     @Override
     protected void onStop() {
+        compositeDisposable.clear();
         super.onStop();
         mapView.onStop();
+        if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestFromDriver.class))
+            EventBus.getDefault().removeStickyEvent(DeclineRequestFromDriver.class);
+        if (EventBus.getDefault().hasSubscriberForEvent(DriverAcceptTripEvent.class))
+            EventBus.getDefault().removeStickyEvent(DriverAcceptTripEvent.class);
+        if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestAndRemoveTripFromDriver.class))
+            EventBus.getDefault().removeStickyEvent(DeclineRequestAndRemoveTripFromDriver.class);
+        if (EventBus.getDefault().hasSubscriberForEvent(DriverCompleteTrip.class))
+            EventBus.getDefault().removeStickyEvent(DriverCompleteTrip.class);
     }
 
     @Override
@@ -901,14 +912,7 @@ public class Map extends AppCompatActivity
         mFusedLocationClient.removeLocationUpdates(locationCallback);
         stopService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
         geoFire.removeLocation(Common.Current_Client_Id);
-
-        if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestFromDriver.class))
-            EventBus.getDefault().removeStickyEvent(DeclineRequestFromDriver.class);
-        if (EventBus.getDefault().hasSubscriberForEvent(DriverAcceptTripEvent.class))
-            EventBus.getDefault().removeStickyEvent(DriverAcceptTripEvent.class);
         EventBus.getDefault().unregister(this);
-
-        compositeDisposable.clear();
     }
 
     @Override
@@ -976,6 +980,14 @@ public class Map extends AppCompatActivity
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void OnDeclineAndRemoveTripDriverRequest(DeclineRequestAndRemoveTripFromDriver event) {
+        if (LastDriverCall != null){
+            Common.driversFound.get(LastDriverCall.getKey()).setDecline(true);
+            finish();
+        }
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void OnAcceptDriverEvent(DriverAcceptTripEvent event) {
         FirebaseDatabase.getInstance()
                 .getReference(Common.Pickup_DataBase_Table)
@@ -1000,6 +1012,13 @@ public class Map extends AppCompatActivity
 
                     }
                 });
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void OnDriverCompleteTrip(DriverCompleteTrip event) {
+        Common.messagingstyle_Notification(getApplicationContext(),new Random().nextInt(),
+                getString(R.string.TripDone),event.getKey()+getString(R.string.YouArrived));
+        finish();
     }
 
     private void initDriverForMoving(String tripKey, Trip trip) {

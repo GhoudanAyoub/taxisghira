@@ -16,8 +16,10 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestAndRemoveTripFromDriver;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DeclineRequestFromDriver;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverAcceptTripEvent;
+import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverCompleteTrip;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.ui.SplashScreen;
 import com.TaxiSghira.TreeProg.plashscreen.ui.UserUtils;
@@ -54,13 +56,25 @@ public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
                         EventBus.getDefault().postSticky(declineRequestFromDriver);
                     }
 
+                    else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_DECLINE_AND_REMOVE_TRIP)){
+                        DeclineRequestAndRemoveTripFromDriver declineRequestAndRemoveTripFromDriver = new DeclineRequestAndRemoveTripFromDriver();
+                        declineRequestAndRemoveTripFromDriver.setKey(dataRec.get(Common.DRIVER_KEY));
+                        EventBus.getDefault().postSticky(declineRequestAndRemoveTripFromDriver);
+                    }
+
+                    else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.RIDER_COMPLETE_TRIP)){
+                        DriverCompleteTrip driverCompleteTrip = new DriverCompleteTrip();
+                        driverCompleteTrip.setKey(dataRec.get(Common.DRIVER_KEY));
+                        EventBus.getDefault().postSticky(driverCompleteTrip);
+                    }
+
                     else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_ACCEPT)){
                         String TripKey = dataRec.get(Common.TRIP_KEY);
                         EventBus.getDefault().postSticky(new DriverAcceptTripEvent(TripKey));
                     }
 
                     else {
-                        messagingstyle_Notification(new Random().nextInt());
+                        Common.messagingstyle_Notification(getApplicationContext(),new Random().nextInt(),"TaxiSghira","لقد اتى سائقك");
                     }
                 }
             }
@@ -70,39 +84,4 @@ public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
 
     }
 
-    private void messagingstyle_Notification(int notificationId) {
-        Uri path = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        PendingIntent pendingIntent = null;
-        Intent intent = new Intent(getApplicationContext(), SplashScreen.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (intent != null)
-            pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
-                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        String channelId = "TreeProg_TaxiSghira";
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId,
-                    "TaxiSghira", NotificationManager.IMPORTANCE_HIGH);
-
-            channel.enableLights(true);
-            channel.setLightColor(Color.RED);
-            channel.setVibrationPattern(new long[]{0,1000,500,1000});
-            channel.enableVibration(true);
-            channel.setDescription("TaxiSghira");
-            notificationManager.createNotificationChannel(channel);
-        }
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                .setSmallIcon(R.drawable.taxisymb)
-                .setContentTitle("TaxiSghira")
-                .setContentText("لقد اتى سائقك")
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(Notification.DEFAULT_VIBRATE)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.no))
-                .setSound(path);
-
-        if (pendingIntent != null)
-            builder.setContentIntent(pendingIntent);
-        notificationManager.notify(notificationId, builder.build());
-    }
 }
