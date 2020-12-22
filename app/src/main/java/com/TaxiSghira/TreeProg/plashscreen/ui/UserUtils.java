@@ -1,9 +1,17 @@
 package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Icon;
 import android.location.Location;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.hilt.lifecycle.ViewModelInject;
 
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
@@ -11,11 +19,13 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.SelectedPlaceEvent;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
 import com.TaxiSghira.TreeProg.plashscreen.Module.TokenModel;
+import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.ui.IconGenerator;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 
@@ -79,5 +89,16 @@ public class UserUtils {
 
                     }
                 });
+    }
+
+    public static Bitmap CreateIconWithDuration(Context context , String duration){
+        View view = LayoutInflater.from(context).inflate(R.layout.pick_up_info_duration,null);
+        TextView textView = view.findViewById(R.id.duration_text);
+        textView.setText(duration.substring(0,duration.indexOf(" ")));
+
+        IconGenerator icnGenerator = new IconGenerator(context);
+        icnGenerator.setContentView(view);
+        icnGenerator.setBackground(new ColorDrawable(Color.TRANSPARENT));
+        return icnGenerator.makeIcon();
     }
 }

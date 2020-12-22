@@ -49,7 +49,4 @@ public class Util_List extends AppCompatActivity {
         } catch (Exception e) {
         }
     }
-
-    @Override
-    public void onBackPressed() { }
 }

@@ -1,11 +1,13 @@
 package com.TaxiSghira.TreeProg.plashscreen.ui;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
@@ -15,9 +17,11 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -47,11 +51,13 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
@@ -72,10 +78,14 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.Polyline;
+import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
@@ -89,8 +99,6 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.shasin.notificationbanner.Banner;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -185,6 +193,13 @@ public class Map extends AppCompatActivity
     private DriverGeoModel LastDriverCall;
     private LatLng Destination_point;
     private Trip pickup12;
+    private Marker DistinationMarker,OriginMarker;
+    private Handler hendler;
+    private float v;
+    private double lat,lng;
+    private int index,next;
+    private LatLng start,end;
+    private String DriverOldLocation;
 
 
     @SuppressLint("CheckResult")
@@ -232,6 +247,7 @@ public class Map extends AppCompatActivity
                     Toasty.success(getApplicationContext(), getString(R.string.you_canceled_your_demand), Toasty.LENGTH_SHORT).show(); }, Throwable::printStackTrace);
         RxView.clicks(findViewById(R.id.Favories))
                 .throttleFirst(2, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
                             mapViewModel.InsertData(pickup12.getChifor());
@@ -497,7 +513,7 @@ public class Map extends AppCompatActivity
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(key ->FindDriversByID(Common.driversFound.get(key)), Throwable::printStackTrace);
         } else {
-            Banner.make(findViewById(android.R.id.content),this,Banner.INFO, getString(R.string.driver_not_Found), Banner.BOTTOM).show();
+            Toasty.info(getApplicationContext(),getString(R.string.driver_not_Found),Toasty.LENGTH_SHORT).show();
         }
     }
 
@@ -970,7 +986,11 @@ public class Map extends AppCompatActivity
                         if (snapshot.exists()){
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()){
                                 Trip trip = dataSnapshot.getValue(Trip.class);
-                                ShowDriverDashboard(trip);
+                                if (trip != null) {
+                                    ShowDriverDashboard(trip);
+                                    SubscribeDriversMoving(trip);
+                                    initDriverForMoving(event.getTripKey(),trip);
+                                }
                             }
                         }
                     }
@@ -980,5 +1000,161 @@ public class Map extends AppCompatActivity
 
                     }
                 });
+    }
+
+    private void initDriverForMoving(String tripKey, Trip trip) {
+        DriverOldLocation = trip.getCurrentLng()+","+trip.getCurrentLat();
+        FirebaseDatabase.getInstance()
+                .getReference(Common.Pickup_DataBase_Table)
+                .child(tripKey)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()){
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                Trip NewTrip = dataSnapshot.getValue(Trip.class);
+                                if (NewTrip != null) {
+                                    String DriverNewLocation = NewTrip.getCurrentLng()+","+NewTrip.getCurrentLat();
+                                    if (!DriverOldLocation.equals(DriverNewLocation))
+                                        MoveMarkerAnimation(DistinationMarker,DriverOldLocation,DriverNewLocation);
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void MoveMarkerAnimation(Marker marker, String from, String to) {
+
+        compositeDisposable.add(
+                mapViewModel.getDirections("driving",
+                        from +";" + to
+                        , "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q"));
+
+        mapViewModel.getRouteLiveData()
+                .observe(this, routes -> {
+                    try {
+                        PolylineOptions blackPolylineOptions = null;
+                        List<LatLng> polylineList = null;
+                        Polyline blackPolyline = null;
+                        for (int i = 0; i < routes.size(); i++) {
+
+                            String point = routes.get(i).getGeometry();
+                            polylineList = Common.decodePoly(point);
+
+
+                            blackPolylineOptions = new PolylineOptions();
+                            blackPolylineOptions.color(Color.WHITE);
+                            blackPolylineOptions.width(5);
+                            blackPolylineOptions.addAll(polylineList);
+                            blackPolyline = mapboxMap.addPolyline(blackPolylineOptions);
+
+                            Bitmap icon = UserUtils.CreateIconWithDuration(getApplicationContext(), String.valueOf(routes.get(0).getDuration()));
+                            OriginMarker.setIcon(IconFactory.getInstance(Map.this).fromBitmap(icon));
+                            //Moving
+                            hendler = new Handler();
+                            index  = -1;
+                            next = 1;
+                            List<LatLng> finalPolylineList = polylineList;
+                            hendler.postDelayed(() -> {
+                                if (index < finalPolylineList.size()-2){
+                                    index ++;
+                                    next = index +1;
+                                    start = finalPolylineList.get(index);
+                                    end = finalPolylineList.get(next);
+                                }
+                                ValueAnimator valueAnimator = ValueAnimator.ofInt(0, 1);
+                                valueAnimator.setDuration(1500);
+                                valueAnimator.setInterpolator(new LinearInterpolator());
+                                valueAnimator.addUpdateListener(value -> {
+                                    v = value.getAnimatedFraction();
+                                    lng = v*end.getLongitude()+(1-v)*start.getLongitude();
+                                    lat = v*end.getLatitude()+(1-v)*start.getLatitude();
+                                    LatLng newPos = new LatLng(lat,lng);
+                                    marker.setPosition(newPos);
+                                    mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
+                                });
+                                valueAnimator.start();
+                                if (index < finalPolylineList.size()-2)
+                                    hendler.postDelayed((Runnable) this,1500);
+                                else if (index < finalPolylineList.size()-1){
+
+                                }
+                            },1500);
+                            DriverOldLocation = to;
+
+                        }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    private void SubscribeDriversMoving(Trip trip) {
+        compositeDisposable.add(
+                mapViewModel.getDirections("driving",
+                        trip.getOrigin()+ ";" + trip.getCurrentLng()+","+trip.getCurrentLat()
+                        , "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q"));
+
+        mapViewModel.getRouteLiveData()
+                .observe(this, routes -> {
+                    try {
+                        PolylineOptions blackPolylineOptions = null;
+                        List<LatLng> polylineList = null;
+                        Polyline blackPolyline = null;
+                        for (int i = 0; i < routes.size(); i++) {
+
+                            String point = routes.get(i).getGeometry();
+                            polylineList = Common.decodePoly(point);
+
+
+                            blackPolylineOptions = new PolylineOptions();
+                            blackPolylineOptions.color(Color.WHITE);
+                            blackPolylineOptions.width(5);
+                            blackPolylineOptions.addAll(polylineList);
+                            blackPolyline = mapboxMap.addPolyline(blackPolylineOptions);
+
+
+                            LatLng origin = new LatLng(
+                                    Double.parseDouble(trip.getOrigin().split(",")[1]),
+                                    Double.parseDouble(trip.getOrigin().split(",")[0]));
+
+                            LatLng destination = new LatLng(trip.getCurrentLng(),trip.getCurrentLat());
+
+                            LatLngBounds latLngBounds = new LatLngBounds.Builder()
+                                    .include(origin)
+                                    .include(destination)
+                                    .build();
+
+                            addPickUpMarkerWithDuration(routes.get(0).getDuration(),origin);
+                            addDestinationDriverMarker(destination);
+
+                            mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 160));
+                            mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(mapboxMap.getCameraPosition().zoom - 1));
+
+                        }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
+
+    }
+
+    private void addDestinationDriverMarker(LatLng destination) {
+        DistinationMarker = mapboxMap.addMarker(new MarkerOptions()
+                .position(destination)
+                .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2)));
+    }
+
+    private void addPickUpMarkerWithDuration(double duration, LatLng origin) {
+        Bitmap icon = UserUtils.CreateIconWithDuration(getApplicationContext(), String.valueOf(duration));
+        OriginMarker = mapboxMap.addMarker(new MarkerOptions()
+                .icon(IconFactory.getInstance(Map.this).fromBitmap(icon))
+                .position(origin));
     }
 }
