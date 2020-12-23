@@ -4,7 +4,7 @@ import com.firebase.geofire.GeoLocation;
 
 public class ClientLocation {
     private String g;
-    private GeoLocation l ;
+    private GeoLocation l;
 
     public ClientLocation() {
     }

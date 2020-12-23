@@ -24,6 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.rxbinding3.view.RxView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,14 +39,14 @@ import kotlin.Unit;
 import timber.log.Timber;
 
 
-
 public class Auth extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 1000;
     private CompositeDisposable compositeDisposable;
     private List<AuthUI.IdpConfig> providers;
     private FirebaseAuth firebaseAuth;
-    private ProgressDialog progressDialog ;
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,16 +63,25 @@ public class Auth extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Unit>() {
                     @Override
-                    public void onSubscribe(Disposable d) { compositeDisposable.add(d); }
+                    public void onSubscribe(@NotNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
 
                     @Override
-                    public void onNext(Unit unit) {findViewById(R.id.buttonphone).setClickable(false);PreBuildLogin(); }
+                    public void onNext(@NotNull Unit unit) {
+                        findViewById(R.id.buttonphone).setClickable(false);
+                        PreBuildLogin();
+                    }
 
                     @Override
-                    public void onError(Throwable e) { Timber.e(e); }
+                    public void onError(@NotNull Throwable e) {
+                        e.printStackTrace();
+                    }
 
                     @Override
-                    public void onComplete() { Timber.e("Map Activity : Called");}
+                    public void onComplete() {
+                        Timber.e("Map Activity : Called");
+                    }
                 });
     }
 
@@ -83,11 +94,11 @@ public class Auth extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()){
+                        if (dataSnapshot.exists()) {
                             FireBaseClient.getFireBaseClient().setFirebaseUser(user);
-                            Toast.makeText(getApplicationContext()," مرحبا بعودتك "+user.getDisplayName(),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), " مرحبا بعودتك " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(), Map.class));
-                        }else {
+                        } else {
                             FireBaseClient.getFireBaseClient().setFirebaseUser(user);
                             startActivity(new Intent(getApplicationContext(), Create_Account.class));
                         }
@@ -101,7 +112,7 @@ public class Auth extends AppCompatActivity {
 
     }
 
-    private void PreBuildLogin(){
+    private void PreBuildLogin() {
         progressDialog.setMessage("المرجو الانتظار قليلا ⌛️");
         progressDialog.show();
         AuthMethodPickerLayout authMethodPickerLayout = new AuthMethodPickerLayout
@@ -123,20 +134,20 @@ public class Auth extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_SIGN_IN){
+        if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
-            if (resultCode == Activity.RESULT_OK){
+            if (resultCode == Activity.RESULT_OK) {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 try {
                     FireBaseClient.getFireBaseClient().setFirebaseUser(user);
                     progressDialog.dismiss();
                     startActivity(new
-                            Intent(getApplicationContext(),Create_Account.class));
+                            Intent(getApplicationContext(), Create_Account.class));
                 } catch (Exception e) {
                     Timber.e(e);
                 }
-            } else{
-                if(response == null){
+            } else {
+                if (response == null) {
                     finish();
                 }
                 assert response != null;
@@ -144,7 +155,7 @@ public class Auth extends AppCompatActivity {
                     //Show No Internet Notification
                     return;
                 }
-                if(response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                     Toast.makeText(this, response.getError().getErrorCode(), Toast.LENGTH_LONG).show();
                     Timber.d(String.valueOf(response.getError().getErrorCode()));
                 }

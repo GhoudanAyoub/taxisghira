@@ -9,36 +9,37 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class FireBaseClient {
     private static FireBaseClient fireBaseClient;
     private DatabaseReference databaseReference;
-    private FirebaseAuth firebaseAuth ;
+    private FirebaseAuth firebaseAuth;
     private FirebaseFirestore firebaseFirestore;
     private FirebaseDatabase firebaseDatabase;
     private FirebaseUser firebaseUser;
 
-    private FireBaseClient() { }
+    private FireBaseClient() {
+    }
 
     public FirebaseDatabase getFirebaseDatabase() {
-        if (firebaseDatabase == null){
+        if (firebaseDatabase == null) {
             firebaseDatabase = FirebaseDatabase.getInstance();
         }
         return firebaseDatabase;
     }
 
     public DatabaseReference getDatabaseReference() {
-        if (databaseReference == null){
+        if (databaseReference == null) {
             databaseReference = FirebaseDatabase.getInstance().getReference();
         }
         return databaseReference;
     }
 
     public FirebaseAuth getFirebaseAuth() {
-        if (firebaseAuth == null){
+        if (firebaseAuth == null) {
             firebaseAuth = FirebaseAuth.getInstance();
         }
         return firebaseAuth;
     }
 
     public FirebaseFirestore getFirebaseFirestore() {
-        if (firebaseFirestore == null){
+        if (firebaseFirestore == null) {
             firebaseFirestore = FirebaseFirestore.getInstance();
         }
         return firebaseFirestore;
@@ -54,7 +55,7 @@ public class FireBaseClient {
 
 
     public static FireBaseClient getFireBaseClient() {
-        if (fireBaseClient == null){
+        if (fireBaseClient == null) {
             fireBaseClient = new FireBaseClient();
         }
         return fireBaseClient;

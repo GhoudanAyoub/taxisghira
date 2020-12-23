@@ -19,6 +19,7 @@ public class Util_List extends AppCompatActivity {
 
     TextView textViewName;
     ImageView circleImageViewClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,22 +27,23 @@ public class Util_List extends AppCompatActivity {
         circleImageViewClient = findViewById(R.id.circleImageViewClient);
         textViewName = findViewById(R.id.textViewName);
 
-        findViewById(R.id.imageView2back).setOnClickListener(v-> super.onBackPressed());
-        findViewById(R.id.button3PN).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), PersonalInfo.class)));
-        findViewById(R.id.button6Stting).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), ActivitySetting.class)));
-        findViewById(R.id.buttonmap).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), Map.class)));
-        findViewById(R.id.button4TopDriver).setOnClickListener(v->startActivity(new Intent(getApplicationContext(), FavorDrivers.class)));
+        findViewById(R.id.imageView2back).setOnClickListener(v -> super.onBackPressed());
+        findViewById(R.id.button3PN).setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), PersonalInfo.class)));
+        findViewById(R.id.button6Stting).setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), ActivitySetting.class)));
+        findViewById(R.id.buttonmap).setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), Map.class)));
+        findViewById(R.id.button4TopDriver).setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), FavorDrivers.class)));
         findViewById(R.id.button8LogOut).setOnClickListener(v -> {
             FireBaseClient.getFireBaseClient().getFirebaseAuth()
                     .signOut();
             startActivity(new Intent(getApplicationContext(), Auth.class));
         });
-        findViewById(R.id.button7RuDriver).setOnClickListener(v->{
+        findViewById(R.id.button7RuDriver).setOnClickListener(v -> {
             try {
                 //  getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getApplicationContext().getPackageName())));
             } catch (ActivityNotFoundException e) {
                 //   getApplicationContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("" + getApplicationContext().getPackageName())));
-            }});
+            }
+        });
 
         try {
             textViewName.setText(FireBaseClient.getFireBaseClient().getFirebaseUser().getDisplayName());

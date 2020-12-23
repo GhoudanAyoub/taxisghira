@@ -31,7 +31,7 @@ import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class InfoTest extends Fragment {
 
-    private TextInputLayout FullName,  city, email;
+    private TextInputLayout FullName, city, email;
     private String phone;
 
     @Override
@@ -59,25 +59,28 @@ public class InfoTest extends Fragment {
                             .getFirebaseAuth().getCurrentUser()).getUid(),
                             Objects.requireNonNull(FullName.getEditText()).getText().toString(),
                             phone
-                            ,Objects.requireNonNull(email.getEditText()).getText().toString()
-                            ,Objects.requireNonNull(city.getEditText()).getText().toString().toLowerCase());
+                            , Objects.requireNonNull(email.getEditText()).getText().toString()
+                            , Objects.requireNonNull(city.getEditText()).getText().toString().toLowerCase());
                     AddData(client);
-                },Throwable::printStackTrace);
+                }, Throwable::printStackTrace);
         return root;
     }
 
     void AddData(Client client) {
         try {
-        FireBaseClient.getFireBaseClient()
-                .getFirebaseDatabase()
-                .getReference(Common.Client_DataBase_Table)
-                .push()
-                .setValue(client)
-                .addOnFailureListener(Timber::e);
+            FireBaseClient.getFireBaseClient()
+                    .getFirebaseDatabase()
+                    .getReference(Common.Client_DataBase_Table)
+                    .push()
+                    .setValue(client)
+                    .addOnFailureListener(Timber::e);
             startActivity(new Intent(requireActivity(), Map.class));
-            Toast.makeText(getApplicationContext(),getString(R.string.welcome),Toast.LENGTH_SHORT).show();
-        }catch (Throwable throwable){Timber.e(throwable);}
+            Toast.makeText(getApplicationContext(), getString(R.string.welcome), Toast.LENGTH_SHORT).show();
+        } catch (Throwable throwable) {
+            Timber.e(throwable);
+        }
     }
+
     private boolean validateForm() {
         boolean valid = true;
 

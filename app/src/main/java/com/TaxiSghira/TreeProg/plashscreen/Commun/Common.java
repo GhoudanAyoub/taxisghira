@@ -26,11 +26,9 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 public class Common {
 
@@ -47,79 +45,78 @@ public class Common {
     public static final String Gmail_String = "gmail";
     public static final String ClientName_String = "ClientName";
     public static final String NOTI_TITLE = "title";
-    public static final String NOTI_BODY= "body";
+    public static final String NOTI_BODY = "body";
     public static final String DRIVER_TOKEN_REFERENCE = "DriverToken";
     public static final String CLIENT_TOKEN_REFERENCE = "ClientToken";
     public static final String Drivers_LOCATION_REFERENCES = "DriversLocation";
     public static final String CLIENT_LOCATION_REFERENCES = "ClientLocation";
-    public static final String CLIENT_DATA = "ClientData" ;
+    public static final String CLIENT_DATA = "ClientData";
     public static final String REQUEST_DRIVER_TITLE = "RequestDriver";
-    public static final String RIDER_KEY = "RiderKey" ;
-    public static final String DRIVER_KEY = "DriverKey" ;
+    public static final String RIDER_KEY = "RiderKey";
+    public static final String DRIVER_KEY = "DriverKey";
     public static final String REQUEST_DRIVER_DECLINE = "Decline";
     public static final String RIDER_PICK_UP_LOCATION = "RequestLocation";
     public static final String RIDER_PICKUP_LOCATION_STRING = "PickupLocationString";
     public static final String RIDER_DESTINATION_STRING = "destinationLocationString";
     public static final String RIDER_DESTINATION = "destinationLocation";
     public static final String REQUEST_DRIVER_ACCEPT = "Accept";
-    public static final String TRIP_KEY = "TripKey" ;;
-    public static final String TRIP_PICKUP_LOCATION =  "TripPickupLocation";
+    public static final String TRIP_KEY = "TripKey";
+    public static final String TRIP_PICKUP_LOCATION = "TripPickupLocation";
     public static final double MINE_RANGE_PICK_UP_IN_KM = 0.05;
     public static final String DRIVER_ARRIVED = "TaxiSghira";
     public static final int WAIT_TIME_IN_MIN = 1;
-    public static final String TRIP_DESTINATION_LOCATION = "TripDestinationLocation" ;
+    public static final String TRIP_DESTINATION_LOCATION = "TripDestinationLocation";
     public static final String REQUEST_DRIVER_DECLINE_AND_REMOVE_TRIP = "DeclineAndRemove";
-    public static final String RIDER_COMPLETE_TRIP =  "DriverCompleteTrip";
+    public static final String RIDER_COMPLETE_TRIP = "DriverCompleteTrip";
 
 
     public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
-    public static Map<String,DriverGeoModel> driversFound = new HashMap<>();
+    public static Map<String, DriverGeoModel> driversFound = new HashMap<>();
     public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();
 
-    public static void SetWelcomeMessage(TextView textView){
+    public static void SetWelcomeMessage(TextView textView) {
         int houre = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        if (houre>=1 && houre <= 12 )
-            textView.setText(new StringBuilder(" صباح الخير "+Current_Client_DispalyName));
+        if (houre >= 1 && houre <= 12)
+            textView.setText(new StringBuilder(" صباح الخير " + Current_Client_DispalyName));
         else
-            textView.setText(new StringBuilder(" مساء الخير "+Current_Client_DispalyName));
+            textView.setText(new StringBuilder(" مساء الخير " + Current_Client_DispalyName));
     }
 
     //DECODE POLY
     public static List<LatLng> decodePoly(String encoded) {
         List poly = new ArrayList();
-        int index=0,len=encoded.length();
-        int lat=0,lng=0;
-        while(index < len)
-        {
-            int b,shift=0,result=0;
-            do{
-                b=encoded.charAt(index++)-63;
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
                 result |= (b & 0x1f) << shift;
-                shift+=5;
+                shift += 5;
 
-            }while(b >= 0x20);
-            int dlat = ((result & 1) != 0 ? ~(result >> 1):(result >> 1));
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
             lat += dlat;
 
             shift = 0;
             result = 0;
-            do{
-                b = encoded.charAt(index++)-63;
+            do {
+                b = encoded.charAt(index++) - 63;
                 result |= (b & 0x1f) << shift;
-                shift +=5;
-            }while(b >= 0x20);
-            int dlng = ((result & 1)!=0 ? ~(result >> 1): (result >> 1));
-            lng +=dlng;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
 
-            LatLng p = new LatLng((((double)lat / 1E5)),
-                    (((double)lng/1E5)));
+            LatLng p = new LatLng((((double) lat / 1E5)),
+                    (((double) lng / 1E5)));
             poly.add(p);
         }
         return poly;
     }
 
 
-    public static void messagingstyle_Notification(Context context,int notificationId,String title,String Body) {
+    public static void messagingstyle_Notification(Context context, int notificationId, String title, String Body) {
         Uri path = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         PendingIntent pendingIntent = null;
         Intent intent = new Intent(context, com.TaxiSghira.TreeProg.plashscreen.ui.Map.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -135,7 +132,7 @@ public class Common {
 
             channel.enableLights(true);
             channel.setLightColor(Color.RED);
-            channel.setVibrationPattern(new long[]{0,1000,500,1000});
+            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
             channel.enableVibration(true);
             channel.setDescription("TaxiSghira");
             notificationManager.createNotificationChannel(channel);
@@ -147,7 +144,7 @@ public class Common {
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(Notification.DEFAULT_VIBRATE)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.no))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.no))
                 .setSound(path);
 
         if (pendingIntent != null)

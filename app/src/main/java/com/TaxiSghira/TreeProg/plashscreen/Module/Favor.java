@@ -6,7 +6,9 @@ public class Favor {
     private String Ch_num;
     private String Taxi_num;
     private String client_name;
-    public Favor() { }
+
+    public Favor() {
+    }
 
     public Favor(String id, String ch_Name, String ch_num, String taxi_num, String Clientname) {
         this.id = id;

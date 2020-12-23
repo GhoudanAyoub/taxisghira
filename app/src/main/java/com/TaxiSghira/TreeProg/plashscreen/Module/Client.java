@@ -7,7 +7,9 @@ public class Client {
     private String tell;
     private String gmail;
     private String city;
-    public Client() { }
+
+    public Client() {
+    }
 
     public Client(String id, String fullname, String tell, String gmail, String city) {
         this.id = id;
@@ -49,7 +51,11 @@ public class Client {
         this.Fullname = Fullname;
     }
 
-    public String getTell() { return tell; }
+    public String getTell() {
+        return tell;
+    }
 
-    public void setTell(String tell) { this.tell = tell; }
+    public void setTell(String tell) {
+        this.tell = tell;
+    }
 }

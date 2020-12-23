@@ -4,7 +4,8 @@ public class legs {
     private String start_address;
     private String end_address;
 
-    public legs() { }
+    public legs() {
+    }
 
     public String getStart_address() {
         return start_address;

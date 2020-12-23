@@ -48,8 +48,8 @@ public class PersonalInfo extends AppCompatActivity {
             Objects.requireNonNull(Tell.getEditText()).setText(client.getCity());
         });
 
-        childUpdates.put("/city:" , Objects.requireNonNull(Tell.getEditText()).getText());
-        childUpdates.put("/fullname" , Objects.requireNonNull(fullname.getEditText()).getText());
+        childUpdates.put("/city:", Objects.requireNonNull(Tell.getEditText()).getText());
+        childUpdates.put("/fullname", Objects.requireNonNull(fullname.getEditText()).getText());
 
 
         findViewById(R.id.returnAnim).setOnClickListener(v -> super.onBackPressed());
@@ -64,11 +64,14 @@ public class PersonalInfo extends AppCompatActivity {
                 .child(Common.Client_DataBase_Table)
                 .updateChildren(childUpdates)
                 .addOnFailureListener(Throwable::printStackTrace)
-                .addOnSuccessListener(v-> {Snackbar.make(findViewById(android.R.id.content),
-                        getString(R.string.YourDataUpdated), Snackbar.LENGTH_LONG).show();
-                gProgress.dismiss();});
+                .addOnSuccessListener(v -> {
+                    Snackbar.make(findViewById(android.R.id.content),
+                            getString(R.string.YourDataUpdated), Snackbar.LENGTH_LONG).show();
+                    gProgress.dismiss();
+                });
     }
 
     @Override
-    public void onBackPressed() { }
+    public void onBackPressed() {
+    }
 }

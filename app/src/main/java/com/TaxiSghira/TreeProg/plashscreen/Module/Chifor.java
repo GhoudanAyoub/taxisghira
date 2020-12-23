@@ -18,7 +18,8 @@ public class Chifor {
     private String Status;
     private String city;
 
-    public Chifor() { }
+    public Chifor() {
+    }
 
     public Chifor(String id, String fullname, String phone, String cin, String taxi_NUM, double lnt, double lng, String status) {
         this.id = id;

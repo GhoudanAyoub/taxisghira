@@ -2,6 +2,7 @@ package com.TaxiSghira.TreeProg.plashscreen.Module.EventBus;
 
 public class DeclineRequestFromDriver {
     private String key;
+
     public DeclineRequestFromDriver() {
     }
 

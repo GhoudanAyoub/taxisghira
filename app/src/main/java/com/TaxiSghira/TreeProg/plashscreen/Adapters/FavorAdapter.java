@@ -20,7 +20,8 @@ import java.util.List;
 
 public class FavorAdapter extends RecyclerView.Adapter<FavorAdapter.FavorAdapterHolder> {
     private List<Chifor> favorList = new ArrayList<>();
-    private Context context;
+    private final Context context;
+
     public FavorAdapter(Context context) {
         this.context = context;
     }
@@ -36,7 +37,7 @@ public class FavorAdapter extends RecyclerView.Adapter<FavorAdapter.FavorAdapter
         holder.TaxiNum.setText(favorList.get(position).getTaxi_NUM());
         holder.Ch_Num.setText(favorList.get(position).getPhone());
         holder.Ch_Name.setText(favorList.get(position).getFullname());
-        holder.ImageView.setOnClickListener(v ->context.startActivity(new Intent(Intent.ACTION_DIAL).setData(Uri.parse("tel:"+favorList.get(position).getPhone()))));
+        holder.ImageView.setOnClickListener(v -> context.startActivity(new Intent(Intent.ACTION_DIAL).setData(Uri.parse("tel:" + favorList.get(position).getPhone()))));
     }
 
     @Override
@@ -50,8 +51,9 @@ public class FavorAdapter extends RecyclerView.Adapter<FavorAdapter.FavorAdapter
     }
 
     static class FavorAdapterHolder extends RecyclerView.ViewHolder {
-        TextView Ch_Name,TaxiNum,Ch_Num;
+        TextView Ch_Name, TaxiNum, Ch_Num;
         ImageView ImageView;
+
         FavorAdapterHolder(@NonNull View itemView) {
             super(itemView);
             Ch_Name = itemView.findViewById(R.id.Ch_Name);

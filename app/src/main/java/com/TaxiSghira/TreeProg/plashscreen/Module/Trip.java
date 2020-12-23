@@ -3,14 +3,14 @@ package com.TaxiSghira.TreeProg.plashscreen.Module;
 public class Trip {
 
     private String id;
-    private String rider,driver;
+    private String rider, driver;
     private Chifor chifor;
     private Client client;
-    private String origin,originString,destination,destinationString;
-    private String distancePickup,distanceDestination;
-    private String durationPickup,durationDestination;
-    private double currentLat,currentLng;
-    private boolean isDone,isCancel;
+    private String origin, originString, destination, destinationString;
+    private String distancePickup, distanceDestination;
+    private String durationPickup, durationDestination;
+    private double currentLat, currentLng;
+    private boolean isDone, isCancel;
 
     public Trip() {
     }

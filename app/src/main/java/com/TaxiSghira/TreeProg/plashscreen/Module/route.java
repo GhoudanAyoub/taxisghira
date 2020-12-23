@@ -16,6 +16,7 @@ public class route {
     private double duration;
     @SerializedName("geometry")
     private String geometry;
+
     public route() {
     }
 

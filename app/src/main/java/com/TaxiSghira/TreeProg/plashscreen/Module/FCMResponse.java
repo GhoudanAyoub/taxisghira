@@ -4,8 +4,8 @@ import java.util.List;
 
 public class FCMResponse {
 
-    private long multicast_id,message_id;
-    private int success,failure,canonnical_ids;
+    private long multicast_id, message_id;
+    private int success, failure, canonnical_ids;
     private List<FCMResult> results;
 
     public FCMResponse() {

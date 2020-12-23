@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class FCMSendData {
     private String to;
-    private Map<String,String> data;
+    private Map<String, String> data;
 
     public FCMSendData(String to, Map<String, String> data) {
         this.to = to;

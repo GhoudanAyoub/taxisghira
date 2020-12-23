@@ -21,7 +21,7 @@ import com.TaxiSghira.TreeProg.plashscreen.R;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ActivitySetting  extends PreferenceActivity {
+public class ActivitySetting extends PreferenceActivity {
 
     private AppCompatDelegate mDelegate;
 

@@ -19,7 +19,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.installations.FirebaseInstallations;
 
 import java.util.Objects;
@@ -32,6 +31,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 public class SplashScreen extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
+
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +48,10 @@ public class SplashScreen extends AppCompatActivity {
                                 .addOnFailureListener(Throwable::printStackTrace)
                                 .addOnSuccessListener(instanceIdResult -> {
                                     if (instanceIdResult != null)
-                                        UserUtils.UpdateToken(this,instanceIdResult);
+                                        UserUtils.UpdateToken(this, instanceIdResult);
                                 });
                         checkUserFromDataBase(firebaseAuth.getCurrentUser());
-                    }
-                    else
+                    } else
                         startActivity(new Intent(getApplication(), Auth.class));
                 });
     }
@@ -65,10 +64,10 @@ public class SplashScreen extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()){
+                        if (dataSnapshot.exists()) {
                             FireBaseClient.getFireBaseClient().setFirebaseUser(user);
                             startActivity(new Intent(getApplicationContext(), Map.class));
-                        }else {
+                        } else {
                             FireBaseClient.getFireBaseClient().setFirebaseUser(user);
                             startActivity(new Intent(getApplicationContext(), Auth.class));
                         }

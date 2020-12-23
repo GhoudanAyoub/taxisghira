@@ -44,7 +44,7 @@ public class phoneTest extends Fragment {
     private Button phoneDone;
     private Button ResendCode;
     private TextView ChangePhoneNumber;
-    private LinearLayout FirstLayout,SecondLayout;
+    private LinearLayout FirstLayout, SecondLayout;
     private String phone;
     private CountryCodePicker countryCodePicker;
     private View root;
@@ -82,21 +82,21 @@ public class phoneTest extends Fragment {
         view(root);
         checkForSmsPermission();
         enableFirstLayout();
-        
+
         ChangePhoneNumber.setOnClickListener(v3 -> {
             enableFirstLayout();
             sendCodeButton.setVisibility(View.VISIBLE);
             phoneDone.setVisibility(View.GONE);
         });
         sendCodeButton.setOnClickListener(v -> sendVerificationCode());
-        ResendCode.setOnClickListener(v -> resendVerificationCode(phone,mResendToken));
+        ResendCode.setOnClickListener(v -> resendVerificationCode(phone, mResendToken));
         phoneDone.setOnClickListener(v4 -> verifySignInCode());
-        
+
         return root;
     }
-    
+
     //**** UI Manipulation
-    public void view(View root){
+    public void view(View root) {
         N1 = root.findViewById(R.id.N1);
         N2 = root.findViewById(R.id.N2);
         N3 = root.findViewById(R.id.N3);
@@ -114,7 +114,7 @@ public class phoneTest extends Fragment {
         editText = root.findViewById(R.id.phoneText);
         makeCall.setEnabled(false);
     }
-    
+
     private boolean validateForm() {
         boolean valid = true;
 
@@ -202,31 +202,31 @@ public class phoneTest extends Fragment {
         sendCodeButton.setVisibility(View.GONE);
         phoneDone.setVisibility(View.VISIBLE);
     }
-    
+
     //******core
     private void sendVerificationCode() {
         if (!validateForm()) return;
         phone = "+" + countryCodePicker.getSelectedCountryCode() + editText.getText().toString();
         PhoneAuthProvider.verifyPhoneNumber(
                 PhoneAuthOptions.newBuilder(FireBaseClient.getFireBaseClient().getFirebaseAuth())
-                .setPhoneNumber(phone)
-                .setTimeout(30L, TimeUnit.SECONDS)
-                .setActivity(requireActivity())
-                .setCallbacks(mCallbacks)
-                .build());
+                        .setPhoneNumber(phone)
+                        .setTimeout(30L, TimeUnit.SECONDS)
+                        .setActivity(requireActivity())
+                        .setCallbacks(mCallbacks)
+                        .build());
         enableSecondLayout();
         EnablePhoneDoneButton();
     }
-    
+
     private void resendVerificationCode(String phoneNumber, PhoneAuthProvider.ForceResendingToken token) {
         PhoneAuthProvider.verifyPhoneNumber(
                 PhoneAuthOptions.newBuilder(FireBaseClient.getFireBaseClient().getFirebaseAuth())
-                .setPhoneNumber(phoneNumber)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(requireActivity())
-                .setCallbacks(mCallbacks)
-                .setForceResendingToken(token)
-                .build());
+                        .setPhoneNumber(phoneNumber)
+                        .setTimeout(60L, TimeUnit.SECONDS)
+                        .setActivity(requireActivity())
+                        .setCallbacks(mCallbacks)
+                        .setForceResendingToken(token)
+                        .build());
     }
 
     private void verifySignInCode() {
@@ -242,10 +242,10 @@ public class phoneTest extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putString("phone", phone);
             Navigation.findNavController(root).navigate(R.id.infoTest, bundle);
-            Toast.makeText(getActivity(),getString(R.string.PleaseEntreTheCorrectCode), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), getString(R.string.PleaseEntreTheCorrectCode), Toast.LENGTH_SHORT).show();
         }
     }
-    
+
     //**** Permission
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String @NotNull [] permissions, @NotNull int @NotNull [] grantResults) {

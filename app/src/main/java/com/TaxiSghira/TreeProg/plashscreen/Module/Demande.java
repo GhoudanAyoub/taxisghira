@@ -8,6 +8,7 @@ public class Demande {
     private String city;
     private double Lnt;
     private double Long;
+
     public Demande() {
     }
 
