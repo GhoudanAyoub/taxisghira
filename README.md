@@ -6,14 +6,20 @@ TaxiSghira is a simple Uber app, which uses some APIs to fetch The Location of c
 
 ## Libraries and tools 🛠
 
-<li><a href="https://firebase.google.com/">FireBase</a></li>
+<li><a href="https://github.com/ReactiveX/RxJava">RxJava</a></li>
+<li><a href="https://github.com/ReactiveX/RxAndroid">RxAndroid</a></li>
 <li><a href="https://developer.android.com/topic/libraries/architecture/navigation/">Navigation</a></li>
 <li><a href="https://developer.android.com/topic/libraries/architecture/viewmodel">ViewModel</a></li>
 <li><a href="https://developer.android.com/topic/libraries/architecture/livedata">LiveData</a></li>
-<li><a href="https://github.com/ReactiveX/RxJava">RxJava</a></li>
-<li><a href="https://github.com/ReactiveX/RxAndroid">RxAndroid</a></li>
+<li><a href="https://developer.android.com/training/dependency-injection/hilt-android">DaggerHilt</a></li>
+<li><a href="https://square.github.io/retrofit/">Retrofit</a></li>
+<li><a href="https://developer.android.com/training/data-storage/room">ROOM</a></li>
+<li><a href="https://firebase.google.com/">FireBase</a></li>
+<li><a href="https://github.com/greenrobot/EventBus">EventBus</a></li>
 <li><a href="https://github.com/square/picasso">Picasso</a></li>
 <li><a href="https://github.com/bumptech/glide">Glide</a></li>
+<li><a href="https://github.com/GrenderG/Toasty">Toasty</a></li>
+<li><a href="https://github.com/Daltron/NotificationBanner">NotificationBanner</a></li>
 <li><a href="https://material.io/develop/android/docs/getting-started/">Material Design</a></li>
 <li><a href="https://github.com/lopspower/RxAnimation">RxAnimation</a></li>
 <li><a href="https://lottiefiles.com/">Lotties</a></li>
@@ -28,6 +34,9 @@ The app uses MVVM [Model-View-ViewModel] architecture to have a unidirectional f
 
 ![Architecture](https://developer.android.com/topic/libraries/architecture/images/final-architecture.png)
 
+The Room persistence library provides an abstraction layer over SQLite to allow fluent database access while harnessing the full power of SQLite
+
+![Architecture](https://miro.medium.com/max/1200/1*jT94pc71uD_A2TPN_E2ulg.png)
 
 ## Design
 Designed by Ayoub Bari [Dribble] (https://dribbble.com/BariAyoub) 
