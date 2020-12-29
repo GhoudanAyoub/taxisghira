@@ -242,7 +242,6 @@ public class phoneTest extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putString("phone", phone);
             Navigation.findNavController(root).navigate(R.id.infoTest, bundle);
-            Toast.makeText(getActivity(), getString(R.string.PleaseEntreTheCorrectCode), Toast.LENGTH_SHORT).show();
         }
     }
 

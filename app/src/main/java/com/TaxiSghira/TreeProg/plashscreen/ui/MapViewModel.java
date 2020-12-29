@@ -87,7 +87,6 @@ public class MapViewModel extends ViewModel {
                 });
     }
 
-
     //Favor Chifor Data
     public void InsertData(Chifor chifor) {
         repository.InsertData(chifor);
@@ -100,7 +99,6 @@ public class MapViewModel extends ViewModel {
     public void GetData() {
         listLiveDataFavorChifor = repository.GetData();
     }
-
 
     //Get Direction For Notification
     @SuppressLint("CheckResult")

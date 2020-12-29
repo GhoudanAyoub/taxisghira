@@ -10,7 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.Auth;
+import com.TaxiSghira.TreeProg.plashscreen.Authentication.Create_Account;
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
+import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,6 +26,7 @@ import com.google.firebase.installations.FirebaseInstallations;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import es.dmoral.toasty.Toasty;
 import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
@@ -57,19 +60,24 @@ public class SplashScreen extends AppCompatActivity {
     }
 
     private void checkUserFromDataBase(FirebaseUser user) {
-        FirebaseDatabase.getInstance()
-                .getReference(Common.Client_DataBase_Table)
-                .orderByChild(Common.Client_Id_String)
-                .equalTo(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())
+        FireBaseClient.getFireBaseClient()
+                .getFirebaseDatabase()
+                .getReference("Client")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            FireBaseClient.getFireBaseClient().setFirebaseUser(user);
-                            startActivity(new Intent(getApplicationContext(), Map.class));
-                        } else {
-                            FireBaseClient.getFireBaseClient().setFirebaseUser(user);
-                            startActivity(new Intent(getApplicationContext(), Auth.class));
+                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                                Client client = dataSnapshot1.getValue(Client.class);
+                                if (client!=null && (client.getId().equals(firebaseAuth.getCurrentUser().getUid()) || client.getGmail().equals(user.getEmail()))){
+                                    FireBaseClient.getFireBaseClient().setFirebaseUser(user);
+                                    Toasty.success(getApplicationContext(), " مرحبا بعودتك " + user.getDisplayName(), Toasty.LENGTH_SHORT).show();
+                                    startActivity(new Intent(getApplicationContext(), Map.class));
+                                }else {
+                                    FireBaseClient.getFireBaseClient().setFirebaseUser(user);
+                                    startActivity(new Intent(getApplicationContext(), Auth.class));
+                                }
+                            }
                         }
                     }
 

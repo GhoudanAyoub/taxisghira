@@ -34,6 +34,9 @@ public class FavorDrivers extends AppCompatActivity {
         Favor_Recycle.setLayoutManager(new LinearLayoutManager(this));
         Favor_Recycle.setHasFixedSize(true);
         Favor_Recycle.setAdapter(favorAdapter);
-        mapViewModel.getListLiveDataFavorChifor().observe(this, chifors -> favorAdapter.setList(chifors));
+        mapViewModel.getListLiveDataFavorChifor().observe(this, chifors -> {
+            favorAdapter.setList(chifors);
+            favorAdapter.notifyDataSetChanged();
+        });
     }
 }

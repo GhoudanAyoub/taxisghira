@@ -24,7 +24,6 @@ public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
-        if (Common.Current_Client_Id != null)
             UserUtils.UpdateToken(this, s);
     }
 

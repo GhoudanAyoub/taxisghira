@@ -512,8 +512,6 @@ public class Map extends AppCompatActivity
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(key -> FindDriversByID(Common.driversFound.get(key)), Throwable::printStackTrace);
-        } else {
-            Toasty.info(getApplicationContext(), getString(R.string.driver_not_Found), Toasty.LENGTH_SHORT).show();
         }
     }
 
@@ -648,6 +646,8 @@ public class Map extends AppCompatActivity
     @SuppressLint("CheckResult")
     private void ShowDriverDashboard(Trip pickup1) {
         try {
+            navigationMapRoute.removeRoute();
+            WhereToGo.getEditText().getText().clear();
             pickup12 = pickup1;
             Timber.tag("wtf").e("Inside");
             findViewById(R.id.progBar).setVisibility(View.GONE);

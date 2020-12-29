@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.ui.Map;
@@ -89,18 +90,21 @@ public class Auth extends AppCompatActivity {
         FireBaseClient.getFireBaseClient()
                 .getFirebaseDatabase()
                 .getReference("Client")
-                .orderByChild("id")
-                .equalTo(firebaseAuth.getCurrentUser().getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            FireBaseClient.getFireBaseClient().setFirebaseUser(user);
-                            Toast.makeText(getApplicationContext(), " مرحبا بعودتك " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), Map.class));
-                        } else {
-                            FireBaseClient.getFireBaseClient().setFirebaseUser(user);
-                            startActivity(new Intent(getApplicationContext(), Create_Account.class));
+                            for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                                Client client = dataSnapshot1.getValue(Client.class);
+                                if (client!=null && (client.getId().equals(firebaseAuth.getCurrentUser().getUid()) || client.getGmail().equals(user.getEmail()))){
+                                    FireBaseClient.getFireBaseClient().setFirebaseUser(user);
+                                    Toast.makeText(getApplicationContext(), " مرحبا بعودتك " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(getApplicationContext(), Map.class));
+                                }else {
+                                    FireBaseClient.getFireBaseClient().setFirebaseUser(user);
+                                    startActivity(new Intent(getApplicationContext(), Create_Account.class));
+                                }
+                            }
                         }
                     }
 
@@ -141,8 +145,8 @@ public class Auth extends AppCompatActivity {
                 try {
                     FireBaseClient.getFireBaseClient().setFirebaseUser(user);
                     progressDialog.dismiss();
-                    startActivity(new
-                            Intent(getApplicationContext(), Create_Account.class));
+                    checkUserFromDataBase(user);
+                    //startActivity(new Intent(getApplicationContext(), Create_Account.class));
                 } catch (Exception e) {
                     Timber.e(e);
                 }
