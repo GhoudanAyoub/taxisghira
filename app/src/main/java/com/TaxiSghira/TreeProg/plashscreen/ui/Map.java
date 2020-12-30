@@ -185,7 +185,7 @@ public class Map extends AppCompatActivity
     private LocationCallback locationCallback;
     private double distances = 1000.0;
     private final double LIMIT_RANGE = 10.0;
-    private Location previousLocation, CurrentLocation, MyLocation;
+    private Location previousLocation, CurrentLocation, MyLocation,location ;
     private Boolean firstTime = true;
     private String cityName;
 
@@ -203,6 +203,7 @@ public class Map extends AppCompatActivity
     private LatLng start, end;
     private String DriverOldLocation;
     private boolean isNextLaunch = false;
+    private Point originPoint, destinationPoint;;
 
 
     @SuppressLint("CheckResult")
@@ -261,6 +262,30 @@ public class Map extends AppCompatActivity
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> startActivity(new Intent(Intent.ACTION_CALL).setData(Uri.parse(pickup12.getChifor().getPhone()))), Throwable::printStackTrace);
+        RxView.clicks(findViewById(R.id.FindButton))
+                .throttleFirst(2, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(unit -> {
+                    try {
+                        Toasty.info(getApplicationContext(), getString(R.string.lookingForBestRoute), Toasty.LENGTH_SHORT).show();
+
+                        destinationPoint = Point.fromLngLat(Destination_point.getLongitude(), Destination_point.getLatitude());
+                        originPoint = Point.fromLngLat(CurrentLocation.getLongitude(), CurrentLocation.getLatitude());
+                        //destination point
+                        GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
+                        if (dest != null) {
+                            dest.setGeoJson(Feature.fromGeometry(destinationPoint));
+                        }
+                        //location point
+                        GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
+                        if (origin != null) {
+                            origin.setGeoJson(Feature.fromGeometry(originPoint));
+                        }
+                        getRoute(originPoint, destinationPoint, location);
+                    } catch (Exception e) {
+                        Timber.e(e);
+                    }
+                }, Throwable::printStackTrace);
     }
 
     private void CheckMyData() {
@@ -329,56 +354,13 @@ public class Map extends AppCompatActivity
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
-                    Location location = locationResult.getLastLocation();
+                    location = locationResult.getLastLocation();
 
                     if (location != null) {
                         Common.SetWelcomeMessage(WelcomeText);
                         startService(new Intent(getApplicationContext(), LocationServiceUpdate.class));
                         init(location);
                         UploadLocation(location);
-                        //Find Button For Lunch Search Request
-                        RxView.clicks(findViewById(R.id.FindButton))
-                                .throttleFirst(3, TimeUnit.SECONDS)
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(unit -> {
-                                    Toasty.info(getApplicationContext(), getString(R.string.lookingForBestRoute), Toasty.LENGTH_SHORT).show();
-                                    Point destinationPoint = null;
-                                    try {
-                                        final Geocoder geocoder = new Geocoder(getApplicationContext());
-                                        final String locName = Objects.requireNonNull(WhereToGo.getEditText()).getText().toString();
-                                        final List<Address> list = geocoder.getFromLocationName(locName, 1);
-                                        if (!(list == null || list.isEmpty())) {
-                                            final Address address = list.get(0);
-                                            destinationPoint = Point.fromLngLat(address.getLongitude(), address.getLatitude());
-                                        }
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    Point originPoint = null;
-                                    try {
-                                        assert locationComponent.getLastKnownLocation() != null;
-                                        originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                                                locationComponent.getLastKnownLocation().getLatitude());
-                                    } catch (Exception e) {
-                                        Timber.e(e);
-                                        startActivity(new Intent(getApplicationContext(), Map.class));
-                                    }
-                                    //destination point
-                                    GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
-                                    if (dest != null) {
-                                        dest.setGeoJson(Feature.fromGeometry(destinationPoint));
-                                    }
-                                    //location point
-                                    GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
-                                    if (origin != null) {
-                                        origin.setGeoJson(Feature.fromGeometry(originPoint));
-                                    }
-                                    try {
-                                        getRoute(originPoint, destinationPoint, location);
-                                    } catch (Exception e) {
-                                        Timber.e(e);
-                                    }
-                                }, Throwable::printStackTrace);
                     }
                     //if user Has Change Location Cal and Load Driver Again
                     if (firstTime) {
@@ -604,8 +586,7 @@ public class Map extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed() {
-    }
+    public void onBackPressed() { }
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
@@ -646,7 +627,6 @@ public class Map extends AppCompatActivity
     @SuppressLint("CheckResult")
     private void ShowDriverDashboard(Trip pickup1) {
         try {
-            navigationMapRoute.removeRoute();
             WhereToGo.getEditText().getText().clear();
             pickup12 = pickup1;
             Timber.tag("wtf").e("Inside");
@@ -672,16 +652,10 @@ public class Map extends AppCompatActivity
     @SuppressWarnings({"MissingPermission"})
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
-        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        try {
-            List<Address> addressList = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-            Destination_point = point;
-            if (addressList.size() > 0) {
-                Objects.requireNonNull(WhereToGo.getEditText()).setText(addressList.get(0).getAddressLine(0));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String Txt = LocationUtils.getAddressFromPoint(getApplicationContext(),point);
+        Destination_point = point;
+        System.out.println(point.getLatitude()+","+point.getLongitude());
+        Objects.requireNonNull(WhereToGo.getEditText()).setText(Txt);
         return true;
     }
 
@@ -701,6 +675,8 @@ public class Map extends AppCompatActivity
                                     TimeUnit.MILLISECONDS,
                                     AndroidSchedulers.mainThread())
                                     .subscribe(() -> buildAlertMessageSearchOperation(location));
+
+                            System.out.println("In");
                             if (response.body() == null) {
                                 Toasty.warning(getApplicationContext(), getString(R.string.NoRouteWasFound), Toasty.LENGTH_SHORT).show();
                                 return;
@@ -735,16 +711,9 @@ public class Map extends AppCompatActivity
         findDriver2.setVisibility(View.VISIBLE);
         BottomContainerHolder.setVisibility(View.VISIBLE);
         DeleteDemand.setVisibility(View.GONE);
-        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        try {
-            List<Address> currentAddress = geocoder.getFromLocation(MyLocation.getLatitude(), MyLocation.getLongitude(), 1);
-            if (currentAddress.size() > 0) {
-                ComingFrom.setText(currentAddress.get(0).getAddressLine(0));
-                GoingTO.setText(Objects.requireNonNull(WhereToGo.getEditText()).getText());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String currentAddress = LocationUtils.getAddressFromLocation(getApplicationContext(),MyLocation);
+        ComingFrom.setText(currentAddress);
+        GoingTO.setText(Objects.requireNonNull(WhereToGo.getEditText()).getText());
     }
 
     private void FindNearByDrivers(Location location) {
@@ -1002,7 +971,7 @@ public class Map extends AppCompatActivity
                         if (snapshot.exists()) {
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 Trip trip = dataSnapshot.getValue(Trip.class);
-                                if (trip != null) {
+                                if (trip != null ) {
                                     ShowDriverDashboard(trip);
                                     SubscribeDriversMoving(trip);
                                     initDriverForMoving(event.getTripKey(), trip);
@@ -1022,7 +991,7 @@ public class Map extends AppCompatActivity
     public void OnDriverCompleteTrip(DriverCompleteTrip event) {
         Common.messagingstyle_Notification(getApplicationContext(), new Random().nextInt(),
                 getString(R.string.TripDone), event.getKey() + getString(R.string.YouArrived));
-        finish();
+       // finish();
     }
 
     private void initDriverForMoving(String tripKey, Trip trip) {
