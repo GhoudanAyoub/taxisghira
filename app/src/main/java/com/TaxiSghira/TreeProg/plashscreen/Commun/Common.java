@@ -116,7 +116,7 @@ public class Common {
     }
 
 
-    public static void messagingstyle_Notification(Context context, int notificationId, String title, String Body) {
+    public static void messagingstyle_Notification(Context context, int notificationId,  String Body) {
         Uri path = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         PendingIntent pendingIntent = null;
         Intent intent = new Intent(context, com.TaxiSghira.TreeProg.plashscreen.ui.Map.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -139,7 +139,6 @@ public class Common {
         }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.taxisymb)
-                .setContentTitle(title)
                 .setContentText(Body)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

@@ -751,9 +751,8 @@ public class Map extends AppCompatActivity
             } else {
                 Toasty.info(getApplicationContext(), getString(R.string.No_Driver_Accept_Request), Toasty.LENGTH_SHORT).show();
                 LastDriverCall = null;
-                navigationMapRoute.removeRoute();
-                layout_location_display_info.setVisibility(View.GONE);
-                BottomContainerHolder.setVisibility(View.GONE);
+                layout_location_display_info.setVisibility(View.VISIBLE);
+                BottomContainerHolder.setVisibility(View.VISIBLE);
             }
 
         } else {
@@ -948,6 +947,7 @@ public class Map extends AppCompatActivity
     public void OnDeclineDriverRequest(DeclineRequestFromDriver event) {
         if (LastDriverCall != null) {
             Common.driversFound.get(LastDriverCall.getKey()).setDecline(true);
+
             FindNearByDrivers(CurrentLocation);
         }
     }
@@ -989,8 +989,7 @@ public class Map extends AppCompatActivity
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void OnDriverCompleteTrip(DriverCompleteTrip event) {
-        Common.messagingstyle_Notification(getApplicationContext(), new Random().nextInt(),
-                getString(R.string.TripDone), event.getKey() + getString(R.string.YouArrived));
+        Common.messagingstyle_Notification(getApplicationContext(), new Random().nextInt(),getString(R.string.YouArrived));
        // finish();
     }
 

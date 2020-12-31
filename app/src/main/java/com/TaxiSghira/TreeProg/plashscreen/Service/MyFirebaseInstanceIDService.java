@@ -37,19 +37,22 @@ public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
                         DeclineRequestFromDriver declineRequestFromDriver = new DeclineRequestFromDriver();
                         declineRequestFromDriver.setKey(dataRec.get(Common.DRIVER_KEY));
                         EventBus.getDefault().postSticky(declineRequestFromDriver);
-                    } else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_DECLINE_AND_REMOVE_TRIP)) {
+                    }
+                    else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_DECLINE_AND_REMOVE_TRIP)) {
                         DeclineRequestAndRemoveTripFromDriver declineRequestAndRemoveTripFromDriver = new DeclineRequestAndRemoveTripFromDriver();
                         declineRequestAndRemoveTripFromDriver.setKey(dataRec.get(Common.DRIVER_KEY));
                         EventBus.getDefault().postSticky(declineRequestAndRemoveTripFromDriver);
-                    } else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.RIDER_COMPLETE_TRIP)) {
-                        DriverCompleteTrip driverCompleteTrip = new DriverCompleteTrip();
-                        driverCompleteTrip.setKey(dataRec.get(Common.DRIVER_KEY));
-                        EventBus.getDefault().postSticky(driverCompleteTrip);
-                    } else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_ACCEPT)) {
+                    }
+                    else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.REQUEST_DRIVER_ACCEPT)) {
                         String TripKey = dataRec.get(Common.TRIP_KEY);
                         EventBus.getDefault().postSticky(new DriverAcceptTripEvent(TripKey));
-                    } else {
-                        Common.messagingstyle_Notification(getApplicationContext(), new Random().nextInt(), "TaxiSghira", "لقد اتى سائقك");
+                    }
+                    else if (Objects.requireNonNull(dataRec.get(Common.NOTI_TITLE)).equals(Common.RIDER_COMPLETE_TRIP)) {
+                        String tripkey = dataRec.get(Common.DRIVER_KEY);
+                        EventBus.getDefault().postSticky(new DriverCompleteTrip(tripkey));
+                    }
+                    else {
+                        Common.messagingstyle_Notification(getApplicationContext(), new Random().nextInt(),  "لقد اتى سائقك");
                     }
                 }
             }

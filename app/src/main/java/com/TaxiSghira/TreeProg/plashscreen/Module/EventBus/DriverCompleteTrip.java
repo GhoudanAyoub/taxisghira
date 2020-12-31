@@ -6,6 +6,10 @@ public class DriverCompleteTrip {
     public DriverCompleteTrip() {
     }
 
+    public DriverCompleteTrip(String key) {
+        this.key = key;
+    }
+
     public String getKey() {
         return key;
     }
