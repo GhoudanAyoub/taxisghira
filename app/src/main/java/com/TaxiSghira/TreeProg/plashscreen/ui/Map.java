@@ -990,7 +990,14 @@ public class Map extends AppCompatActivity
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void OnDriverCompleteTrip(DriverCompleteTrip event) {
         Common.messagingstyle_Notification(getApplicationContext(), new Random().nextInt(),getString(R.string.YouArrived));
-       // finish();
+        finish();
+        navigationMapRoute.removeRoute();
+        mapboxMap.clear();
+        _ShowRateLayout();
+    }
+
+    private void _ShowRateLayout() {
+
     }
 
     private void initDriverForMoving(String tripKey, Trip trip) {
