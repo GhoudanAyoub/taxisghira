@@ -13,6 +13,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Client;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMResponse;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
+import com.TaxiSghira.TreeProg.plashscreen.Module.YourLocations;
 import com.TaxiSghira.TreeProg.plashscreen.Module.route;
 import com.TaxiSghira.TreeProg.plashscreen.Room.Repository;
 import com.google.firebase.database.DataSnapshot;
@@ -20,8 +21,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -31,9 +34,10 @@ import timber.log.Timber;
 public class MapViewModel extends ViewModel {
 
     private final Repository repository;
+    private List<YourLocations> yourLocationsList = new ArrayList<>();
 
     private LiveData<List<Chifor>> listLiveDataFavorChifor = null;
-
+    private MutableLiveData<List<YourLocations>> yourLocationsMutableLiveData = null;
     private MutableLiveData<Client> clientMutableLiveData;
     private MutableLiveData<List<route>> RouteLiveData = new MutableLiveData<>();
 
@@ -51,12 +55,48 @@ public class MapViewModel extends ViewModel {
         return RouteLiveData;
     }
 
+    public LiveData<List<YourLocations>> getYourLocationsMutableLiveData() {
+        return yourLocationsMutableLiveData;
+    }
 
     @ViewModelInject
     public MapViewModel(Repository repository) {
         this.repository = repository;
     }
 
+    //YourLocations Data
+    public void GetYourLocations(){
+        FirebaseDatabase.getInstance()
+                .getReference(Common.YourLocations_DataBase_Table)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()){
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                YourLocations yourLocations = dataSnapshot.getValue(YourLocations.class);
+                                if (yourLocations!=null && yourLocations.getUser_id().equals(Common.Current_Client_Id))
+                                    yourLocationsList.add(yourLocations);
+                                System.out.println(yourLocationsList);
+                            }
+                            //if (yourLocationsList!=null)
+                                //yourLocationsMutableLiveData.setValue(yourLocationsList);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    public void PushYourLocation(YourLocations yourLocations){
+        FirebaseDatabase.getInstance()
+                .getReference(Common.YourLocations_DataBase_Table)
+                .push()
+                .setValue(yourLocations)
+                .addOnFailureListener(Throwable::printStackTrace);
+    }
 
     //Send Notification
     public Observable<FCMResponse> sendNotification(FCMSendData body) {

@@ -31,67 +31,78 @@
         app:lottie_loop="true"
         app:lottie_rawRes="@raw/researsh" />
 
-
-    <TableRow
+    <LinearLayout
         android:id="@+id/tableRow2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginRight="32dp"
         android:background="@drawable/cerclebackgroundwhite"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listAnim"
-        tools:visibility="visible">
+        app:layout_constraintTop_toBottomOf="@+id/listAnim">
 
-        <ImageButton
-            android:id="@+id/FindButton"
-            android:layout_width="72dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1 "
-            android:background="@drawable/ccp_selectable_bg"
-            android:contentDescription="TODO"
-            app:srcCompat="@drawable/ll" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/editText2"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:fontFamily="@font/harmattan"
-            android:gravity="center|start"
-            android:hint="@string/whereAreYouGoing"
-            android:inputType="textPersonName"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
-            android:textSize="18sp"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/frutorial_title"
-            app:boxStrokeWidth="2dp"
-            app:hintAnimationEnabled="true"
-            app:hintEnabled="true"
-            app:hintTextColor="@color/black">
+            android:background="@drawable/cerclebackgroundwhite"
+            tools:visibility="visible">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <ImageButton
+                android:id="@+id/FindButton"
+                android:layout_width="72dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1 "
+                android:background="@drawable/ccp_selectable_bg"
+                android:contentDescription="TODO"
+                app:srcCompat="@drawable/ll" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/editText2"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:fontFamily="@font/scheherazade"
-                android:inputType="textEmailAddress"
-                android:singleLine="true"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/harmattan"
+                android:gravity="center|start"
+                android:hint="@string/whereAreYouGoing"
+                android:inputType="textPersonName"
                 android:textColor="@color/black"
                 android:textColorHint="@color/black"
-                android:textCursorDrawable="@color/black" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:textSize="18sp"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/frutorial_title"
+                app:boxStrokeWidth="2dp"
+                app:hintAnimationEnabled="true"
+                app:hintEnabled="true"
+                app:hintTextColor="@color/black">
 
-    </TableRow>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TIPET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="@font/scheherazade"
+                    android:inputType="textEmailAddress"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
+                    android:textCursorDrawable="@color/black" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/YourLocationsRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:visibility="visible" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/BottomContainerHolder"
@@ -103,7 +114,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
         app:layout_constraintStart_toStartOf="@+id/tableRow2"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <include layout="@layout/location_display_info" />
 

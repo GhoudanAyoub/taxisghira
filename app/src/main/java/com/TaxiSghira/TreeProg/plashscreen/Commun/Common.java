@@ -35,15 +35,11 @@ public class Common {
     public static final String Current_Client_Id = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     public static final String Current_Client_DispalyName = FireBaseClient.getFireBaseClient().getFirebaseUser().getDisplayName();
     public static final String Current_Client_Gmail = FireBaseClient.getFireBaseClient().getFirebaseUser().getEmail();
-    public static final String Favor_DataBase_Table = "Favor";
     public static final String Chifor_DataBase_Table = "Chifor";
-    public static final String Demande_DataBase_Table = "Demande";
     public static final String Pickup_DataBase_Table = "Trip";
     public static final String Client_DataBase_Table = "Client";
+    public static final String YourLocations_DataBase_Table = "YourLocations";
     public static final String city = "city";
-    public static final String Client_Id_String = "id";
-    public static final String Gmail_String = "gmail";
-    public static final String ClientName_String = "ClientName";
     public static final String NOTI_TITLE = "title";
     public static final String NOTI_BODY = "body";
     public static final String DRIVER_TOKEN_REFERENCE = "DriverToken";
@@ -61,16 +57,9 @@ public class Common {
     public static final String RIDER_DESTINATION = "destinationLocation";
     public static final String REQUEST_DRIVER_ACCEPT = "Accept";
     public static final String TRIP_KEY = "TripKey";
-    public static final String TRIP_PICKUP_LOCATION = "TripPickupLocation";
-    public static final double MINE_RANGE_PICK_UP_IN_KM = 0.05;
-    public static final String DRIVER_ARRIVED = "TaxiSghira";
-    public static final int WAIT_TIME_IN_MIN = 1;
-    public static final String TRIP_DESTINATION_LOCATION = "TripDestinationLocation";
     public static final String REQUEST_DRIVER_DECLINE_AND_REMOVE_TRIP = "DeclineAndRemove";
     public static final String RIDER_COMPLETE_TRIP = "DriverCompleteTrip";
 
-
-    public static List<Chifor> Drivers_Locations_List = new ArrayList<>();
     public static Map<String, DriverGeoModel> driversFound = new HashMap<>();
     public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();
 

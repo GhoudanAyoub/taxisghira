@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -32,7 +33,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.TaxiSghira.TreeProg.plashscreen.Adapters.YourLocationAdapter;
 import com.TaxiSghira.TreeProg.plashscreen.Authentication.PersonalInfo;
 import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseDriverInfoListener;
 import com.TaxiSghira.TreeProg.plashscreen.Callback.IFirebaseFailedListener;
@@ -46,6 +50,7 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverAcceptTripEvent
 import com.TaxiSghira.TreeProg.plashscreen.Module.EventBus.DriverCompleteTrip;
 import com.TaxiSghira.TreeProg.plashscreen.Module.GeoQueryModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Trip;
+import com.TaxiSghira.TreeProg.plashscreen.Module.YourLocations;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
@@ -114,6 +119,7 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import dagger.hilt.android.AndroidEntryPoint;
 import es.dmoral.toasty.Toasty;
 import io.reactivex.Completable;
@@ -130,9 +136,9 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacem
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
 @AndroidEntryPoint
-@SuppressLint("NonConstantResourceId")
-public class Map extends AppCompatActivity
-        implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener,
+@SuppressLint({"NonConstantResourceId","CheckResult"})
+@SuppressWarnings({"MissingPermission"})
+public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener,
         IFirebaseDriverInfoListener, IFirebaseFailedListener, LocationListener {
 
     @BindView(R.id.textView5)
@@ -161,7 +167,8 @@ public class Map extends AppCompatActivity
     LinearLayout layout_driver_display_info;
     @BindView(R.id.listAnim)
     FloatingActionButton listAnim;
-
+    @BindView(R.id.YourLocationsRecycler)
+    RecyclerView YourLocationsRecycler;
 
     MapView mapView;
     public static String id;
@@ -176,6 +183,7 @@ public class Map extends AppCompatActivity
     private Client Current_Client;
     MapViewModel mapViewModel;
     private LocationRequest locationRequest;
+    private YourLocationAdapter locationAdapter;
 
     //online System
     private DatabaseReference ClientLocationRef, driver_location_ref;
@@ -212,6 +220,7 @@ public class Map extends AppCompatActivity
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         if (FirebaseInstanceId.getInstance().getToken() != null)
             UserUtils.UpdateToken(this, FirebaseInstanceId.getInstance().getToken());
@@ -220,6 +229,7 @@ public class Map extends AppCompatActivity
 
         views();
         mapViewModel.getClientInfo();
+        mapViewModel.GetYourLocations();
         CheckMyData();
 
         if (isMapsEnabled()) {
@@ -230,7 +240,10 @@ public class Map extends AppCompatActivity
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-
+        RxView.clicks(findViewById(R.id.TIPET))
+                .throttleFirst(2, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(unit->ShowYourLocation());
         RxView.clicks(findDriver2).
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -252,7 +265,6 @@ public class Map extends AppCompatActivity
                 }, Throwable::printStackTrace);
         RxView.clicks(findViewById(R.id.Favories))
                 .throttleFirst(2, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
                     mapViewModel.InsertData(pickup12.getChifor());
@@ -288,6 +300,15 @@ public class Map extends AppCompatActivity
                 }, Throwable::printStackTrace);
     }
 
+    private void ShowYourLocation(){
+        mapViewModel.getYourLocationsMutableLiveData().observe(this,yourLocations -> {
+            if (yourLocations!=null){
+                System.out.println("=========> "+yourLocations.get(1).getLocation_String());
+                locationAdapter.setList(yourLocations);
+            }
+        } );
+    }
+
     private void CheckMyData() {
         mapViewModel.getClientMutableLiveData().observe(this, client -> {
             if (client == null)
@@ -311,6 +332,7 @@ public class Map extends AppCompatActivity
         ButterKnife.bind(this, findViewById(android.R.id.content));
         Common.SetWelcomeMessage(WelcomeText);
         mapView = findViewById(R.id.mapView);
+        locationAdapter = new YourLocationAdapter();
         findViewById(R.id.progBar).setVisibility(View.GONE);
         findDriver2.setVisibility(View.GONE);
         BottomContainerHolder.setVisibility(View.GONE);
@@ -318,7 +340,8 @@ public class Map extends AppCompatActivity
         layout_location_display_info.setVisibility(View.GONE);
         DeleteDemand.setVisibility(View.GONE);
         listAnim.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
-
+        YourLocationsRecycler.setLayoutManager(new LinearLayoutManager(this));
+        YourLocationsRecycler.setAdapter(locationAdapter);
         manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -649,7 +672,6 @@ public class Map extends AppCompatActivity
         loadedMapStyle.addLayer(destinationSymbolLayer);
     }
 
-    @SuppressWarnings({"MissingPermission"})
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
         String Txt = LocationUtils.getAddressFromPoint(getApplicationContext(),point);
@@ -704,7 +726,6 @@ public class Map extends AppCompatActivity
         }
     }
 
-    @SuppressLint("CheckResult")
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
         MyLocation = location;
         layout_location_display_info.setVisibility(View.VISIBLE);
@@ -747,6 +768,7 @@ public class Map extends AppCompatActivity
             }
             if (foundDriver != null) {
                 UserUtils.sendRequestToDriver(mapViewModel, Destination_point, WhereToGo.getEditText().getText().toString(), foundDriver, currentRiderLocation, Current_Client);
+                mapViewModel.PushYourLocation(new YourLocations(WhereToGo.getEditText().getText().toString(),Common.Current_Client_Id,destinationPoint.latitude(),destinationPoint.longitude()));
                 LastDriverCall = foundDriver;
             } else {
                 Toasty.info(getApplicationContext(), getString(R.string.No_Driver_Accept_Request), Toasty.LENGTH_SHORT).show();
