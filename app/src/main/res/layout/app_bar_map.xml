@@ -114,7 +114,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/tableRow2"
         app:layout_constraintStart_toStartOf="@+id/tableRow2"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <include layout="@layout/location_display_info" />
 
@@ -168,4 +168,17 @@
         app:layout_constraintEnd_toStartOf="@+id/floatingActionButton"
         app:layout_constraintStart_toEndOf="@+id/listAnim"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/CloseDemandeTaxi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:backgroundTint="#FF0000"
+        android:clickable="true"
+        android:tint="#FDF8F8"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/BottomContainerHolder"
+        app:layout_constraintEnd_toEndOf="@+id/BottomContainerHolder"
+        app:srcCompat="@drawable/ic_close_black_24dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

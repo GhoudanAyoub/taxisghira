@@ -19,17 +19,17 @@ public class DbModule {
 
     @Singleton
     @Provides
-    public static ChiforDb ProvideDb(Application application){
+    public static DataBaseRoom ProvideDb(Application application){
         return Room.databaseBuilder(
                 application
-                ,ChiforDb.class
-                ,"ChiforDb")
+                , DataBaseRoom.class
+                ,"DataBaseRoom")
                 .build();
     }
 
     @Singleton
     @Provides
-    public static Doa ProvideDoa(ChiforDb chiforDb){
-        return chiforDb.getDoa();
+    public static Doa ProvideDoa(DataBaseRoom dataBaseRoom){
+        return dataBaseRoom.getDoa();
     }
 }

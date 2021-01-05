@@ -7,6 +7,8 @@ import androidx.room.Insert;
 import androidx.room.Query;
 
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
+import com.TaxiSghira.TreeProg.plashscreen.Module.YourLocations;
+import com.google.protobuf.ByteOutput;
 
 import java.util.List;
 
@@ -21,4 +23,12 @@ public interface Doa {
 
     @Query("select * from chifor")
     LiveData<List<Chifor>> GetData();
+
+
+    @Insert
+    void InsertLocation(YourLocations yourLocations);
+
+    @Query("select * from YourLocation")
+    LiveData<List<YourLocations>> GetLocation();
+
 }

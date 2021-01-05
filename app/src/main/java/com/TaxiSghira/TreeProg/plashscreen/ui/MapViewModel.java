@@ -7,6 +7,8 @@ import androidx.hilt.lifecycle.ViewModelInject;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.room.Insert;
+import androidx.room.Query;
 
 import com.TaxiSghira.TreeProg.plashscreen.Commun.Common;
 import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
@@ -23,6 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -31,13 +34,14 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
+@SuppressLint("CheckResult")
 public class MapViewModel extends ViewModel {
 
     private final Repository repository;
     private List<YourLocations> yourLocationsList = new ArrayList<>();
 
     private LiveData<List<Chifor>> listLiveDataFavorChifor = null;
-    private MutableLiveData<List<YourLocations>> yourLocationsMutableLiveData = null;
+    private LiveData<List<YourLocations>> yourLocationsMutableLiveData = null;
     private MutableLiveData<Client> clientMutableLiveData;
     private MutableLiveData<List<route>> RouteLiveData = new MutableLiveData<>();
 
@@ -55,7 +59,7 @@ public class MapViewModel extends ViewModel {
         return RouteLiveData;
     }
 
-    public LiveData<List<YourLocations>> getYourLocationsMutableLiveData() {
+    public LiveData<List<YourLocations>> getYourLocationsLiveData() {
         return yourLocationsMutableLiveData;
     }
 
@@ -65,6 +69,19 @@ public class MapViewModel extends ViewModel {
     }
 
     //YourLocations Data
+
+    public void InsertLocation(YourLocations yourLocations){
+        Observable.timer(1,TimeUnit.MILLISECONDS)
+                .observeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe( aLong -> repository.InsertLocation(yourLocations)
+                        ,Throwable::printStackTrace);
+    }
+
+    public void  GetLocation(){
+        yourLocationsMutableLiveData = repository.GetLocation();
+    }
+
     public void GetYourLocations(){
         FirebaseDatabase.getInstance()
                 .getReference(Common.YourLocations_DataBase_Table)
@@ -74,12 +91,13 @@ public class MapViewModel extends ViewModel {
                         if (snapshot.exists()){
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()){
                                 YourLocations yourLocations = dataSnapshot.getValue(YourLocations.class);
-                                if (yourLocations!=null && yourLocations.getUser_id().equals(Common.Current_Client_Id))
+                                if (yourLocations!=null && yourLocations.getUser_id().equals(Common.Current_Client_Id)) {
                                     yourLocationsList.add(yourLocations);
-                                System.out.println(yourLocationsList);
+                                    System.out.println(yourLocationsList);
+                                    //yourLocationsMutableLiveData.setValue(yourLocationsList);
+                                }
                             }
                             //if (yourLocationsList!=null)
-                                //yourLocationsMutableLiveData.setValue(yourLocationsList);
                         }
                     }
 
@@ -141,7 +159,6 @@ public class MapViewModel extends ViewModel {
     }
 
     //Get Direction For Notification
-    @SuppressLint("CheckResult")
     public Disposable getDirections(String profile, String to, String access_token) {
         return repository.getDirections(profile, to, access_token)
                 .subscribeOn(Schedulers.io())

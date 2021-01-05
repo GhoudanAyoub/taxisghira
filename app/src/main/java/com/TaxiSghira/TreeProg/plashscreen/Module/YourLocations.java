@@ -1,7 +1,13 @@
 package com.TaxiSghira.TreeProg.plashscreen.Module;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "YourLocation")
 public class YourLocations {
 
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private String Location_String;
     private String User_id;
     private double lnt;
@@ -15,6 +21,14 @@ public class YourLocations {
         User_id = user_id;
         this.lnt = lnt;
         this.lng = lng;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getUser_id() {

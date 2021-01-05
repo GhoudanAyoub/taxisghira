@@ -64,6 +64,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.ChildEventListener;
@@ -167,8 +168,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     LinearLayout layout_driver_display_info;
     @BindView(R.id.listAnim)
     FloatingActionButton listAnim;
-    @BindView(R.id.YourLocationsRecycler)
-    RecyclerView YourLocationsRecycler;
+    @BindView(R.id.TIPET)
+    TextInputEditText textInputEditText;
+    @BindView(R.id.CloseDemandeTaxi)
+    FloatingActionButton CloseDemandeTaxi;
 
     MapView mapView;
     public static String id;
@@ -184,6 +187,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     MapViewModel mapViewModel;
     private LocationRequest locationRequest;
     private YourLocationAdapter locationAdapter;
+    private RecyclerView YourLocationsRecycler;
 
     //online System
     private DatabaseReference ClientLocationRef, driver_location_ref;
@@ -229,7 +233,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
         views();
         mapViewModel.getClientInfo();
-        mapViewModel.GetYourLocations();
+        mapViewModel.GetLocation();
         CheckMyData();
 
         if (isMapsEnabled()) {
@@ -240,10 +244,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        RxView.clicks(findViewById(R.id.TIPET))
+        RxView.clicks(textInputEditText)
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(unit->ShowYourLocation());
+                .subscribe(unit->ShowYourLocation(),Throwable::printStackTrace);
         RxView.clicks(findDriver2).
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -259,6 +263,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 .subscribe(unit -> {
                     findViewById(R.id.progBar).setVisibility(View.GONE);
                     navigationMapRoute.removeRoute();
+                    mapboxMap.clear();
+                    CloseDemandeTaxi.setVisibility(View.GONE);
                     layout_location_display_info.setVisibility(View.GONE);
                     BottomContainerHolder.setVisibility(View.GONE);
                     Toasty.success(getApplicationContext(), getString(R.string.you_canceled_your_demand), Toasty.LENGTH_SHORT).show();
@@ -298,12 +304,23 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         Timber.e(e);
                     }
                 }, Throwable::printStackTrace);
+        RxView.clicks(CloseDemandeTaxi)
+                .throttleFirst(2,TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(unit -> {
+                    WhereToGo.getEditText().getText().clear();
+                    mapboxMap.clear();
+                    navigationMapRoute.removeRoute();
+                    CloseDemandeTaxi.setVisibility(View.GONE);
+                    layout_location_display_info.setVisibility(View.GONE);
+                    findDriver2.setVisibility(View.GONE);
+                    BottomContainerHolder.setVisibility(View.GONE);
+                },Throwable::printStackTrace);
     }
 
     private void ShowYourLocation(){
-        mapViewModel.getYourLocationsMutableLiveData().observe(this,yourLocations -> {
+        mapViewModel.getYourLocationsLiveData().observe(this,yourLocations -> {
             if (yourLocations!=null){
-                System.out.println("=========> "+yourLocations.get(1).getLocation_String());
                 locationAdapter.setList(yourLocations);
             }
         } );
@@ -336,10 +353,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         findViewById(R.id.progBar).setVisibility(View.GONE);
         findDriver2.setVisibility(View.GONE);
         BottomContainerHolder.setVisibility(View.GONE);
+        CloseDemandeTaxi.setVisibility(View.GONE);
         layout_driver_display_info.setVisibility(View.GONE);
         layout_location_display_info.setVisibility(View.GONE);
         DeleteDemand.setVisibility(View.GONE);
         listAnim.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), Util_List.class)));
+        YourLocationsRecycler =  findViewById(R.id.YourLocationsRecycler);
         YourLocationsRecycler.setLayoutManager(new LinearLayoutManager(this));
         YourLocationsRecycler.setAdapter(locationAdapter);
         manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -673,7 +692,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     }
 
     @Override
-    public boolean onMapClick(@NonNull LatLng point) {
+    public boolean onMapClick(@NonNull LatLng point){
         String Txt = LocationUtils.getAddressFromPoint(getApplicationContext(),point);
         Destination_point = point;
         System.out.println(point.getLatitude()+","+point.getLongitude());
@@ -693,12 +712,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         @SuppressLint("CheckResult")
                         @Override
                         public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
-                            Completable.timer(500,
-                                    TimeUnit.MILLISECONDS,
-                                    AndroidSchedulers.mainThread())
-                                    .subscribe(() -> buildAlertMessageSearchOperation(location));
-
-                            System.out.println("In");
                             if (response.body() == null) {
                                 Toasty.warning(getApplicationContext(), getString(R.string.NoRouteWasFound), Toasty.LENGTH_SHORT).show();
                                 return;
@@ -706,6 +719,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                 Toasty.warning(getApplicationContext(), getString(R.string.NoRouteWasFound), Toasty.LENGTH_SHORT).show();
                                 return;
                             }
+                            buildAlertMessageSearchOperation(location);
                             currentRoute = response.body().routes().get(0);
                             if (navigationMapRoute != null) {
                                 navigationMapRoute.removeRoute();
@@ -729,6 +743,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
         MyLocation = location;
         layout_location_display_info.setVisibility(View.VISIBLE);
+        CloseDemandeTaxi.setVisibility(View.VISIBLE);
         findDriver2.setVisibility(View.VISIBLE);
         BottomContainerHolder.setVisibility(View.VISIBLE);
         DeleteDemand.setVisibility(View.GONE);
@@ -769,6 +784,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
             if (foundDriver != null) {
                 UserUtils.sendRequestToDriver(mapViewModel, Destination_point, WhereToGo.getEditText().getText().toString(), foundDriver, currentRiderLocation, Current_Client);
                 mapViewModel.PushYourLocation(new YourLocations(WhereToGo.getEditText().getText().toString(),Common.Current_Client_Id,destinationPoint.latitude(),destinationPoint.longitude()));
+
+                mapViewModel.InsertLocation(new YourLocations(WhereToGo.getEditText().getText().toString(),Common.Current_Client_Id,destinationPoint.latitude(),destinationPoint.longitude()));
                 LastDriverCall = foundDriver;
             } else {
                 Toasty.info(getApplicationContext(), getString(R.string.No_Driver_Accept_Request), Toasty.LENGTH_SHORT).show();
@@ -780,7 +797,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         } else {
             Toasty.info(getApplicationContext(), getString(R.string.driver_not_Found), Toasty.LENGTH_SHORT).show();
             LastDriverCall = null;
-            finish();
         }
     }
 
