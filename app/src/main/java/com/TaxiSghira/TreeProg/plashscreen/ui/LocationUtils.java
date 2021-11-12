@@ -6,7 +6,8 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.text.TextUtils;
 
-import com.mapbox.mapboxsdk.geometry.LatLng;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,7 +42,7 @@ public class LocationUtils {
         StringBuilder result = new StringBuilder();
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
-            List<Address> addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            List<Address> addressList = geocoder.getFromLocation(location.latitude, location.longitude, 1);
             if (addressList != null && addressList.size() > 0) {
                 if (addressList.get(0).getLocality() != null && !TextUtils.isEmpty(addressList.get(0).getLocality())) {
                     result.append(addressList.get(0).getLocality());

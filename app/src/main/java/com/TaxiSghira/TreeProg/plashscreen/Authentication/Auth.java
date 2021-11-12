@@ -37,7 +37,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import kotlin.Unit;
-import timber.log.Timber;
 
 
 public class Auth extends AppCompatActivity {
@@ -81,7 +80,6 @@ public class Auth extends AppCompatActivity {
 
                     @Override
                     public void onComplete() {
-                        Timber.e("Map Activity : Called");
                     }
                 });
     }
@@ -148,7 +146,6 @@ public class Auth extends AppCompatActivity {
                     checkUserFromDataBase(user);
                     //startActivity(new Intent(getApplicationContext(), Create_Account.class));
                 } catch (Exception e) {
-                    Timber.e(e);
                 }
             } else {
                 if (response == null) {
@@ -161,7 +158,7 @@ public class Auth extends AppCompatActivity {
                 }
                 if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                     Toast.makeText(this, response.getError().getErrorCode(), Toast.LENGTH_LONG).show();
-                    Timber.d(String.valueOf(response.getError().getErrorCode()));
+
                 }
             }
         }

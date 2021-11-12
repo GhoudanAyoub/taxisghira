@@ -16,10 +16,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
@@ -53,16 +55,34 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Trip;
 import com.TaxiSghira.TreeProg.plashscreen.Module.YourLocations;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
+import com.TaxiSghira.TreeProg.plashscreen.Service.DirectionsJSONParser;
 import com.TaxiSghira.TreeProg.plashscreen.Service.LocationServiceUpdate;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.JointType;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -75,43 +95,20 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.jakewharton.rxbinding3.view.RxView;
-import com.mapbox.android.core.location.LocationEngineRequest;
-import com.mapbox.android.core.permissions.PermissionsListener;
-import com.mapbox.android.core.permissions.PermissionsManager;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.Polyline;
-import com.mapbox.mapboxsdk.annotations.PolylineOptions;
-import com.mapbox.mapboxsdk.camera.CameraPosition;
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.location.LocationComponent;
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
-import com.mapbox.mapboxsdk.location.LocationComponentOptions;
-import com.mapbox.mapboxsdk.location.modes.CameraMode;
-import com.mapbox.mapboxsdk.location.modes.RenderMode;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -131,15 +128,13 @@ import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.TaxiSghira.TreeProg.plashscreen.ui.UserUtils.sendRequestToDriver;
 
 @AndroidEntryPoint
 @SuppressLint({"NonConstantResourceId","CheckResult"})
 @SuppressWarnings({"MissingPermission"})
-public class Map extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener,
+public class Map extends AppCompatActivity implements OnMapReadyCallback,
         IFirebaseDriverInfoListener, IFirebaseFailedListener, LocationListener {
 
     @BindView(R.id.textView5)
@@ -175,12 +170,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     MapView mapView;
     public static String id;
-    private MapboxMap mapboxMap;
-    private PermissionsManager permissionsManager;
-    private LocationComponent locationComponent;
-    private DirectionsRoute currentRoute;
+    private GoogleMap mapboxMap;
     private LocationManager manager;
-    private NavigationMapRoute navigationMapRoute;
     private boolean mLocationPermissionGranted = false;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private Client Current_Client;
@@ -215,14 +206,18 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private LatLng start, end;
     private String DriverOldLocation;
     private boolean isNextLaunch = false;
-    private Point originPoint, destinationPoint;;
+    private LatLng originPoint, destinationPoint;;
 
+    LatLng origin;
+    LatLng dest;
+    PolylineOptions lineOptions;
+    boolean startTrack = false;
+    ArrayList<LatLng> points;
 
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, "pk.eyJ1IjoidGhlc2hhZG93MiIsImEiOiJjazk5YWNzczYwMjJ2M2VvMGttZHRrajFuIn0.evtApMiwXCmCfyw5qUDT5Q");
         setContentView(R.layout.app_bar_map);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -262,7 +257,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
                     findViewById(R.id.progBar).setVisibility(View.GONE);
-                    navigationMapRoute.removeRoute();
+                    //navigationMapRoute.removeRoute();
                     mapboxMap.clear();
                     CloseDemandeTaxi.setVisibility(View.GONE);
                     layout_location_display_info.setVisibility(View.GONE);
@@ -287,21 +282,13 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     try {
                         Toasty.info(getApplicationContext(), getString(R.string.lookingForBestRoute), Toasty.LENGTH_SHORT).show();
 
-                        destinationPoint = Point.fromLngLat(Destination_point.getLongitude(), Destination_point.getLatitude());
-                        originPoint = Point.fromLngLat(CurrentLocation.getLongitude(), CurrentLocation.getLatitude());
+                        destinationPoint = new LatLng(Destination_point.longitude, Destination_point.latitude);
+                        originPoint = new LatLng(CurrentLocation.getLongitude(), CurrentLocation.getLatitude());
                         //destination point
-                        GeoJsonSource dest = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-source-id");
-                        if (dest != null) {
-                            dest.setGeoJson(Feature.fromGeometry(destinationPoint));
-                        }
-                        //location point
-                        GeoJsonSource origin = Objects.requireNonNull(mapboxMap.getStyle()).getSourceAs("destination-origin-id");
-                        if (origin != null) {
-                            origin.setGeoJson(Feature.fromGeometry(originPoint));
-                        }
-                        getRoute(originPoint, destinationPoint, location);
+                        drawRoute(destinationPoint);
+
+                       // getRoute(originPoint, destinationPoint, location);
                     } catch (Exception e) {
-                        Timber.e(e);
                     }
                 }, Throwable::printStackTrace);
         RxView.clicks(CloseDemandeTaxi)
@@ -310,7 +297,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 .subscribe(unit -> {
                     WhereToGo.getEditText().getText().clear();
                     mapboxMap.clear();
-                    navigationMapRoute.removeRoute();
                     CloseDemandeTaxi.setVisibility(View.GONE);
                     layout_location_display_info.setVisibility(View.GONE);
                     findDriver2.setVisibility(View.GONE);
@@ -432,7 +418,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void loadAvailableDrivers() {
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Timber.e(getString(R.string.permission_not_granted));
             return;
         }
         mFusedLocationClient.getLastLocation()
@@ -481,7 +466,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                                 @Override
                                 public void onGeoQueryError(DatabaseError error) {
-                                    Timber.e(error.getMessage());
+
                                 }
                             });
 
@@ -584,9 +569,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                     new GeoLocation(locationComponent.getLatitude(),
                             locationComponent.getLongitude()),
                     (key, error) -> {
-                        if (error != null)
-                            Timber.e(error.getMessage());
-                        else
+                        if (error == null)
                             Toasty.info(getApplicationContext(), getString(R.string.Looking), Toasty.LENGTH_SHORT);
                     });
         }
@@ -630,67 +613,22 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     @Override
     public void onBackPressed() { }
 
-    @Override
-    public void onMapReady(@NonNull final MapboxMap mapboxMap) {
-        this.mapboxMap = mapboxMap;
-
-        mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
-            enableLocationComponent(style);
-            addDestinationIconSymbolLayer(style);
-            mapboxMap.addOnMapClickListener(Map.this);
-
-        });
-
-        //get current Location animation
-        findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
-            try {
-                if (locationComponent.getLastKnownLocation() != null) {
-                    CameraPosition position = new CameraPosition
-                            .Builder()
-                            .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
-                                    locationComponent.getLastKnownLocation().getLongitude()))
-                            .zoom(17)
-                            .bearing(180).tilt(30)
-                            .build();
-                    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toasty.warning(getApplicationContext(), getString(R.string.LocationNotFound), Toasty.LENGTH_SHORT).show();
-            }
-        });
-
-        //Move Location
-        BuildLocationRequest();
-        BuildLocationCallBack();
-        UpdateLocation();
-    }
-
     @SuppressLint("CheckResult")
     private void ShowDriverDashboard(Trip pickup1) {
         try {
             WhereToGo.getEditText().getText().clear();
             pickup12 = pickup1;
-            Timber.tag("wtf").e("Inside");
             findViewById(R.id.progBar).setVisibility(View.GONE);
             layout_location_display_info.setVisibility(View.GONE);
             layout_driver_display_info.setVisibility(View.VISIBLE);
             ListTaxiNum.setText(pickup1.getChifor().getTaxi_NUM());
             ListChName.setText(pickup1.getChifor().getFullname());
             ListChNum.setText(pickup1.getChifor().getPhone());
-        } catch (Throwable t) {
-            Timber.e(t);
+        } catch (Throwable t) {t.printStackTrace();
         }
     }
 
-    private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
-        loadedMapStyle.addImage("destination-icon-id", BitmapFactory.decodeResource(this.getResources(), R.drawable.map_marker_dark));
-        loadedMapStyle.addSource(new GeoJsonSource("destination-source-id"));
-        SymbolLayer destinationSymbolLayer = new SymbolLayer("destination-symbol-layer-id", "destination-source-id");
-        destinationSymbolLayer.withProperties(iconImage("destination-icon-id"), iconIgnorePlacement(true));
-        loadedMapStyle.addLayer(destinationSymbolLayer);
-    }
-
+/*
     @Override
     public boolean onMapClick(@NonNull LatLng point){
         String Txt = LocationUtils.getAddressFromPoint(getApplicationContext(),point);
@@ -698,8 +636,192 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         System.out.println(point.getLatitude()+","+point.getLongitude());
         Objects.requireNonNull(WhereToGo.getEditText()).setText(Txt);
         return true;
+    }*/
+
+    public void drawRoute(LatLng destinationPoint) {
+
+        origin = new LatLng(CurrentLocation.getLatitude(), CurrentLocation.getLongitude());
+        dest = new LatLng(destinationPoint.latitude,destinationPoint.longitude);
+        //addMarker(origin);
+        // Getting URL to the Google Directions API
+        String url = getUrl(origin, dest);
+        FetchUrl FetchUrl = new FetchUrl();
+
+        FetchUrl.execute(url);
+        //move map camera
+        mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(origin));
+        mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        startTrack = true;
     }
 
+    private String getUrl(LatLng origin, LatLng dest) {
+
+
+        //  String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters + "&key=" + MY_API_KEY
+        // Origin of route
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+
+        // Destination of route
+        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+
+
+        // Sensor enabled
+        String sensor = "sensor=false";
+
+        // Building the parameters to the web service
+        String parameters = str_origin + "&" + str_dest + "&" + sensor;
+
+        // Output format
+        String output = "json";
+
+        // Building the url to the web service
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters
+                + "&key=" + "AIzaSyBhbAlczAjPkCr0p6DHdTf0pqUHX2eRrVg";
+
+
+        return url;
+    }
+
+    private class FetchUrl extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try {
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+                Log.e("Background Task data", data.toString());
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
+            }
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+            // Invokes the thread for parsing the JSON data
+            parserTask.execute(result);
+
+
+        }
+    }
+
+    private String downloadUrl(String strUrl) throws IOException {
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try {
+            URL url = new URL(strUrl);
+
+            // Creating an http connection to communicate with url
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            // Connecting to url
+            urlConnection.connect();
+
+            // Reading data from url
+            iStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+            StringBuffer sb = new StringBuffer();
+
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            data = sb.toString();
+            Log.d("downloadUrl", data.toString());
+            br.close();
+
+        } catch (Exception e) {
+            Log.d("Exception", e.toString());
+        } finally {
+            iStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+                jObject = new JSONObject(jsonData[0]);
+                Log.d("ParserTask", jsonData[0].toString());
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+                Log.d("ParserTask", parser.toString());
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+                Log.d("ParserTask", "Executing routes");
+                Log.d("ParserTask", routes.toString());
+
+            } catch (Exception e) {
+                Log.d("ParserTask", e.toString());
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            //  ArrayList<LatLng> points;
+            lineOptions = null;
+
+            // Traversing through all the routes
+            for (int i = 0; i < result.size(); i++) {
+                points = new ArrayList<>();
+                lineOptions = new PolylineOptions();
+
+                // Fetching i-th route
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                // Adding all the points in the route to LineOptions
+                lineOptions.addAll(points);
+                lineOptions.width(10);
+                lineOptions.color(Color.RED);
+
+                Log.d("onPostExecute", "onPostExecute lineoptions decoded");
+
+            }
+
+            // Drawing polyline in the Google Map for the i-th route
+            if (lineOptions != null) {
+                mapboxMap.addPolyline(lineOptions);
+            } else {
+                Log.d("onPostExecute", "without Polylines drawn");
+            }
+        }
+    }
+
+/*
     private void getRoute(Point origin, Point destination, Location location) {
         try {
             assert Mapbox.getAccessToken() != null;
@@ -738,7 +860,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     private void buildAlertMessageSearchOperation(@NotNull Location location) {
         MyLocation = location;
@@ -782,10 +904,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                 }
             }
             if (foundDriver != null) {
-                UserUtils.sendRequestToDriver(mapViewModel, Destination_point, WhereToGo.getEditText().getText().toString(), foundDriver, currentRiderLocation, Current_Client);
-                mapViewModel.PushYourLocation(new YourLocations(WhereToGo.getEditText().getText().toString(),Common.Current_Client_Id,destinationPoint.latitude(),destinationPoint.longitude()));
+                sendRequestToDriver(mapViewModel, Destination_point, WhereToGo.getEditText().getText().toString(), foundDriver, currentRiderLocation, Current_Client);
+                mapViewModel.PushYourLocation(new YourLocations(WhereToGo.getEditText().getText().toString(),Common.Current_Client_Id,destinationPoint.latitude,destinationPoint.longitude));
 
-                mapViewModel.InsertLocation(new YourLocations(WhereToGo.getEditText().getText().toString(),Common.Current_Client_Id,destinationPoint.latitude(),destinationPoint.longitude()));
+                mapViewModel.InsertLocation(new YourLocations(WhereToGo.getEditText().getText().toString(),Common.Current_Client_Id,destinationPoint.latitude,destinationPoint.longitude));
                 LastDriverCall = foundDriver;
             } else {
                 Toasty.info(getApplicationContext(), getString(R.string.No_Driver_Accept_Request), Toasty.LENGTH_SHORT).show();
@@ -800,50 +922,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         }
     }
 
-    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
-            locationComponent = mapboxMap.getLocationComponent();
-            locationComponent.activateLocationComponent(
-                    LocationComponentActivationOptions
-                            .builder(this, loadedMapStyle)
-                            .useDefaultLocationEngine(true)
-                            .locationEngineRequest(new LocationEngineRequest.Builder(750)
-                                    .setFastestInterval(750)
-                                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                                    .build())
-                            .build());
-            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Toasty.warning(this, R.string.user_location_permission_explanation, Toasty.LENGTH_LONG).show();
-                return;
-            }
-            locationComponent.setLocationComponentEnabled(true);
-            locationComponent.setCameraMode(CameraMode.TRACKING_GPS);
-            locationComponent.setRenderMode(RenderMode.COMPASS);
-
-            LocationComponentOptions locationComponentOptions =
-                    LocationComponentOptions.builder(this)
-                            .trackingGesturesManagement(true)
-                            .bearingTintColor(Color.YELLOW)
-                            .accuracyAlpha(.4f)
-                            .build();
-            LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions
-                    .builder(this, loadedMapStyle)
-                    .locationComponentOptions(locationComponentOptions)
-                    .build();
-
-            locationComponent.activateLocationComponent(locationComponentActivationOptions);
-        } else {
-            permissionsManager = new PermissionsManager(this);
-            permissionsManager.requestLocationPermissions(this);
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+       // permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
         mLocationPermissionGranted = false;
         if (requestCode == 334) {
             // If request is cancelled, the result arrays are empty.
@@ -854,20 +935,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
         }
     }
 
-    @Override
-    public void onExplanationNeeded(List<String> permissionsToExplain) {
-        Toasty.warning(getApplicationContext(), R.string.user_location_permission_explanation, Toasty.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onPermissionResult(boolean granted) {
-        if (granted) {
-            enableLocationComponent(Objects.requireNonNull(mapboxMap.getStyle()));
-        } else {
-            Toasty.warning(getApplicationContext(), R.string.user_location_permission_not_granted, Toasty.LENGTH_LONG).show();
-            finish();
-        }
-    }
 
     @Override
     protected void onStart() {
@@ -941,7 +1008,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     driverGeoModel.getGeoLocation().longitude))
                             .title(driverGeoModel.getChifor().getFullname())
                             .snippet(driverGeoModel.getChifor().getPhone())
-                            .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2))));
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.car2))));
         if (!TextUtils.isEmpty(cityName)) {
             DatabaseReference driverLocation = FireBaseClient.getFireBaseClient()
                     .getDatabaseReference()
@@ -964,7 +1031,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Timber.e(error.getMessage());
                 }
             });
         }
@@ -973,7 +1039,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
 
     @Override
     public void onFirebaseLoadFailed(String message) {
-        Timber.e(message);
     }
 
     @Override
@@ -1029,7 +1094,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     public void OnDriverCompleteTrip(DriverCompleteTrip event) {
         Common.messagingstyle_Notification(getApplicationContext(), new Random().nextInt(),getString(R.string.YouArrived));
         finish();
-        navigationMapRoute.removeRoute();
         mapboxMap.clear();
         _ShowRateLayout();
     }
@@ -1091,7 +1155,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             blackPolyline = mapboxMap.addPolyline(blackPolylineOptions);
 
                             Bitmap icon = UserUtils.CreateIconWithDuration(getApplicationContext(), String.valueOf(routes.get(0).getDuration()));
-                            OriginMarker.setIcon(IconFactory.getInstance(Map.this).fromBitmap(icon));
+                            OriginMarker.setIcon(BitmapDescriptorFactory.fromBitmap(icon));
                             //Moving
                             hendler = new Handler();
                             index = -1;
@@ -1109,8 +1173,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                 valueAnimator.setInterpolator(new LinearInterpolator());
                                 valueAnimator.addUpdateListener(value -> {
                                     v = value.getAnimatedFraction();
-                                    lng = v * end.getLongitude() + (1 - v) * start.getLongitude();
-                                    lat = v * end.getLatitude() + (1 - v) * start.getLatitude();
+                                    lng = v * end.longitude + (1 - v) * start.longitude;
+                                    lat = v * end.latitude + (1 - v) * start.latitude;
                                     LatLng newPos = new LatLng(lat, lng);
                                     marker.setPosition(newPos);
                                     mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
@@ -1143,7 +1207,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                         PolylineOptions blackPolylineOptions = null;
                         List<LatLng> polylineList = null;
                         Polyline blackPolyline = null;
-                        for (int i = 0; i < routes.size(); i++) {
+                        int i = 0;
+                        for ( i = 0; i < routes.size(); i++) {
 
                             String point = routes.get(i).getGeometry();
                             polylineList = Common.decodePoly(point);
@@ -1152,6 +1217,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                             blackPolylineOptions = new PolylineOptions();
                             blackPolylineOptions.color(Color.WHITE);
                             blackPolylineOptions.width(5);
+                            blackPolylineOptions.startCap(new SquareCap());
+                            blackPolylineOptions.jointType(JointType.ROUND);
                             blackPolylineOptions.addAll(polylineList);
                             blackPolyline = mapboxMap.addPolyline(blackPolylineOptions);
 
@@ -1161,7 +1228,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
                                     Double.parseDouble(trip.getOrigin().split(",")[0]));
 
                             LatLng destination = new LatLng(trip.getCurrentLng(), trip.getCurrentLat());
-
                             LatLngBounds latLngBounds = new LatLngBounds.Builder()
                                     .include(origin)
                                     .include(destination)
@@ -1184,13 +1250,51 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Mapbox
     private void addDestinationDriverMarker(LatLng destination) {
         DistinationMarker = mapboxMap.addMarker(new MarkerOptions()
                 .position(destination)
-                .icon(IconFactory.getInstance(Map.this).fromResource(R.drawable.car2)));
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.car2)));
     }
 
     private void addPickUpMarkerWithDuration(double duration, LatLng origin) {
         Bitmap icon = UserUtils.CreateIconWithDuration(getApplicationContext(), String.valueOf(duration));
         OriginMarker = mapboxMap.addMarker(new MarkerOptions()
-                .icon(IconFactory.getInstance(Map.this).fromBitmap(icon))
+                .icon(BitmapDescriptorFactory.fromBitmap(icon))
                 .position(origin));
+    }
+
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        this.mapboxMap = googleMap;
+
+        mapboxMap.setMyLocationEnabled(true);
+        mapboxMap.getUiSettings().setZoomControlsEnabled(true);
+        mapboxMap.setMyLocationEnabled(true);
+        mapboxMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mapboxMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getApplicationContext(),R.raw.st));
+
+        //get current Location animation
+        findViewById(R.id.floatingActionButton).setOnClickListener(t -> {
+            try {
+                if (CurrentLocation != null) {
+                    CameraPosition position = new CameraPosition
+                            .Builder()
+                            .target(new LatLng(CurrentLocation.getLatitude(),
+                                    CurrentLocation.getLongitude()))
+                            .zoom(17)
+                            .bearing(180).tilt(30)
+                            .build();
+                    mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+                    mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toasty.warning(getApplicationContext(), getString(R.string.LocationNotFound), Toasty.LENGTH_SHORT).show();
+            }
+        });
+
+        //Move Location
+        BuildLocationRequest();
+        BuildLocationCallBack();
+        UpdateLocation();
+
     }
 }

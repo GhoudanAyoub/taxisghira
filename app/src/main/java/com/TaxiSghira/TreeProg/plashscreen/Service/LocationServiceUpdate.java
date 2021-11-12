@@ -25,8 +25,6 @@ import com.google.firebase.firestore.GeoPoint;
 import java.util.HashMap;
 import java.util.Map;
 
-import timber.log.Timber;
-
 public class LocationServiceUpdate extends Service {
 
 
@@ -50,7 +48,6 @@ public class LocationServiceUpdate extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Timber.tag(TAG).e("OnstartCommand : Called");
         getLocaion();
         return START_NOT_STICKY;
     }
@@ -63,7 +60,7 @@ public class LocationServiceUpdate extends Service {
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Timber.tag(TAG).e("getLocation: stopping the location service.");
+
             stopSelf();
             return;
         }

@@ -32,7 +32,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 @SuppressLint("CheckResult")
 public class MapViewModel extends ViewModel {
@@ -140,7 +139,7 @@ public class MapViewModel extends ViewModel {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Timber.e(error.getMessage());
+
                     }
                 });
     }

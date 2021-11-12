@@ -7,7 +7,7 @@
     tools:context=".ui.Map"
     tools:showIn="@layout/app_bar_map">
 
-    <com.mapbox.mapboxsdk.maps.MapView
+    <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -15,9 +15,8 @@
         mapbox:layout_constraintEnd_toEndOf="parent"
         mapbox:layout_constraintHorizontal_bias="1.0"
         mapbox:layout_constraintStart_toStartOf="parent"
-        mapbox:layout_constraintTop_toTopOf="parent"
-        mapbox:mapbox_cameraZoom="14">
+        mapbox:layout_constraintTop_toTopOf="parent">
 
-    </com.mapbox.mapboxsdk.maps.MapView>
+    </com.google.android.gms.maps.MapView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

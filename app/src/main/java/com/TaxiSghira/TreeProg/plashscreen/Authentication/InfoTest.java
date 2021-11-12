@@ -25,9 +25,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import timber.log.Timber;
-
-import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class InfoTest extends Fragment {
 
@@ -72,12 +69,11 @@ public class InfoTest extends Fragment {
                     .getFirebaseDatabase()
                     .getReference(Common.Client_DataBase_Table)
                     .push()
-                    .setValue(client)
-                    .addOnFailureListener(Timber::e);
+                    .setValue(client);
             startActivity(new Intent(requireActivity(), Map.class));
-            Toast.makeText(getApplicationContext(), getString(R.string.welcome), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.welcome), Toast.LENGTH_SHORT).show();
         } catch (Throwable throwable) {
-            Timber.e(throwable);
+            throwable.printStackTrace();
         }
     }
 

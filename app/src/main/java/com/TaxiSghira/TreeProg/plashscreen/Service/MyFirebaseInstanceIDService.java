@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import timber.log.Timber;
 
 public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
     @Override
@@ -57,8 +56,7 @@ public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
                 }
             }
         } catch (Throwable e) {
-            Timber.e("onMessageReceivedNotification: %s", e.getMessage());
-        }
+          e.printStackTrace(); }
 
     }
 

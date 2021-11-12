@@ -17,13 +17,13 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.Module.FCMSendData;
 import com.TaxiSghira.TreeProg.plashscreen.Module.TokenModel;
 import com.TaxiSghira.TreeProg.plashscreen.R;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.ui.IconGenerator;
-import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +68,7 @@ public class UserUtils {
                             notification.put(Common.RIDER_PICKUP_LOCATION_STRING, location.toString());
                             notification.put(Common.RIDER_PICK_UP_LOCATION, location.getLongitude() + "," + location.getLatitude());
                             notification.put(Common.RIDER_DESTINATION_STRING, Destination_String);
-                            notification.put(Common.RIDER_DESTINATION, Destination_point.getLatitude() + "," + Destination_point.getLongitude());
+                            notification.put(Common.RIDER_DESTINATION, Destination_point.latitude + "," + Destination_point.longitude);
                             FCMSendData fcmSendData = new FCMSendData(token.getToken(), notification);
                             disposable.add(mapViewModel.sendNotification(fcmSendData)
                                     .subscribeOn(Schedulers.io())

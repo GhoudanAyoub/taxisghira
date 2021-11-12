@@ -33,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
-import timber.log.Timber;
 
 
 public class phoneTest extends Fragment {
@@ -72,7 +71,6 @@ public class phoneTest extends Fragment {
         public void onCodeSent(@NotNull String s, @NotNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
             super.onCodeSent(s, forceResendingToken);
             mResendToken = forceResendingToken;
-            Timber.e(s);
         }
     };
 
@@ -247,7 +245,7 @@ public class phoneTest extends Fragment {
 
     //**** Permission
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NotNull String @NotNull [] permissions, @NotNull int @NotNull [] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NotNull String  [] permissions, @NotNull int  [] grantResults) {
         if (requestCode == MY_PERMISSIONS_REQUEST_SEND_SMS) {
             if (permissions[0].equalsIgnoreCase(Manifest.permission.SEND_SMS)
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

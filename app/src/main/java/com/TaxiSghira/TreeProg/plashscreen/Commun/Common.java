@@ -19,9 +19,9 @@ import com.TaxiSghira.TreeProg.plashscreen.Module.Chifor;
 import com.TaxiSghira.TreeProg.plashscreen.Module.DriverGeoModel;
 import com.TaxiSghira.TreeProg.plashscreen.R;
 import com.TaxiSghira.TreeProg.plashscreen.Room.FireBaseClient;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.auth.FirebaseAuth;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,7 +61,7 @@ public class Common {
     public static final String RIDER_COMPLETE_TRIP = "DriverCompleteTrip";
 
     public static Map<String, DriverGeoModel> driversFound = new HashMap<>();
-    public static HashMap<String, Marker> marerList = new HashMap<String, com.mapbox.mapboxsdk.annotations.Marker>();
+    public static HashMap<String, Marker> marerList = new HashMap<String, Marker>();
 
     public static void SetWelcomeMessage(TextView textView) {
         int houre = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
