@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -63,6 +64,7 @@ import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -83,6 +85,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -108,6 +114,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -191,6 +198,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
     private Location previousLocation, CurrentLocation, MyLocation,location ;
     private Boolean firstTime = true;
     private String cityName;
+    private AutocompleteSupportFragment autocompleteSupportFragment;
 
     //Listeners
     IFirebaseDriverInfoListener iFirebaseDriverInfoListener;
@@ -280,12 +288,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
                     try {
+                        Log.e("currdest","curr "+CurrentLocation.getLongitude()+" /"+ CurrentLocation.getLatitude()+" des "+Destination_point.longitude+" / "+ Destination_point.latitude);
                         Toasty.info(getApplicationContext(), getString(R.string.lookingForBestRoute), Toasty.LENGTH_SHORT).show();
 
-                        destinationPoint = new LatLng(Destination_point.longitude, Destination_point.latitude);
-                        originPoint = new LatLng(CurrentLocation.getLongitude(), CurrentLocation.getLatitude());
+
+                        destinationPoint = new LatLng(Destination_point.latitude,Destination_point.longitude);
+                        originPoint = new LatLng(CurrentLocation.getLatitude(),CurrentLocation.getLongitude());
                         //destination point
-                        drawRoute(destinationPoint);
+                        drawRoute(destinationPoint,location);
 
                        // getRoute(originPoint, destinationPoint, location);
                     } catch (Exception e) {
@@ -301,6 +311,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
                     layout_location_display_info.setVisibility(View.GONE);
                     findDriver2.setVisibility(View.GONE);
                     BottomContainerHolder.setVisibility(View.GONE);
+                    loadAvailableDrivers();
                 },Throwable::printStackTrace);
     }
 
@@ -353,6 +364,28 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
     private void init() {
         iFirebaseDriverInfoListener = this;
         iFirebaseFailedListener = this;
+
+        Places.initialize(getApplicationContext(),getString(R.string.google_maps_key));
+        autocompleteSupportFragment = (AutocompleteSupportFragment)getSupportFragmentManager().findFragmentById(R.id.autoComplete_fragment);
+        autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ID,Place.Field.ADDRESS,Place.Field.NAME,Place.Field.LAT_LNG));
+        autocompleteSupportFragment.setHint(getString(R.string.whereAreYouGoing));
+        if(CurrentLocation!=null)
+            autocompleteSupportFragment.setCountries(LocationUtils.getCountryCodeFromPoint(getApplicationContext(),new LatLng(CurrentLocation.getLatitude(), CurrentLocation.getLongitude())));
+        autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Destination_point=place.getLatLng();
+                mapboxMap.addMarker(new MarkerOptions()
+                        .position(Destination_point)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                Toasty.info(getApplicationContext(),""+status.getStatusMessage()).show();
+            }
+        });
 
         BuildLocationRequest();
         BuildLocationCallBack();
@@ -628,22 +661,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
         }
     }
 
-/*
-    @Override
-    public boolean onMapClick(@NonNull LatLng point){
-        String Txt = LocationUtils.getAddressFromPoint(getApplicationContext(),point);
-        Destination_point = point;
-        System.out.println(point.getLatitude()+","+point.getLongitude());
-        Objects.requireNonNull(WhereToGo.getEditText()).setText(Txt);
-        return true;
-    }*/
-
-    public void drawRoute(LatLng destinationPoint) {
+    public void drawRoute(LatLng destinationPoint, Location location) {
 
         origin = new LatLng(CurrentLocation.getLatitude(), CurrentLocation.getLongitude());
         dest = new LatLng(destinationPoint.latitude,destinationPoint.longitude);
         //addMarker(origin);
         // Getting URL to the Google Directions API
+
+        String Txt = LocationUtils.getAddressFromPoint(getApplicationContext(),destinationPoint);
+        WhereToGo.getEditText().setText(Txt);
         String url = getUrl(origin, dest);
         FetchUrl FetchUrl = new FetchUrl();
 
@@ -652,32 +678,23 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
         mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(origin));
         mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         startTrack = true;
+        buildAlertMessageSearchOperation(location);
     }
 
     private String getUrl(LatLng origin, LatLng dest) {
 
-
-        //  String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters + "&key=" + MY_API_KEY
-        // Origin of route
         String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
 
-        // Destination of route
         String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
 
-
-        // Sensor enabled
         String sensor = "sensor=false";
 
-        // Building the parameters to the web service
         String parameters = str_origin + "&" + str_dest + "&" + sensor;
 
-        // Output format
         String output = "json";
 
-        // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters
                 + "&key=" + "AIzaSyBhbAlczAjPkCr0p6DHdTf0pqUHX2eRrVg";
-
 
         return url;
     }

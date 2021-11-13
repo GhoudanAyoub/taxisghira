@@ -51,6 +51,50 @@
             android:background="@drawable/cerclebackgroundwhite"
             tools:visibility="visible">
 
+            <fragment
+                android:id="@+id/autoComplete_fragment"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="9">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/editText2"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/harmattan"
+                    android:gravity="center|start"
+                    android:hint="@string/whereAreYouGoing"
+                    android:inputType="textPersonName"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
+                    android:textSize="18sp"
+                    app:boxBackgroundMode="outline"
+                    app:boxStrokeColor="@color/frutorial_title"
+                    app:boxStrokeWidth="2dp"
+                    app:hintAnimationEnabled="true"
+                    app:hintEnabled="true"
+                    app:hintTextColor="@color/black"
+                    tools:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/TIPET"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:fontFamily="@font/scheherazade"
+                        android:inputType="textEmailAddress"
+                        android:singleLine="true"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/black"
+                        android:textCursorDrawable="@color/black" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </fragment>
+
             <ImageButton
                 android:id="@+id/FindButton"
                 android:layout_width="72dp"
@@ -60,42 +104,9 @@
                 android:contentDescription="TODO"
                 app:srcCompat="@drawable/ll" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/editText2"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/harmattan"
-                android:gravity="center|start"
-                android:hint="@string/whereAreYouGoing"
-                android:inputType="textPersonName"
-                android:textColor="@color/black"
-                android:textColorHint="@color/black"
-                android:textSize="18sp"
-                app:boxBackgroundMode="outline"
-                app:boxStrokeColor="@color/frutorial_title"
-                app:boxStrokeWidth="2dp"
-                app:hintAnimationEnabled="true"
-                app:hintEnabled="true"
-                app:hintTextColor="@color/black">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/TIPET"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:fontFamily="@font/scheherazade"
-                    android:inputType="textEmailAddress"
-                    android:singleLine="true"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/black"
-                    android:textCursorDrawable="@color/black" />
-            </com.google.android.material.textfield.TextInputLayout>
-
         </LinearLayout>
+
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/YourLocationsRecycler"

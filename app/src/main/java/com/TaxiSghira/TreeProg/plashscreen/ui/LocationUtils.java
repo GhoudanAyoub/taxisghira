@@ -60,5 +60,18 @@ public class LocationUtils {
             e.printStackTrace();
             return result.toString();
         }
+    }    public static String getCountryCodeFromPoint(Context context, LatLng location) {
+        StringBuilder result = new StringBuilder();
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addressList = geocoder.getFromLocation(location.latitude, location.longitude, 1);
+            if (addressList != null && addressList.size() > 0) {
+                result.append(addressList.get(0).getCountryCode());
+            }
+            return result.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return result.toString();
+        }
     }
 }

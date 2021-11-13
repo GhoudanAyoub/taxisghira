@@ -66,7 +66,7 @@ dependencies {
     //implementation 'com.google.android.gms:play-services-ads:17.2.0'
     //implementation 'com.google.android.gms:play-services-location:18.0.0'
 
-    implementation 'com.google.android.gms:play-services:12.0.1'
+    //implementation 'com.google.android.gms:play-services:12.0.1'
 
     //some stuff :
     implementation 'androidx.cardview:cardview:1.0.0'

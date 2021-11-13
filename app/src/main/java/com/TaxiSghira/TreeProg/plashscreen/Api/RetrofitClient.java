@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @Module
 @InstallIn(ApplicationComponent.class)
 public class RetrofitClient {
-    private static final String BaseURL = "https://api.mapbox.com/";
+    private static final String BaseURL = "https://maps.googleapis.com/maps/api/directions/";
 
     @Singleton
     @Provides
