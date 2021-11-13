@@ -1,5 +1,6 @@
 package com.TaxiSghira.TreeProg.plashscreen.Module;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,14 +9,23 @@ public class Chifor {
 
     @PrimaryKey(autoGenerate = true)
     private int id2;
+    @ColumnInfo(name = "id")
     private String id;
+    @ColumnInfo(name = "fullname")
     private String fullname;
+    @ColumnInfo(name = "phone")
     private String phone;
+    @ColumnInfo(name = "cin")
     private String cin;
+    @ColumnInfo(name = "taxi_NUM")
     private String taxi_NUM;
+    @ColumnInfo(name = "lnt")
     private double lnt;
+    @ColumnInfo(name = "lng")
     private double lng;
+    @ColumnInfo(name = "Status")
     private String Status;
+    @ColumnInfo(name = "city")
     private String city;
 
     public Chifor() {

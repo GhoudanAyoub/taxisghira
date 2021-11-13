@@ -136,5 +136,6 @@ dependencies {
     implementation "com.github.shasin89:NotificationBanner:1.1.5"
 
     implementation "com.google.maps.android:android-maps-utils:0.4.3"
+    implementation 'com.karumi:dexter:6.2.2'
 }
 apply plugin: 'com.google.gms.google-services'

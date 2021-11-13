@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import es.dmoral.toasty.Toasty;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -37,19 +39,19 @@ public class UserUtils {
 
     public static void UpdateToken(Context context, String token) {
         TokenModel token1 = new TokenModel(token);
-        FirebaseDatabase.getInstance()
-                .getReference(Common.CLIENT_TOKEN_REFERENCE)
-                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
-                .setValue(token1)
-                .addOnFailureListener(Throwable::printStackTrace)
-                .addOnSuccessListener(aVoid -> {
-                });
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null)
+            FirebaseDatabase.getInstance()
+                    .getReference(Common.CLIENT_TOKEN_REFERENCE)
+                    .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                    .setValue(token1)
+                    .addOnFailureListener(Throwable::printStackTrace)
+                    .addOnSuccessListener(aVoid -> {
+                    });
     }
 
     public static void sendRequestToDriver(MapViewModel mapViewModel, LatLng Destination_point, String Destination_String, DriverGeoModel foundDriver, Location location, Client client) {
 
         CompositeDisposable disposable = new CompositeDisposable();
-
         FirebaseDatabase
                 .getInstance()
                 .getReference(Common.DRIVER_TOKEN_REFERENCE)
@@ -76,6 +78,7 @@ public class UserUtils {
                                     .subscribe(fcmResponse -> {
                                         if (fcmResponse.getSuccess() == 0) {
                                             disposable.clear();
+                                            Log.e("RD","clear");
                                         }
                                     }, Throwable::printStackTrace));
                         }

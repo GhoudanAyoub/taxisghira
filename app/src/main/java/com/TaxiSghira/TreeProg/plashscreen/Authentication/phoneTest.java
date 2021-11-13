@@ -111,6 +111,7 @@ public class phoneTest extends Fragment {
         phoneDone = root.findViewById(R.id.phonedone);
         editText = root.findViewById(R.id.phoneText);
         makeCall.setEnabled(false);
+        phoneDone.setVisibility(View.INVISIBLE);
     }
 
     private boolean validateForm() {

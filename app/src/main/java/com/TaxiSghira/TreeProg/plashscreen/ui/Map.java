@@ -29,6 +29,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -101,6 +102,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.jakewharton.rxbinding3.view.RxView;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -113,6 +121,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -214,7 +223,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
     private LatLng start, end;
     private String DriverOldLocation;
     private boolean isNextLaunch = false;
-    private LatLng originPoint, destinationPoint;;
+    private LatLng  destinationPoint;;
 
     LatLng origin;
     LatLng dest;
@@ -255,7 +264,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
                 throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(unit -> {
-                    FindNearByDrivers(MyLocation);
+                    FindNearByDrivers(CurrentLocation);
                     findDriver2.setVisibility(View.GONE);
                     DeleteDemand.setVisibility(View.VISIBLE);
                     findViewById(R.id.progBar).setVisibility(View.VISIBLE);
@@ -293,7 +302,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
 
 
                         destinationPoint = new LatLng(Destination_point.latitude,Destination_point.longitude);
-                        originPoint = new LatLng(CurrentLocation.getLatitude(),CurrentLocation.getLongitude());
                         //destination point
                         drawRoute(destinationPoint,location);
 
@@ -1282,11 +1290,29 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         this.mapboxMap = googleMap;
 
-        mapboxMap.setMyLocationEnabled(true);
-        mapboxMap.getUiSettings().setZoomControlsEnabled(true);
+        Dexter.withContext(getApplicationContext())
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                     }
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+                        Toasty.info(getApplicationContext(), getString(R.string.user_location_permission_explanation), Toasty.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+
+                    }
+                });
         mapboxMap.setMyLocationEnabled(true);
         mapboxMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mapboxMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getApplicationContext(),R.raw.st));
+
+        mapboxMap.setMyLocationEnabled(true);
+        mapboxMap.getUiSettings().setZoomControlsEnabled(true);
 
         //get current Location animation
         findViewById(R.id.floatingActionButton).setOnClickListener(t -> {

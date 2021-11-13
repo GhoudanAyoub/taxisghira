@@ -7,6 +7,7 @@ import io.reactivex.Observable;
 import retrofit2.http.Body;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 public interface IFCMService {
 
@@ -14,6 +15,6 @@ public interface IFCMService {
             "Content-Type:application/json",
             "Authorization: key=AAAAnSVv7kU:APA91bErWb1Ps-29el8QjW-UdQA21QNcvDyf8yBHJBpJWhNA140K7Xr0JysE4--eLlI9NK0721-s53Hqp6uHPzafQ9sd_EvWBGt-N5ymSuy0H0paEl4xJZG-sbh1jDufr702fTzbYFBn"
     })
-    @POST("fcm/send")
-    Observable<FCMResponse> sendNotification(@Body FCMSendData body);
+    @POST("send.php")
+    Observable<FCMResponse> sendNotification(@Query("to") String to,@Query("title") String title,@Query("body") String body);
 }

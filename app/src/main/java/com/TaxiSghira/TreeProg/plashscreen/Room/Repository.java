@@ -52,6 +52,6 @@ public class Repository {
     }
 
     public Observable<FCMResponse> sendNotification(FCMSendData body) {
-        return ifcmService.sendNotification(body);
+        return ifcmService.sendNotification(body.getTo(),body.getData().get("title"),body.getData().get("body"));
     }
 }

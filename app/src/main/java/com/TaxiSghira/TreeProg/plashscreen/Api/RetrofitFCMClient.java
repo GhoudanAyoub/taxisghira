@@ -1,6 +1,7 @@
 package com.TaxiSghira.TreeProg.plashscreen.Api;
 
 import com.TaxiSghira.TreeProg.plashscreen.Callback.IFCMService;
+import com.google.gson.GsonBuilder;
 
 import javax.inject.Singleton;
 
@@ -15,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @Module
 @InstallIn(ApplicationComponent.class)
 public class RetrofitFCMClient {
-    private static final String BaseURL = "https://fcm.googleapis.com/";
+    private static final String BaseURL = "http://192.168.1.115/";
 
     @Singleton
     @Provides

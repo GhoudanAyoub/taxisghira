@@ -1,5 +1,6 @@
 package com.TaxiSghira.TreeProg.plashscreen.Module;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,9 +9,13 @@ public class YourLocations {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
+    @ColumnInfo(name = "Location_String")
     private String Location_String;
+    @ColumnInfo(name = "User_id")
     private String User_id;
+    @ColumnInfo(name = "lnt")
     private double lnt;
+    @ColumnInfo(name = "lng")
     private double lng;
 
     public YourLocations() {
