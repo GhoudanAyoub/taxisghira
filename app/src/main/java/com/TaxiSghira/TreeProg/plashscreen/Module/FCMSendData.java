@@ -1,8 +1,11 @@
 package com.TaxiSghira.TreeProg.plashscreen.Module;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Map;
 
 public class FCMSendData {
+    @SerializedName("to")
     private String to;
     private Map<String, String> data;
 

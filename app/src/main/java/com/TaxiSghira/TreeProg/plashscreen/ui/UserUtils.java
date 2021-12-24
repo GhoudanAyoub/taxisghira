@@ -35,6 +35,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
+
 public class UserUtils {
 
     public static void UpdateToken(Context context, String token) {
@@ -72,7 +73,7 @@ public class UserUtils {
                             notification.put(Common.RIDER_DESTINATION_STRING, Destination_String);
                             notification.put(Common.RIDER_DESTINATION, Destination_point.latitude + "," + Destination_point.longitude);
                             FCMSendData fcmSendData = new FCMSendData(token.getToken(), notification);
-                            disposable.add(mapViewModel.sendNotification(fcmSendData)
+                            disposable.add(MapViewModel.sendNotification(fcmSendData)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(fcmResponse -> {

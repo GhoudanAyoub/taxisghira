@@ -36,7 +36,7 @@ import io.reactivex.schedulers.Schedulers;
 @SuppressLint("CheckResult")
 public class MapViewModel extends ViewModel {
 
-    private final Repository repository;
+    private static Repository repository;
     private List<YourLocations> yourLocationsList = new ArrayList<>();
 
     private LiveData<List<Chifor>> listLiveDataFavorChifor = null;
@@ -92,7 +92,6 @@ public class MapViewModel extends ViewModel {
                                 YourLocations yourLocations = dataSnapshot.getValue(YourLocations.class);
                                 if (yourLocations!=null && yourLocations.getUser_id().equals(Common.Current_Client_Id)) {
                                     yourLocationsList.add(yourLocations);
-                                    System.out.println(yourLocationsList);
                                     //yourLocationsMutableLiveData.setValue(yourLocationsList);
                                 }
                             }
@@ -116,7 +115,7 @@ public class MapViewModel extends ViewModel {
     }
 
     //Send Notification
-    public Observable<FCMResponse> sendNotification(FCMSendData body) {
+    public static Observable<FCMResponse> sendNotification(FCMSendData body) {
         return repository.sendNotification(body);
     }
 

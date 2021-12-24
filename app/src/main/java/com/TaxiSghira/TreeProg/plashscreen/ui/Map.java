@@ -246,6 +246,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
         views();
         mapViewModel.getClientInfo();
         mapViewModel.GetLocation();
+        mapViewModel.GetData();
+        mapViewModel.getListLiveDataFavorChifor().observe(this, x ->{});
         CheckMyData();
 
         if (isMapsEnabled()) {
@@ -316,6 +318,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
                     WhereToGo.getEditText().getText().clear();
                     mapboxMap.clear();
                     CloseDemandeTaxi.setVisibility(View.GONE);
+                    findViewById(R.id.progBar).setVisibility(View.GONE);
                     layout_location_display_info.setVisibility(View.GONE);
                     findDriver2.setVisibility(View.GONE);
                     BottomContainerHolder.setVisibility(View.GONE);
@@ -937,13 +940,21 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
             } else {
                 Toasty.info(getApplicationContext(), getString(R.string.No_Driver_Accept_Request), Toasty.LENGTH_SHORT).show();
                 LastDriverCall = null;
-                layout_location_display_info.setVisibility(View.VISIBLE);
-                BottomContainerHolder.setVisibility(View.VISIBLE);
+                findViewById(R.id.progBar).setVisibility(View.GONE);
+                mapboxMap.clear();
+                CloseDemandeTaxi.setVisibility(View.GONE);
+                layout_location_display_info.setVisibility(View.GONE);
+                BottomContainerHolder.setVisibility(View.GONE);
             }
 
         } else {
             Toasty.info(getApplicationContext(), getString(R.string.driver_not_Found), Toasty.LENGTH_SHORT).show();
             LastDriverCall = null;
+            findViewById(R.id.progBar).setVisibility(View.GONE);
+            mapboxMap.clear();
+            CloseDemandeTaxi.setVisibility(View.GONE);
+            layout_location_display_info.setVisibility(View.GONE);
+            BottomContainerHolder.setVisibility(View.GONE);
         }
     }
 
